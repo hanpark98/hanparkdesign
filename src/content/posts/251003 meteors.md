@@ -97,7 +97,7 @@ Météors는 프랑스의 작은 마을에 사는 두 청년, 미카와 단의 �
 <div style="display: flex; gap: 8px; padding: 0.8em 0;">
   <div style="flex:1; display: flex; flex-direction: column; align-items: center;">
     <img src="/images/posts/251003 meteors/nuclear1.webp"
-         style="width: 100%; aspect-ratio: 9/4; object-fit: cover; border-radius: 24px; display: block;">
+         style="width: 100%; aspect-ratio: 9/4; object-fit: cover; border-radius: 16px; display: block;">
     <h4 style="margin: 0; line-height: 1;">내 방안엔 포인트 컬러</h4>
   </div>
 </div>
