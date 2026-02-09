@@ -64,7 +64,12 @@ html, body{
 .section-inner > :last-child  { margin-bottom: 0 !important; }
 
 /* flex 컨테이너(main) 안전 보정 */
-main { flex: 1 1 auto; min-height: 0; }
+main {
+  flex: 1 0 auto;
+  /* 스크롤 인터랙션 보장을 위해 auto로 변경하거나 속성 자체를 제거하세요 */
+  -webkit-user-select: auto;
+  user-select: auto;
+}
 
 @tailwind base;
 @tailwind components;

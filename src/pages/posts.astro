@@ -46,7 +46,7 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
     </div>
 
     <!-- 포스트 목록 -->
-    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 py-6 justify-items-start overflow-y-auto overscroll-contain">
+    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 py-6 justify-items-start">
       {posts.map(p => (
         <a href={`/posts/${p.slug}`} class="group post-card"
            data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}>
