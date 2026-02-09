@@ -10,10 +10,13 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.4.0",
     "@astrojs/tailwind": "^6.0.2",
     "@tailwindcss/typography": "^0.5.16",
     "@vercel/analytics": "1.5.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "rehype-raw": "^7.0.0"
   },
   "devDependencies": {
