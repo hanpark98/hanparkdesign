@@ -9,37 +9,60 @@ import Layout from '../layouts/Layout.astro';
         onclick="window.history.back()"
         class="back-btn mr-6"
       >
-        뒤로가기
+        Return
       </button>
     </div>
 
     <!-- 프로필 카드 -->
-    <div class="profile-card max-w-xl mx-auto my-8 bg-white shadow rounded-[16px] p-10 flex flex-col items-center">
-      <div class="w-full flex justify-center mb-8">
-        <div
-          class="profile-img-container rounded-[16px] bg-gray-200 flex items-center justify-center overflow-hidden shadow"
-          style="font-size:1.3rem;font-weight:600;"
-        >
-          <img src="/images/website/profile.jpg" alt="프로필 사진" class="w-full h-full object-cover" />
-        </div>
-      </div>
-      <div class="w-full text-center">
-        <div class="text-2xl font-semibold mb-1">한결</div>
-        <div class="text-gray-500 mb-2">블로그 주인</div>
-        <p class="m-6">
-          "우리 성소수자들에게는 진정한 자신의 모습으로 자랄 기회가 주어지지 않습니다.
-          어릴 적부터 모욕과 편견을 피하기 위해 진정성을 희생한 모습을 자신인 양 연기하며 살아갑니다."<br><br>
-          "우리가 성인이 되어 마주하는 거대한 과제는, 자신의 진짜 모습이 무엇인지,
-          그리고 자신을 보호하기 위해 꾸며낸 모습이 무엇인지 하나씩 분리해내는 일입니다."
-          <br><br>— Alexander Leon
-        </p>
-        <div class="flex gap-4 justify-center">
-          <a href="mailto:hanparkdesign@gmail.com" class="text-blue-700 underline">이메일</a>
-          <a href="https://instagram.com/" target="_blank" class="text-pink-600 underline">Instagram</a>
-        </div>
-      </div>
+<div class="profile-card max-w-xl mx-auto my-8 bg-white shadow rounded-[16px] p-10 flex flex-col items-center">
+  <div class="w-full flex justify-center mb-8">
+    <div
+      class="profile-img-container rounded-[16px] bg-gray-200 flex items-center justify-center overflow-hidden shadow"
+      style="font-size:1.3rem;font-weight:600;"
+    >
+      <img src="/images/website/profile.jpg" alt="프로필 사진" class="w-full h-full object-cover" />
     </div>
   </div>
+
+  <div class="w-full text-center">
+    <div class="text-2xl font-semibold mb-1">Han Park <br> 박한결</div>
+    <div class="text-gray-500 mb-2">Graphic Designer</div>
+    
+    <p class="m-6">
+      "Global-minded strategist with an educational background from Canada, the UK, and South Korea, specialized in marketing and creative direction."
+    </p>
+    
+
+<div class="text-2xl font-semibold mb-4 mt-10 border-t pt-10">Experience</div>
+    
+    <ul class="inline-block text-left list-none space-y-2 text-gray-700">
+      <li><i>2023 - 2025</i><br>  <b>BAZZAAL</b><br> Graphic Designer</li>
+      <li><i>2021 - 2023</i><br>  <b>Han Design</b><br> Graphic Designer</li>
+      <li><i>2022</i><br>  <b>Daeki & Jun</b><br> Assistant Designer Designer</li>
+      <li><i>2020 - 2022</i><br>  <b>Content Creator</b></li>
+      <li><i>2018 - 2020</i><br>  <b>ROKA 1st Artillery Brigade</b><br>Assistant Publicist</li>
+      <li><i>2018</i><br>  <b>YBM</b><br>Videographer</li>
+      <li><i>2018</i><br>  <b>UNIVTOMORROW</b><br>Content Creator</li>
+      <li><i>2017</i><br>  <b>RocketView</b><br>Marketing Strategy and Design</li>
+    </ul>
+
+<div class="text-2xl font-semibold mb-4 mt-10 border-t pt-10">Awards</div>
+    
+    <ul class="inline-block text-left list-none space-y-2 text-gray-700">
+      <li><i>2023</i><br>  <b>Red Dot Design Awards</b><br> Brand & Communication</li>
+      <li><i>2024</i><br>  <b>Graphis International Awards</b><br> Gold / Silver</li>
+      <li><i>2023</i><br>  <b>The Society of Typographic Arts</b><br> STA 100</li>
+      <li><i>2015</i><br>  <b>The Korean Society of Media & Arts</b> <br>Honorable Mention</li>
+      <li><i>2014</i><br>  <b>Seoul National Univ. of Sci & Tech</b><br>2nd Prize</li>
+    </ul>
+
+    <div class="flex gap-4 mb-4 mt-10 border-t pt-10 justify-center">
+      <a href="mailto:hanparkdesign@gmail.com" class="text-blue-700 underline">E-mail</a>
+      <a href="https://instagram.com/" target="_blank" class="text-pink-600 underline">Instagram</a>
+    </div>
+
+  </div>
+</div>
 
   <style>
     /* 뒤로가기 버튼 (flat, no shadow) */

@@ -5,76 +5,53 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Welcome">
   <section id="home-hero" class="w-full flex flex-col bg-white full-viewport section-clip" style="position:relative;">
 
-    <!-- =========================
-         Single bar (상단/좌/우 40px, 하단 0)
-         좌측: 로고 + '한결' → 홈
-         우측: '프로필' → /profile, '모든 글' → /posts
-         ========================= -->
     <div id="home-bar" class="w-full">
       <div class="home-bar">
         <a href="/" class="home-brand" aria-label="홈">
-          <!-- ▼ 로고 높이 조절: --logo-size -->
           <img src="/images/website/logo.svg" alt="" class="home-logo" />
-          <!-- ▼ '한결' 크기 조절: --title-size -->
-          <span class="home-brand-title">한결</span>
+          <span class="home-brand-title">Han Park</span>
         </a>
         <nav class="home-nav">
-          <a class="home-link" href="/profile">프로필</a>
-          <a class="home-link" href="/posts">모든 글</a>
+          <a class="home-link" href="/profile">Profile</a>
+          <a class="home-link" href="/posts">Projects</a>
         </nav>
       </div>
     </div>
 
-    <!-- =========================
-         Row 2: 텍스트 애니메이션 섹션 (클릭 시 /posts 이동)
-         ========================= -->
     <div class="anim-wrap">
       <div class="anim-panel">
         <div class="text-block">
           <p>
-Love gives naught but itself and takes naught but from itself.<br>
-Love possesses not nor would it be possessed;
-For love is sufficient unto love.
+            Graphic Design is more than just a visual. It is an interaction between the product and the user, where every pixel tells a story.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- =========================
-         모바일 주소창 변동 + 바 실제 높이 반영 (핵심 스크립트)
-         ========================= -->
     <script>
       (() => {
         const root = document.documentElement;
-
         function setVH() {
           const h = (window.visualViewport?.height || window.innerHeight);
           root.style.setProperty('--vh', (h * 0.01) + 'px');
         }
-
         function setBarH() {
           const bar = document.getElementById('home-bar');
           if (!bar) return;
           const h = Math.round(bar.getBoundingClientRect().height);
           root.style.setProperty('--bar-h-actual', h + 'px');
         }
-
         const init = () => { setVH(); setBarH(); };
-
-        // bar 높이 변화 관찰(줄바꿈/폰트 로드/반응형 등)
         const barEl = document.getElementById('home-bar');
         if (barEl && 'ResizeObserver' in window) {
           const ro = new ResizeObserver(setBarH);
           ro.observe(barEl);
         }
-
-        // 뷰포트 변화 대응
         window.addEventListener('resize', setVH, { passive: true });
         if (window.visualViewport) {
           window.visualViewport.addEventListener('resize', setVH, { passive: true });
         }
         window.addEventListener('orientationchange', () => setTimeout(setVH, 250), { passive: true });
-
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', init);
         } else {
@@ -83,37 +60,24 @@ For love is sufficient unto love.
       })();
     </script>
 
-    <!-- =========================
-         경량 스크램블(해독) 애니메이션: 근접 시 크로스페이드 + 3~4초 후 자동 복귀(모바일은 5.5~7.5초)
-         ========================= -->
     <script>
       (() => {
         const RADIUS = 100;
         const MAX_DUR = 600;
         const MIN_DUR = 200;
-        const SCRAMBLE_GLYPH = ":"; // 폭 안정화용 고정폭 문자
-
-        // ▼ 기본(데스크톱) 자동 복귀 시간
-        const REVERT_MIN_MS = 3000;
-        const REVERT_MAX_MS = 4000;
-
-        // ▼ 모바일 전용: 자동 복귀(사라지기 시작) 시간 늘리기
-        const REVERT_MIN_MS_TOUCH = 5500;
+        const SCRAMBLE_GLYPH = ":";
+        const REVERT_MIN_MS = 5000;
+        const REVERT_MAX_MS = 6000;
+        const REVERT_MIN_MS_TOUCH = 6000;
         const REVERT_MAX_MS_TOUCH = 7500;
-
-        // ▼ 모바일 전용: 0.5초 대기 후 랜덤 노출
-        const MOBILE_REVEAL_DELAY = 500; // ms
-
-        const REVERT_BACK_DUR = 220; // 되돌아갈 때 페이드 속도(부드럽게)
+        const MOBILE_REVEAL_DELAY = 500;
+        const REVERT_BACK_DUR = 220;
 
         const mql = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
         const prefersReduced = !!(mql && mql.matches);
         const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-        const isWS = (ch) => /\s/.test(ch);
         const isASCII = (ch) => ch && ch.charCodeAt(0) <= 0x7F;
-
-        const randMs = (min, max) => Math.floor(min + Math.random() * (max - min));
         const debounce = (fn, wait)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), wait); }; };
 
         function boot(){
@@ -122,61 +86,42 @@ For love is sufficient unto love.
           const p = textRoot.querySelector('p');
           if (!p) return;
 
-          // 애니메이션 섹션 전체 클릭 → /posts
           const panel = document.querySelector('#home-hero .anim-panel');
           if (panel){
             panel.classList.add('is-clickable');
-            panel.setAttribute('role','link');
-            panel.setAttribute('tabindex','0');
-            panel.setAttribute('aria-label','모든 글 보러가기');
             panel.addEventListener('click', () => { window.location.href = '/posts'; });
-            panel.addEventListener('keydown', (e) => {
-              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = '/posts'; }
-            });
           }
 
           const original = p.textContent || '';
-
-          // 접근성/SEO: 원문은 sr-only로 보존, 시각 텍스트는 aria-hidden
           const sr = document.createElement('p');
           sr.className = 'sr-only';
           sr.textContent = original;
           p.setAttribute('aria-hidden', 'true');
           textRoot.insertBefore(sr, p);
 
-          // ========= 단어 래핑 도입: <br> 보존(+모바일 숨김), 공백은 ws, 단어는 .word로 감싸서 내부에 문자 스팬 생성 =========
           function splitWithWordsAndBr(node){
             const frag = document.createDocumentFragment();
 
             function makeASCIIChar(ch){
-              // .char.ascii 컨테이너 안에 gib/orig 두 겹을 쌓아 opacity로 크로스페이드
               const wrap = document.createElement('span');
               wrap.className = 'char ascii';
-              wrap.dataset.content = ch;
-              wrap.dataset.state = 'gib'; // 초기 상태: gib 보임
-
+              wrap.dataset.state = 'gib';
               const gib = document.createElement('span');
               gib.className = 'g gib';
               gib.textContent = SCRAMBLE_GLYPH;
-              gib.style.opacity = '1';
-
               const orig = document.createElement('span');
               orig.className = 'g orig';
               orig.textContent = ch;
-              orig.style.opacity = '0';
-
               wrap.appendChild(gib);
               wrap.appendChild(orig);
               return wrap;
             }
 
             function pushSpaces(seq){
-              // 각 공백을 독립 스팬으로(폭 유지)
               for (let i=0; i<seq.length; i++){
-                const ch = seq[i];
                 const span = document.createElement('span');
                 span.className = 'char ws';
-                span.textContent = ch;   // 공백 문자 그대로
+                span.textContent = seq[i];
                 frag.appendChild(span);
               }
             }
@@ -186,25 +131,19 @@ For love is sufficient unto love.
               w.className = 'word';
               for (let i=0; i<seq.length; i++){
                 const ch = seq[i];
-                if (prefersReduced){
+                if (prefersReduced || !isASCII(ch)){
                   const span = document.createElement('span');
                   span.className = 'char fixed';
                   span.textContent = ch;
                   w.appendChild(span);
-                } else if (isASCII(ch)){
-                  w.appendChild(makeASCIIChar(ch));
                 } else {
-                  const span = document.createElement('span');
-                  span.className = 'char fixed';
-                  span.textContent = ch; // 한글 등은 초기부터 원문
-                  w.appendChild(span);
+                  w.appendChild(makeASCIIChar(ch));
                 }
               }
               frag.appendChild(w);
             }
 
             function tokenize(text){
-              // 공백/탭/다중 스페이스는 그룹으로, 나머지는 단어 그룹
               const tokens = text.split(/(\s+)/);
               tokens.forEach(tok=>{
                 if (!tok) return;
@@ -214,22 +153,19 @@ For love is sufficient unto love.
             }
 
             function walk(n){
-              if (n.nodeType === 3){ // TEXT
-                // 코드 인덴트 개행 → 공백으로 정리
+              if (n.nodeType === 3){
                 const t = (n.nodeValue || '').replace(/\s*\n+\s*/g, ' ');
-                if (!t) return;
-                tokenize(t);
-              } else if (n.nodeType === 1){ // ELEMENT
+                if (t) tokenize(t);
+              } else if (n.nodeType === 1){
                 if (n.tagName === 'BR'){
                   const br = document.createElement('br');
-                  br.className = 'hard-br'; // 모바일에서 숨기고 PC에서 표시
+                  br.className = 'hard-br';
                   frag.appendChild(br);
                 } else {
                   Array.from(n.childNodes).forEach(walk);
                 }
               }
             }
-
             Array.from(node.childNodes).forEach(walk);
             node.replaceChildren(frag);
           }
@@ -237,7 +173,6 @@ For love is sufficient unto love.
 
           const asciiChars = Array.from(p.querySelectorAll('.char.ascii'));
           let boxes = [];
-
           function measure(){
             boxes = asciiChars.map((el)=>{
               const r = el.getBoundingClientRect();
@@ -247,89 +182,50 @@ For love is sufficient unto love.
           requestAnimationFrame(measure);
           window.addEventListener('resize', debounce(()=>requestAnimationFrame(measure), 150));
 
-          // Reduced Motion: 즉시 원문 표시(레이어 사용 안 함)
-          if (prefersReduced){
-            asciiChars.forEach(el=>{
-              const gib = el.querySelector('.g.gib');
-              const orig = el.querySelector('.g.orig');
-              if (gib && orig){ gib.style.opacity='0'; orig.style.opacity='1'; }
-              el.dataset.state = 'orig';
-            });
-            textRoot.classList.add('rm-ready');
-            const io = new IntersectionObserver((ents)=>{
-              ents.forEach(e=>{
-                if (e.isIntersecting){
-                  textRoot.classList.add('rm-fade-in');
-                  io.disconnect();
-                }
-              });
-            }, { threshold: 0.2 });
-            io.observe(textRoot);
-            return;
-          }
-
-          // ====== 근접 시 크로스페이드 + 자동 복귀 ======
           function clearRevert(el){ if (el._rt){ clearTimeout(el._rt); el._rt = null; } }
           function revertToGib(el, dur){
             const gib = el.querySelector('.g.gib');
             const orig = el.querySelector('.g.orig');
             if (!gib || !orig) return;
-            gib.style.transition  = `opacity ${dur}ms linear`;
-            orig.style.transition = `opacity ${dur}ms linear`;
-            gib.style.opacity  = '1';
-            orig.style.opacity = '0';
+            gib.style.transition = orig.style.transition = `opacity ${dur}ms linear`;
+            gib.style.opacity = '1'; orig.style.opacity = '0';
             el.dataset.state = 'gib';
             clearRevert(el);
           }
           function resolveToOrig(el, dur){
-            if (!el.classList.contains('ascii')) return;
             if (el.dataset.state === 'orig') return;
             const gib = el.querySelector('.g.gib');
             const orig = el.querySelector('.g.orig');
             if (!gib || !orig) return;
-
-            gib.style.transition  = `opacity ${dur}ms linear`;
-            orig.style.transition = `opacity ${dur}ms linear`;
-            gib.style.opacity  = '0';
-            orig.style.opacity = '1';
+            gib.style.transition = orig.style.transition = `opacity ${dur}ms linear`;
+            gib.style.opacity = '0'; orig.style.opacity = '1';
             el.dataset.state = 'orig';
-
-            // 자동 복귀: 플랫폼별 시간 사용
             const min = isTouch ? REVERT_MIN_MS_TOUCH : REVERT_MIN_MS;
             const max = isTouch ? REVERT_MAX_MS_TOUCH : REVERT_MAX_MS;
             clearRevert(el);
-            el._rt = setTimeout(
-              () => revertToGib(el, REVERT_BACK_DUR),
-              Math.floor(min + Math.random()*(max - min))
-            );
+            el._rt = setTimeout(() => revertToGib(el, REVERT_BACK_DUR), randMs(min, max));
           }
+          function randMs(min, max) { return Math.floor(min + Math.random() * (max - min)); }
 
           if (!isTouch){
-            // 데스크톱: 포인터 근접 → 해독 페이드 후 자동 복귀
             textRoot.addEventListener('pointermove', (e)=>{
               const ex = e.clientX, ey = e.clientY;
               for (let i=0;i<boxes.length;i++){
-                const b = boxes[i]; if (!b) continue;
-                const dx = ex - b.cx, dy = ey - b.cy;
-                const dist = Math.hypot(dx, dy);
+                const b = boxes[i];
+                const dist = Math.hypot(ex - b.cx, ey - b.cy);
                 if (dist < RADIUS){
-                  const k = 1 - dist/RADIUS;
-                  const dur = Math.round(MIN_DUR + k * (MAX_DUR - MIN_DUR));
+                  const dur = Math.round(MIN_DUR + (1 - dist/RADIUS) * (MAX_DUR - MIN_DUR));
                   resolveToOrig(b.el, dur);
                 }
               }
             });
           } else {
-            // 모바일: 0.5초 대기 후, 랜덤 순서로 해독 → 5.5~7.5초 뒤 자동 복귀
             const io = new IntersectionObserver((ents)=>{
               ents.forEach(e=>{
                 if (e.isIntersecting){
                   setTimeout(() => {
-                    const shuffled = asciiChars.slice().sort(() => Math.random() - 0.5);
-                    shuffled.forEach((el) => {
-                      const jitter = Math.floor(Math.random() * 720);
-                      const dur = 320 + Math.floor(Math.random() * 860);
-                      setTimeout(() => resolveToOrig(el, dur), jitter);
+                    asciiChars.forEach((el) => {
+                      setTimeout(() => resolveToOrig(el, 320 + Math.random() * 860), Math.random() * 720);
                     });
                   }, MOBILE_REVEAL_DELAY);
                   io.disconnect();
@@ -339,227 +235,74 @@ For love is sufficient unto love.
             io.observe(textRoot);
           }
         }
-
-        if (document.readyState === 'loading'){
-          document.addEventListener('DOMContentLoaded', boot);
-        } else {
-          boot();
-        }
+        boot();
       })();
     </script>
 
-    <!-- =========================
-         스타일 (컴포넌트 스코프)
-         ========================= -->
     <style>
-/* 변수 */
-#home-bar{
-  --bar-bg   : #ebe9e5;
-  --bar-fg   : #040404;
-  --link-fg  : #040404;
+      #home-bar{
+        --bar-bg: #ebe9e5; --bar-fg: #040404; --link-fg: #040404;
+        --logo-size: clamp(28px, 3.7vw, 30px); --brand-gap: 12px;
+        --title-size: clamp(22px, 3.5vw, 25px); --link-size: clamp(17px, 2.4vw, 18px);
+      }
+      #home-hero{
+        --bar-h: clamp(200px, 20vw, 600px);
+        --anim-margin-bg: #ebe9e5; --anim-text: #ffffff; --anim-margin: 24px;
+        --anim-radius: 16px; --anim-inner-pad-x: 40px;
+        --anim-inner-gradient: linear-gradient(to bottom, #040404 0%, #040404 18%, #13151e 34%, #2f3756 50%, #747e89 68%, #c3c0ba 82%, #ebe9e5 95%, #f8f7f3 100%);
+        --anim-grain-opacity: .10;
+      }
+      #home-bar .home-bar{
+        padding: 30px 30px 0 30px; min-height: var(--bar-h); background: var(--bar-bg);
+        display: flex; align-items: flex-start; justify-content: space-between;
+      }
+      #home-bar .home-brand{ display:flex; align-items:center; gap: var(--brand-gap); color: var(--bar-fg); text-decoration: none; }
+      #home-bar .home-logo{ height: var(--logo-size); width:auto; }
+      #home-bar .home-brand-title{ font-weight: 600; font-size: var(--title-size); line-height: 1; }
+      #home-bar .home-nav{ display:flex; }
+      #home-bar .home-link{ color: var(--link-fg); font-size: var(--link-size); font-weight: 600; text-decoration: none; margin-left: 18px; }
 
-  --logo-size : clamp(28px, 3.7vw, 30px);
-  --brand-gap : 12px;
-  --title-size: clamp(22px, 3.5vw, 25px);
-  --link-size : clamp(17px, 2.4vw, 18px);
-}
-#home-hero{
-  --bar-h           : clamp(200px, 20vw, 600px); /* 초기 최소값 (실측은 --bar-h-actual) */
-  --anim-margin-bg  : #ebe9e5;
-  --anim-text       : #ffffff;
-  --anim-margin     : 24px;
-  --anim-radius     : 16px;
-  --anim-inner-pad-x: 40px;
-  --anim-inner-gradient: linear-gradient(
-    to bottom,
-    #040404 0%,
-    #040404 18%,
-    #13151e 34%,
-    #2f3756 50%,
-    #747e89 68%,
-    #c3c0ba 82%,
-    #ebe9e5 95%,
-    #f8f7f3 100%
-  );
-  --anim-grain-opacity: .10;
-}
-
-/* 상단 바 */
-#home-bar .home-bar{
-  padding: 30px 30px 0 30px;
-  box-sizing: border-box;
-  min-height: var(--bar-h);
-  height: auto;
-  background: var(--bar-bg);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-#home-bar .home-brand{
-  display:flex; align-items:center; gap: var(--brand-gap);
-  color: var(--bar-fg); text-decoration: none;
-}
-#home-bar .home-logo{ height: var(--logo-size); width:auto; display:block; }
-#home-bar .home-brand-title{
-  font-weight: 600; letter-spacing: -0.02em; font-size: var(--title-size);
-  line-height: 1; color: var(--bar-fg);
-}
-#home-bar .home-nav{ display:flex; align-items:flex-start; }
-#home-bar .home-link{
-  color: var(--link-fg);
-  font-size: var(--link-size);
-  font-weight: 600;
-  text-decoration: none;
-  text-underline-offset: 2px;
-  margin-left: 18px;
-}
-#home-bar .home-link:hover{ opacity:.8; }
-
-/* 애니메이션 섹션: 남는 스크롤 없이 화면 하단까지 꽉 채움 */
-.anim-wrap{
-  display:flex; align-items:center; justify-content:center;
-  padding: var(--anim-margin);
-  background: var(--anim-margin-bg);
-  box-sizing: border-box;
-  overflow: hidden;
-
-  /* 핵심: 실측 vh와 바의 실제 높이 사용 */
-  min-height: calc(var(--vh, 1vh) * 100 - var(--bar-h-actual, var(--bar-h)));
-  height:     calc(var(--vh, 1vh) * 100 - var(--bar-h-actual, var(--bar-h)));
-}
-
-/* 브라우저가 dvh/svh 지원 시 오차 추가 보정 */
-@supports (height: 100dvh){
-  .anim-wrap{
-    min-height: calc(100dvh - var(--bar-h-actual, var(--bar-h)));
-    height:     calc(100dvh - var(--bar-h-actual, var(--bar-h)));
-  }
-}
-@supports (height: 100svh){
-  .anim-wrap{
-    min-height: calc(100svh - var(--bar-h-actual, var(--bar-h)));
-    height:     calc(100svh - var(--bar-h-actual, var(--bar-h)));
-  }
-}
-
-/* 노치/홈바 안전영역 하단 여백(필요 시) */
-.anim-panel > .text-block{
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-@media (max-width: 639px){
-  #home-hero{ --anim-inner-pad-x: 24px; }
-}
-.anim-panel{
-  width: 100%; height: 100%;
-  background: var(--anim-inner-gradient);
-  border-radius: var(--anim-radius);
-  display:flex; align-items:center; justify-content:center;
-  padding-left:  var(--anim-inner-pad-x);
-  padding-right: var(--anim-inner-pad-x);
-  position: relative;
-  background-origin: border-box;
-
-  /* iOS Safari 테두리 헤어라인 방지 */
-  overflow: hidden;
-  background-clip: padding-box;
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  outline: 1px solid transparent;
-}
-
-.anim-panel::after{
-  content:"";
-  position:absolute; inset:0; pointer-events:none; border-radius:inherit;
-  background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>\
-  <filter id='n'>\
-    <feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/>\
-    <feColorMatrix type='saturate' values='0'/>\
-  </filter>\
-  <rect width='100%' height='100%' filter='url(%23n)'/>\
-</svg>");
-  background-size: 200px 200px;
-  mix-blend-mode: multiply;
-  opacity: var(--anim-grain-opacity);
-  will-change: opacity;
-}
-
-/* iOS(WebKit) 전용 완화: grain 블렌드로 테두리선 발생 시 normal로 강등 */
-@supports (-webkit-touch-callout: none){
-  .anim-panel::after{
-    mix-blend-mode: normal;
-    opacity: calc(var(--anim-grain-opacity) * 0.8);
-  }
-}
-
-.anim-panel > .text-block{ position: relative; z-index: 1; }
-
-/* 텍스트 블록 */
-.text-block{
-  max-width: 1000px;
-  margin: 0 auto;
-  text-align: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-weight: 300;
-  font-size: clamp(16px, 4vw, 40px);
-  line-height: 1.45;
-  letter-spacing: 0;
-  color: var(--anim-text);
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: break-word;
-}
+      .anim-wrap{
+        display:flex; align-items:center; justify-content:center; padding: var(--anim-margin);
+        background: var(--anim-margin-bg); box-sizing: border-box; overflow: hidden;
+        min-height: calc(var(--vh, 1vh) * 100 - var(--bar-h-actual, var(--bar-h)));
+        height: calc(var(--vh, 1vh) * 100 - var(--bar-h-actual, var(--bar-h)));
+      }
+      .anim-panel{
+        width: 100%; height: 100%; background: var(--anim-inner-gradient); border-radius: var(--anim-radius);
+        display:flex; align-items:center; justify-content:center; padding: 0 var(--anim-inner-pad-x);
+        position: relative; overflow: hidden; transform: translateZ(0);
+      }
+      .anim-panel::after{
+        content:""; position:absolute; inset:0; pointer-events:none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        background-size: 200px 200px; mix-blend-mode: multiply; opacity: var(--anim-grain-opacity);
+      }
+      .text-block{
+        max-width: 1000px; margin: 0 auto; text-align: center;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-weight: 300; font-size: clamp(16px, 4vw, 40px); line-height: 1.45; color: var(--anim-text);
+      }
     </style>
 
-    <!-- =========================
-         동적 요소용 글로벌 스타일(중요!)
-         ========================= -->
     <style is:global>
-html, body { margin:0; padding:0; height:100%; overflow-x:hidden; }
+      /* 문자 컨테이너 */
+      #home-hero .char{ display:inline-block; vertical-align: baseline; }
+      #home-hero .char.ascii{ position: relative; width: 1ch; height: 1em; }
+      #home-hero .char.ascii .g{ position: absolute; inset:0; will-change: opacity; }
+      #home-hero .char.ascii .g.gib{ opacity: 1; }
+      #home-hero .char.ascii .g.orig{ opacity: 0; }
+      #home-hero .char.ws{ display:inline-block; white-space: pre; }
 
-/* 문자 컨테이너: ASCII는 폭 고정(1ch) + 레이어 두 겹 */
-#home-hero .char{ display:inline-block; vertical-align: baseline; }
-#home-hero .char.ascii{
-  position: relative;
-  width: 1ch;     /* 폭 고정 → 크로스페이드 중 레이아웃 흔들림 방지 */
-  height: 1em;
-}
-#home-hero .char.ascii .g{
-  position: absolute; left:0; top:0; right:0; bottom:0;
-  display: inline-block;
-  line-height: inherit;
-  will-change: opacity;
-}
-#home-hero .char.ascii .g.gib{ opacity: 1; }
-#home-hero .char.ascii .g.orig{ opacity: 0; }
+      /* === [수정 핵심] 단어 단위 래핑 설정 === */
+      #home-hero .word {
+        display: inline-block;  /* 단어를 한 덩어리로 취급 */
+        white-space: nowrap;    /* 단어 내부 글자들 줄바꿈 방지 */
+      }
 
-/* 공백은 그대로 (폭 유지) */
-#home-hero .char.ws{ display:inline-block; white-space: pre; }
-
-/* === 단어 래핑: 모바일에서만 단어 단위로 줄바꿈 === */
-#home-hero .word{ display:inline; }                /* 기본(PC): 문자단위 래핑 유지 */
-@media (max-width: 639px){
-  #home-hero .word{ display:inline-block; }        /* 모바일: 단어를 원자적으로 취급 → 단어 단위 줄바꿈 */
-}
-
-/* PC에서만 하드 줄바꿈 표시 */
-#home-hero .hard-br{ display: none; }              /* 모바일: 숨김 */
-@media (min-width: 640px){
-  #home-hero .hard-br{ display: initial; }         /* PC: 표시 */
-}
-
-/* Reduced Motion 페이드 */
-@media (prefers-reduced-motion: reduce){
-  #home-hero .rm-ready { opacity: 0; }
-  #home-hero .rm-ready.rm-fade-in { opacity: 1; transition: opacity .28s ease-out; }
-}
-
-/* 페이지 자체의 수직 스크롤 잠금(테스트용) — 스크롤이 즉시 사라지면 "아래 형제"가 원인 확정 */
-body:has(#home-hero) { overflow-y: hidden !important; }
-
+      #home-hero .hard-br{ display: none; }
+      @media (min-width: 640px){ #home-hero .hard-br{ display: initial; } }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
     </style>
   </section>
 </Layout>

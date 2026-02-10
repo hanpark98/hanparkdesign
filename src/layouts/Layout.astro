@@ -78,7 +78,7 @@ const showFooter = Astro.url.pathname !== '/';
       }
       .brand-title{
         font-weight:500; font-size: clamp(22px, 3.5vw, 25px);
-        letter-spacing:-0.02em; line-height:1; white-space:nowrap; color:#fff;
+        letter-spacing:0.01em; line-height:1; white-space:nowrap; color:#fff;
         overflow:hidden; text-overflow:ellipsis;
       }
 
@@ -104,14 +104,16 @@ const showFooter = Astro.url.pathname !== '/';
 
       #search-input:focus{ box-shadow: 0 0 0 0px rgba(255,255,255,.6), 0 0 0 5px rgba(0,0,0,.2) inset; }
 
-      @media (max-width: 640px){
-        .site-nav-box{ margin-inline: max(var(--nav-side-gap), 24px); }
-        #search-form{ width: min(10rem, 52vw); }
-      }
-      @media (max-width: 400px){
-        .site-nav-box{ margin-inline: max(var(--nav-side-gap), 20px); }
-        #search-form{ width: min(9.2rem, 56vw); }
-      }
+/* 변경 후 (모바일에서 여백을 12px로 축소) */
+@media (max-width: 640px){
+  .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
+  #search-form{ width: min(10rem, 52vw); }
+}
+@media (max-width: 400px){
+  /* 400px 이하에서도 동일하게 12px 유지 */
+  .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
+  #search-form{ width: min(9.2rem, 56vw); }
+}
     </style>
   </head>
 
@@ -122,11 +124,11 @@ const showFooter = Astro.url.pathname !== '/';
           <div class="site-nav-box">
             <a href="/" class="site-brand" aria-label="홈">
               <img src="/images/website/logo.svg" alt="로고" class="brand-logo" />
-              <span class="brand-title">한결</span>
+              <span class="brand-title">Han Park</span>
             </a>
 
             <form id="search-form">
-              <input type="search" placeholder="게시물 검색" id="search-input" />
+              <input type="search" placeholder="Search" id="search-input" />
               <button type="submit" aria-label="검색">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <circle cx="11" cy="11" r="7" stroke-width="2" />
@@ -153,7 +155,7 @@ const showFooter = Astro.url.pathname !== '/';
           margin-top: 0;
           flex-shrink: 0;
         ">
-          © {new Date().getFullYear()} 한결 | All rights reserved. | hanparkdesign@gmail.com
+          © {new Date().getFullYear()} Han Park | All rights reserved. | hanparkdesign@gmail.com
         </footer>
       )}
     </div>

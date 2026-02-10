@@ -32,13 +32,13 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
 
     <!-- 카테고리 Navigation -->
-    <div id="category-nav" class="flex items-start gap-0 px-6 mb-0">
-      <a href="/profile" class="profile-btn mr-6" data-category="profile">프로필</a>
+    <div id="category-nav" class="flex items-start gap-0 px-3 sm:px-6 mb-0">
+      <a href="/profile" class="profile-btn mr-6" data-category="profile">Profile</a>
 
       <!-- 가로 스크롤 트랙 -->
       <div id="cat-track"
            class="flex flex-nowrap overflow-x-auto gap-2 min-w-0 flex-1 -mr-6 pr-6">
-        <button class="category-btn active" data-category="all">모든 글</button>
+        <button class="category-btn active" data-category="all">Every Projects</button>
         {allCategories.map(c => (
           <button class="category-btn" data-category={c}>{c}</button>
         ))}
@@ -46,7 +46,7 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
     </div>
 
     <!-- 포스트 목록 -->
-    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 py-6 justify-items-start">
+    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-3 sm:px-6 py-6 justify-items-start">
       {posts.map(p => (
         <a href={`/posts/${p.slug}`} class="group post-card"
            data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}>
@@ -101,7 +101,7 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
       border-radius: 6px;
       background: #fff;
       color: #111;
-      font-weight: 600;
+      font-weight: 700;
       white-space: nowrap;
     }
 

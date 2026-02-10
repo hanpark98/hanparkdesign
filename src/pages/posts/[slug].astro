@@ -12,56 +12,91 @@ export async function getStaticPaths() {
 }
 
 const { default: Content, frontmatter } = await import(`../../content/posts/${Astro.params.slug}.md`);
+
+// 새로운 포맷 여부 확인
+const isWide = frontmatter.format === 'wide';
 ---
 
 <Layout title={frontmatter.title}>
-  <!-- 전체 배경색 변경 -->
-  <div class="pt-[24px] bg-[#ebe9e5]">
-    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-8 px-6 justify-start items-center">
-      <!-- 뒤로가기: 프로필 버튼과 동일 디자인 (rounded 6px) -->
-      <button
-        onclick="window.history.back()"
-        class="back-btn mr-6"
-      >
-        뒤로가기
-      </button>
+  <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
+    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-8 px-4 sm:px-6 justify-start items-center">
+      <button onclick="window.history.back()" class="back-btn mr-6">Return</button>
     </div>
 
-    <div class="px-6">
-      <article class="prose prose-lg max-w-3xl mx-auto mt-4 !prose-img:rounded-xl !prose-img:mb-1">
-        <div class="bg-white rounded-16px px-5 py-5 mb-7 card-shell">
-          <div class="mb-1 flex gap-3 items-center text-gray-400 text-[0.96rem]">
-            <span>
-              {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
-            <span class="mx-1">&middot;</span>
-            <span>{frontmatter.category}</span>
+    <div class="px-4 sm:px-6">
+      {isWide ? (
+        /* ✅ 1. Wide 포맷 디자인 */
+        <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
+          <div class="bg-white px-8 py-6 mb-6 card-shell">
+            <div class="mb-4 flex gap-3 items-center text-gray-400 text-[0.96rem]">
+              <span>
+                {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+              <span class="mx-1">&middot;</span>
+              <span>{frontmatter.category}</span>
+            </div>
+            <h1 class="text-4xl font-bold mb-4">{frontmatter.title}</h1>
+            {frontmatter.description && (
+              <p class="text-gray-600 text-xl mt-2 mb-0">{frontmatter.description}</p>
+            )}
           </div>
-          <h1 class="mb-1">{frontmatter.title}</h1>
-          {frontmatter.description && (
-            <p class="text-gray-600 text-lg mt-2 mb-3">{frontmatter.description}</p>
-          )}
-          {frontmatter.image && (
-            <img
-              src={frontmatter.image}
-              alt={frontmatter.title}
-              class="square-img rounded-8px mt-4 mb-1"
-              style="margin-left:auto; margin-right:auto; display:block;"
-            />
-          )}
-        </div>
+          
+          <div class="bg-white px-8 py-5 mb-5 card-shell">
+            <Content />
+          </div>
 
-        <Content />
-      </article>
+          <div class="bg-white px-8 py-6 mb-6 card-shell">
+            <div class="mb-4 flex gap-3 items-center text-gray-400 text-[0.96rem]">
+              <span>
+              sadasdasd
+              </span>
+            </div>
+            <h1 class="text-4xl font-bold mb-4">blah blah blah</h1>
+            {frontmatter.description && (
+              <p class="text-gray-600 text-xl mt-2 mb-0">i have designed this with al wierjd sdnwied be cause baby i dont know what do o ro</p>
+            )}
+          </div>
+
+        </article>
+      ) : (
+        /* ✅ 2. Legacy 포맷 디자인 */
+        <article class="prose prose-lg max-w-3xl mx-auto mt-4">
+          <div class="bg-white px-5 py-5 mb-7 card-shell">
+            <div class="mb-1 flex gap-3 items-center text-gray-400 text-[0.96rem]">
+              <span>
+                {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+              <span class="mx-1">&middot;</span>
+              <span>{frontmatter.category}</span>
+            </div>
+            <h1 class="mb-1">{frontmatter.title}</h1>
+            {frontmatter.description && (
+              <p class="text-gray-600 text-lg mt-2 mb-3">{frontmatter.description}</p>
+            )}
+            
+            {/* 대표 이미지 (썸네일) */}
+            {frontmatter.image && (
+              <img
+                src={frontmatter.image}
+                alt={frontmatter.title}
+                class="square-img"
+              />
+            )}
+          </div>
+          <Content />
+        </article>
+      )}
     </div>
   </div>
 
   <style>
-    /* 🔹 공통 round 값 */
-    .rounded-6px { border-radius: 6px; }
-    .rounded-16px { border-radius: 16px; }
+    /* 레이아웃 구성용 기본 스타일 - 세부 미디어 속성은 global.css 변수로 관리됩니다. */
+    .card-shell {
+      border-radius: 16px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02);
+      overflow: hidden; /* 내부 미디어가 삐져나오지 않도록 설정 */
+    }
 
-    /* 🔹 뒤로가기 버튼: 프로필 버튼과 동일 디자인 (round 6px) */
     .back-btn {
       flex-shrink: 0;
       padding: .40rem 1.6rem;
@@ -69,89 +104,51 @@ const { default: Content, frontmatter } = await import(`../../content/posts/${As
       background: #fff;
       color: #111;
       font-weight: 700;
-      white-space: nowrap;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
       border: none;
-      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0);
       transition: background 0.2s ease;
+      cursor: pointer;
     }
 
-    /* 🔹 카드 컨테이너: round 16px + postcard 그림자 */
-    .card-shell {
-      border-radius: 16px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02);
+    .back-btn:hover {
+      background: #f4f4f4;
     }
 
-    /* 페이지 배경색 */
     html, body { background: #ebe9e5; }
   </style>
 
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const FALLBACK = '/images/block.jpg';
+    document.addEventListener("DOMContentLoaded", function () {
+      // 캐러셀 페이드 효과 제어
+      document.querySelectorAll('.my-carousel').forEach(function(carousel) {
+        const scrollArea = carousel.querySelector('.my-carousel-scroll');
+        if (!scrollArea) return;
 
-    function toPosterPath(src) {
-      if (!src) return null;
-      if (!/\.(mp4|mov)$/i.test(src)) return null;
-      return src.replace(/\.(mp4|mov)$/i, '.poster.jpg');
-    }
-
-    function ensurePoster(video) {
-      const src = video.getAttribute('src') || '';
-      const isMedia = /\.(mp4|mov)$/i.test(src);
-      if (!video.hasAttribute('preload')) video.setAttribute('preload', 'metadata');
-      if (!video.hasAttribute('playsinline')) video.setAttribute('playsinline', '');
-      if (!video.hasAttribute('controls')) video.setAttribute('controls', '');
-
-      if (isMedia) {
-        const autoPoster = toPosterPath(src);
-        const curr = video.getAttribute('poster') || '';
-        if (!curr || /\/images\/block\.jpg$/.test(curr)) {
-          video.setAttribute('poster', autoPoster);
+        function updateFade() {
+          const scrollLeft = scrollArea.scrollLeft;
+          const maxScroll = scrollArea.scrollWidth - scrollArea.clientWidth;
+          
+          // 좌측 페이드 제어
+          carousel.classList.toggle('hide-left', scrollLeft <= 2);
+          // 우측 페이드 제어
+          carousel.classList.toggle('hide-right', scrollLeft >= maxScroll - 2);
         }
-        const testImg = new Image();
-        testImg.onload = () => {};
-        testImg.onerror = () => { video.setAttribute('poster', FALLBACK); };
-        testImg.src = autoPoster;
-      } else {
-        if (!video.hasAttribute('poster')) video.setAttribute('poster', FALLBACK);
-      }
-    }
 
-    // 캐러셀 페이드 효과
-    document.querySelectorAll('.my-carousel').forEach(function(carousel) {
-      const scrollArea = carousel.querySelector('.my-carousel-scroll');
-      if (!scrollArea) return;
-      function updateFade() {
-        const scrollLeft = scrollArea.scrollLeft;
-        const maxScroll = scrollArea.scrollWidth - scrollArea.clientWidth;
-        if (scrollLeft <= 2) {
-          carousel.classList.add('hide-left');
-        } else {
-          carousel.classList.remove('hide-left');
-        }
-        if (scrollLeft >= maxScroll - 2) {
-          carousel.classList.add('hide-right');
-        } else {
-          carousel.classList.remove('hide-right');
-        }
-      }
-      updateFade();
-      scrollArea.addEventListener('scroll', updateFade);
-      window.addEventListener('resize', updateFade);
-    });
+        updateFade();
+        scrollArea.addEventListener('scroll', updateFade);
+        window.addEventListener('resize', updateFade);
+      });
 
-    // Safari 렌더링 버그 수정을 위해 캐러셀 레이아웃 강제 재계산
-    window.addEventListener('load', function() {
-      document.querySelectorAll('.my-carousel-scroll').forEach(function(scrollArea) {
-        scrollArea.style.display = 'none';
-        scrollArea.offsetHeight;
-        scrollArea.style.display = '';
+      // 브라우저 렌더링 최적화 (Safari 호환성)
+      window.addEventListener('load', function() {
+        document.querySelectorAll('.my-carousel-scroll').forEach(function(scrollArea) {
+          scrollArea.style.display = 'none';
+          scrollArea.offsetHeight; // 레이아웃 강제 재계산
+          scrollArea.style.display = '';
+        });
       });
     });
-  });
   </script>
 </Layout>

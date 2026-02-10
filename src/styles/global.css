@@ -2,46 +2,41 @@
 @font-face {
   font-family: 'Noto Sans KR';
   font-style: normal;
-  font-weight: 100 900;  /* 100~900 범위 커버 */
+  font-weight: 100 900;
   src: url('/fonts/NotoSansKR-Variable.woff2') format('woff2-variations');
   font-display: swap;
 }
 
-
 /* === 뷰포트/스크롤 기본값 보수 === */
-/* html/body만 100% 기준으로 유지 */
 html, body{
   height: 100%;
   min-height: 100%;
   margin: 0;
   padding: 0;
   background: #F8F8FF;
-  -webkit-text-size-adjust: 100%;  /* iOS 폰트 자동확대 방지 */
-  overscroll-behavior: none;       /* 튕김시 바디 번쩍 방지 */
-  overflow-x: hidden;              /* 가로 1px 스크롤 방지 */
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+  overflow-x: hidden;
 }
 
-/* 레이아웃 루트는 '최소' 높이만 강제 (뷰포트 꽉 채움) */
 .layout-root{
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   height: auto;
 }
-/* 신형 뷰포트 유닛 지원 시 우선 사용 */
+
 @supports (min-height: 100svh){
   .layout-root{ min-height: 100svh; }
 }
 @supports (min-height: 100dvh){
   .layout-root{ min-height: 100dvh; }
 }
-/* 구형 iOS(WebKit) 폴백 */
 @supports (-webkit-touch-callout: none){
   html, body { height: -webkit-fill-available; }
   .layout-root { min-height: -webkit-fill-available; }
 }
 
-/* 섹션을 뷰포트 꽉 채우고 싶을 때 쓰는 헬퍼 */
 .full-viewport {
   min-height: 100vh;
   height: 100vh;
@@ -53,20 +48,16 @@ html, body{
   .full-viewport { min-height: 100dvh; height: 100dvh; }
 }
 
-/* 섹션 경계 넘침(그림자/transform)로 인한 미세 스크롤 방지 */
 .section-clip { overflow: clip; }
 @supports not (overflow: clip) {
   .section-clip { overflow: hidden; }
 }
 
-/* 첫/마지막 마진 붕괴 방지용 래퍼 */
 .section-inner > :first-child { margin-top: 0 !important; }
 .section-inner > :last-child  { margin-bottom: 0 !important; }
 
-/* flex 컨테이너(main) 안전 보정 */
 main {
   flex: 1 0 auto;
-  /* 스크롤 인터랙션 보장을 위해 auto로 변경하거나 속성 자체를 제거하세요 */
   -webkit-user-select: auto;
   user-select: auto;
 }
@@ -76,37 +67,7 @@ main {
 @tailwind utilities;
 @tailwind typography;
 
-/* ------------ 마크다운 마진 완전 강제 ------------
-article.prose.prose-lg h1,
-article.prose.prose-lg h2,
-article.prose.prose-lg h3,
-article.prose.prose-lg h4,
-article.prose.prose-lg p,
-article.prose.prose-lg ul,
-article.prose.prose-lg ol,
-article.prose.prose-lg pre,
-article.prose.prose-lg blockquote,
-article.prose.prose-lg li,
-article.prose.prose-lg img {
-  margin-top: 0.4rem !important;
-  margin-bottom: 0.4rem !important;
-}
-
-/* 중첩 리스트/후손 p 등도 덮어써서, Tailwind Typography의 특이 마진까지 완전히 무력화 
-article.prose.prose-lg ul ul,
-article.prose.prose-lg ul ol,
-article.prose.prose-lg ol ul,
-article.prose.prose-lg ol ol,
-article.prose.prose-lg ul > li > p,
-article.prose.prose-lg ol > li > p,
-article.prose.prose-lg ul > li > p:first-child,
-article.prose.prose-lg ul > li > p:last-child,
-article.prose.prose-lg ol > li > p:first-child,
-article.prose.prose-lg ol > li > p:last-child {
-  margin-top: 0.4rem !important;
-  margin-bottom: 0.4rem !important;
-}
-*/
+/* ------------ 타이포그래피 스타일 ------------ */
 h1 {
   margin-top: 0em !important;
   margin-bottom: 0.15em !important;
@@ -149,14 +110,6 @@ p {
   font-size: 1.15rem !important;
   font-weight: 400 !important;
 }
-p2 {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  line-height: 1.6 !important;
-  letter-spacing: -0.01em !important;
-  font-size: 1.1rem !important;
-  font-weight: 400 !important;
-}
 ul {
   margin-top: 1.2em !important;
   margin-bottom: 1.2em !important;
@@ -175,84 +128,87 @@ li {
 }
 img { margin-top: 0rem !important; margin-bottom: 0rem !important; }
 
-/* 1:1 정사각형 이미지 스타일 */
 .square-img { margin-top: 1rem; aspect-ratio: 1 / 1; object-fit: cover; width: 100%; display: block; }
 .aspect-10-8 { margin-top: 1rem; aspect-ratio: 1 / 0.8; object-fit: cover; width: 100%; display: block; }
 
-/* Tailwind Typography에도 같은 폰트 강제 */
 .prose, .prose-lg {
   font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
     'Segoe UI Symbol', 'Arial', sans-serif !important;
 }
 
-/* 이미지/비디오 불펌 방지 기본값 */
-img,
-video {
-  -webkit-user-drag: none;     /* 드래그 저장 방지 */
-  -webkit-touch-callout: none; /* iOS 길게눌러 저장 메뉴 방지 */
-  user-select: none;           /* 선택 방지 */
+img, video {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
-/* (선택) 사이트 전체 텍스트 선택 방지 */
 body {
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* ----------- 캐러셀 ----------- */
+/* ----------- 캐러셀 수정본 ----------- */
 .my-carousel {
   --carousel-height: 600px;
   position: relative;
-  height: var(--carousel-height);
-  min-height: 280px;
-  max-height: 100vw;
+  /* 수정: 고정 높이 대신 auto와 margin 초기화 적용 */
+  height: auto; 
+  min-height: 140px; 
+  margin-top: 10px !important; 
+  margin-left: -12px;
+  margin-right: -12px;
 }
 @media (max-width: 640px) {
   .my-carousel {
-    --carousel-height: 90vw;
-    min-height: 28vw;
-    max-height: 90vw;
+    --carousel-height: 50vw;
   }
 }
+
 .my-carousel-scroll {
   display: flex;
   overflow-x: auto;
   flex-wrap: nowrap;
-  gap: 6px;
-  padding-bottom: 8px;
+  gap: 10px;
+  padding: 0;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  align-items: flex-end;
-  height: 100%;
+  /* 수정: flex-end에서 flex-start로 변경하여 상단 밀착 */
+  align-items: flex-start; 
+  height: auto;
   min-height: 140px;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
 }
 .my-carousel-scroll::-webkit-scrollbar { display: none; }
+
 .my-carousel-item {
   flex: 0 0 auto;
-  height: 100%;
+  height: auto;
   min-width: 80px;
   display: flex;
   flex-direction: column;
+  /* 수정: 내부 요소도 상단 정렬 */
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start; 
   scroll-snap-align: center;
-  position: relative; /* 캐러셀 비디오 오버레이 기준점 */
+  position: relative;
 }
+
 .my-carousel-img {
-  height: calc(98% - 36px);
-  max-height: 100%;
+  /* 수정: 고정 계산식 대신 유연한 높이 부여 */
+  height: auto;
+  max-height: var(--carousel-height);
   width: auto;
   object-fit: contain;
-  border-radius: 16px;
+  border-radius: 10px;
   display: block;
   margin: 0;
 }
+
 .my-carousel-title {
-  margin: 6px 0 0 0;
+  margin: 8px 0 0 0; /* 제목 상단에 약간의 여백 */
   line-height: 1.5;
   font-size: 1rem;
   text-align: center;
@@ -262,6 +218,7 @@ body {
   margin-right: auto;
   word-break: keep-all;
 }
+
 /* 페이드 인디케이터 */
 .my-carousel::before,
 .my-carousel::after {
@@ -269,7 +226,7 @@ body {
   position: absolute;
   top: 0;
   width: 15px;
-  height: 92%;
+  height: 100%; /* 전체 높이 커버 */
   pointer-events: none;
   z-index: 2;
   transition: opacity 0.5s;
@@ -285,44 +242,30 @@ body {
   right: 0;
   background: linear-gradient(to left, rgb(255, 255, 255) 0%, transparent 100%);
 }
-.my-carousel.hide-left::before { opacity: 0; }
-.my-carousel.hide-right::after { opacity: 0; }
 
-/* 캐러셀 비디오용 최소 재생/정지 아이콘 오버레이 */
+/* 비디오 관련 스타일 유지 */
 .carousel-video-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-
-  /* 제목 영역(약 36px)을 제외하고 비디오 영역만 덮도록 */
   bottom: 36px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   pointer-events: none;
   z-index: 20;
   opacity: 1;
   transform: scale(1);
   transition: opacity 0.18s ease-out, transform 0.18s ease-out;
 }
-
-/* 기본: 재생 준비 상태 = 삼각형 */
 .carousel-video-overlay::before {
   content: "";
   border-style: solid;
   border-width: 10px 0 10px 18px;
   border-color: transparent transparent transparent rgba(255, 255, 255, 0.96);
 }
-
-/* 정지 상태: 두 줄(일시정지 아이콘) */
-.carousel-video-overlay.is-paused::before {
-  border-width: 0; /* 삼각형 제거 */
-  border-color: transparent;
-}
-
+.carousel-video-overlay.is-paused::before { border-width: 0; border-color: transparent; }
 .carousel-video-overlay.is-paused::after {
   content: "";
   display: block;
@@ -332,15 +275,8 @@ body {
   border-left: 4px solid rgba(255, 255, 255, 0.96);
   border-right: 4px solid rgba(255, 255, 255, 0.96);
 }
+.carousel-video-overlay.is-playing { opacity: 0; transform: scale(0.9); }
 
-/* 재생 중일 때는 살짝 축소하며 숨김 */
-.carousel-video-overlay.is-playing {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-
-/* 비디오 스타일 및 네이티브 컨트롤 숨김 */
 video {
   background-color: #f0f0f0;
   background-size: cover;
@@ -350,47 +286,12 @@ video {
   z-index: 10;
   pointer-events: auto;
 }
-
-/* iOS / Safari 중앙 재생 버튼 숨김 */
-video::-webkit-media-controls-start-playback-button {
-  display: none !important;
-}
-
-/* 전체 컨트롤 바 통째로 숨김 (WebKit 계열) */
+video::-webkit-media-controls-start-playback-button { display: none !important; }
 video::-webkit-media-controls,
-video::-webkit-media-controls-enclosure {
-  display: none !important;
-}
+video::-webkit-media-controls-enclosure { display: none !important; }
 
-/* 타임라인 / 시간 표시도 숨김 */
-video::-webkit-media-controls-timeline,
-video::-webkit-media-controls-current-time-display,
-video::-webkit-media-controls-time-remaining-display {
-  display: none !important;
-}
-
-@media (max-width: 640px) {
-  video {
-    object-fit: cover;
-  }
-}
-
-/* 커스텀 최소 UI용 래퍼와 오버레이 (캐러셀 밖 일반 비디오용) */
-.video-wrapper {
-  position: relative;
-  display: block;
-  overflow: hidden; /* 라운드 모서리 안으로 비디오 잘리게 */
-}
-
-/* 래퍼 안 비디오는 래퍼 크기에 맞춤 */
-.video-wrapper video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-/* 재생 아이콘 오버레이 */
+.video-wrapper { position: relative; display: block; overflow: hidden; }
+.video-wrapper video { width: 100%; height: 100%; object-fit: contain; display: block; }
 .video-play-overlay {
   position: absolute;
   inset: 0;
@@ -403,13 +304,6 @@ video::-webkit-media-controls-time-remaining-display {
   transition: opacity 0.18s ease-out, transform 0.18s ease-out;
   z-index: 20;
 }
-
-/* 동그란 반투명 배경 제거 */
-.video-play-overlay::before {
-  content: none;
-}
-
-/* 흰색 삼각형 아이콘 */
 .video-play-overlay::after {
   content: "";
   position: absolute;
@@ -418,22 +312,9 @@ video::-webkit-media-controls-time-remaining-display {
   border-width: 10px 0 10px 18px;
   border-color: transparent transparent transparent rgba(255, 255, 255, 0.96);
 }
-
-/* 재생 중일 때는 살짝 축소하면서 숨김 */
-.video-wrapper.is-playing .video-play-overlay {
-  opacity: 0;
-  transform: scale(0.9);
-}
-
-/* 일반 비디오 정지 상태 아이콘 (일시정지 표시) */
-.video-wrapper.is-paused .video-play-overlay::after {
-  /* 삼각형(재생 아이콘) 숨기기 */
-  border-width: 0;
-  border-color: transparent;
-}
-
+.video-wrapper.is-playing .video-play-overlay { opacity: 0; transform: scale(0.9); }
+.video-wrapper.is-paused .video-play-overlay::after { border-width: 0; border-color: transparent; }
 .video-wrapper.is-paused .video-play-overlay::before {
-  /* 두 줄짜리 일시정지 아이콘 */
   content: "";
   display: block;
   width: 16px;
@@ -443,21 +324,8 @@ video::-webkit-media-controls-time-remaining-display {
   border-right: 4px solid rgba(255, 255, 255, 0.96);
 }
 
-
-/* Tailwind Typography blockquote padding 강제 덮어쓰기 */
 .prose-lg :where(blockquote):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
   margin-top: 1.5rem;
   padding: 1rem !important;
   padding-inline-start: 2rem !important;
 }
-
-
-/*
-footer {
-  width: 100%;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  z-index: 10;
-}
-*/
