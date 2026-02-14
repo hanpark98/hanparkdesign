@@ -329,3 +329,83 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   padding: 1rem !important;
   padding-inline-start: 2rem !important;
 }
+
+
+/* =========================================
+   [slug] 포스트 내부 스타일링 규칙 (Final)
+   ========================================= */
+
+/* 1. 수직 간격 자동화 */
+.post-content > * {
+  /* Mobile: padding-top/bottom(0.5rem)과 일치하도록 축소 */
+  margin-bottom: 0.5rem !important;
+  margin-top: 0 !important;
+}
+
+@media (min-width: 640px) {
+  .post-content > * {
+    /* Desktop: padding-top/bottom(1rem)과 일치하도록 축소 */
+    margin-bottom: 1rem !important;
+  }
+}
+
+.post-content > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* 2. 기본 이미지 스타일 */
+.post-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* 3. 그리드 시스템 */
+.img-row {
+  display: flex;
+  gap: 10px;        
+  width: 100%;
+  /* 기본적으로는 옆 친구와 키를 맞춤 (stretch) */
+  align-items: stretch; 
+}
+
+.img-col {
+  flex: 1;          
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative; /* 중요 */
+}
+
+/* 4. 비율 유틸리티 클래스 (이걸 마크다운에서 씁니다) */
+.ar-square    { aspect-ratio: 1 / 1; }   /* 1:1 정방형 */
+.ar-3-4       { aspect-ratio: 3 / 4; }   /* 3:4 세로형 */
+.ar-4-3       { aspect-ratio: 4 / 3; }   /* 4:3 가로형 */
+.ar-5-4       { aspect-ratio: 5 / 4; }   /* 5:4 가로형 */
+.ar-16-9      { aspect-ratio: 16 / 9; }  /* 16:9 와이드 */
+.ar-2-1      { aspect-ratio: 2 / 1; }  /* 2:1 와이드 */
+.ar-3-1      { aspect-ratio: 3 / 1; }  /* 3:1 와이드 */
+.ar-2-3       { aspect-ratio: 2 / 3; }   /* 2:3 포스터형 */
+
+/* 5. 이미지 채우기 규칙 */
+/* .img-col 안에 있는 이미지는 부모의 높/너비를 꽉 채운다 */
+.img-col img {
+  width: 100% !important;
+  height: 100% !important; 
+  object-fit: cover;  /* 비율이 안 맞아도 찌그러지지 않고 꽉 채움 (Crop) */
+  margin: 0 !important;
+  border-radius: 10px;
+}
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+  .img-row { gap: 8px; }
+}
+
+/* 캐러셀 재설정 */
+.post-content .my-carousel {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}

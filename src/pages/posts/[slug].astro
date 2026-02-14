@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { marked } from 'marked'; // 마크다운 파서가 필요합니다.
 
 export async function getStaticPaths() {
   const postImportResult = import.meta.glob('../../content/posts/*.md');
@@ -12,50 +13,81 @@ export async function getStaticPaths() {
 }
 
 const { default: Content, frontmatter } = await import(`../../content/posts/${Astro.params.slug}.md`);
-
-// 새로운 포맷 여부 확인
 const isWide = frontmatter.format === 'wide';
+
+// intro 내용을 마크다운으로 변환합니다.
+const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : null;
 ---
 
 <Layout title={frontmatter.title}>
   <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
-    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-8 px-4 sm:px-6 justify-start items-center">
+    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4 px-4 sm:px-6 justify-start items-center">
       <button onclick="window.history.back()" class="back-btn mr-6">Return</button>
     </div>
 
     <div class="px-4 sm:px-6">
       {isWide ? (
-        /* ✅ 1. Wide 포맷 디자인 */
         <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
-          <div class="bg-white px-8 py-6 mb-6 card-shell">
-            <div class="mb-4 flex gap-3 items-center text-gray-400 text-[0.96rem]">
+          
+          {/* 1. 상단 정보 컨테이너 (기존 description 유지) */}
+          <div class="bg-white p-6 sm:p-8 mb-4 card-shell">
+            <div class="mb-2 flex gap-3 items-center text-gray-400 text-[0.96rem]">
               <span>
                 {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
               <span class="mx-1">&middot;</span>
               <span>{frontmatter.category}</span>
             </div>
-            <h1 class="text-4xl font-bold mb-4">{frontmatter.title}</h1>
+            <h1 class="text-4xl font-bold !mb-1">{frontmatter.title}</h1>
             {frontmatter.description && (
-              <p class="text-gray-600 text-xl mt-2 mb-0">{frontmatter.description}</p>
+              <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>
             )}
           </div>
           
-          <div class="bg-white px-8 py-5 mb-5 card-shell">
+          {/* 2. 메인 본문 컨테이너 (이미지 등) */}
+          <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content">
             <Content />
           </div>
 
-          <div class="bg-white px-8 py-6 mb-6 card-shell">
-            <div class="mb-4 flex gap-3 items-center text-gray-400 text-[0.96rem]">
-              <span>
-              sadasdasd
-              </span>
+          {/* 3. 새로운 컨테이너: 본문 하단에 intro 출력 */}
+          {introHtml && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content">
+              <div 
+                class="prose prose-lg max-w-none text-gray-800"
+                set:html={introHtml} 
+              />
+
+              {frontmatter.tags && (
+    <div class="flex flex-wrap gap-2">
+      {frontmatter.tags.map((tag) => (
+        <span class="text-s text-gray-400 italic">#{tag}</span>
+      ))}
+    </div>
+  )}
+</div>
             </div>
-            <h1 class="text-4xl font-bold mb-4">blah blah blah</h1>
-            {frontmatter.description && (
-              <p class="text-gray-600 text-xl mt-2 mb-0">i have designed this with al wierjd sdnwied be cause baby i dont know what do o ro</p>
-            )}
-          </div>
+          )}
+
+{/* 4. 하단 Contact 영역 */}
+{/* 4. 하단 Contact 영역 */}
+<div 
+  class="p-6 sm:p-8 mb-4 card-shell" 
+  style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;"
+>
+  <div class="mb-0 flex gap-3 items-center text-white/70 text-[0.96rem]">
+    <span>Got any Questions?</span>
+  </div>
+  <h2 class="text-6xl font-bold !mb-4 text-white">I've got answers !</h2>
+  <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
+    With 9+ years of experience ranging from marketing to motion graphics, I know the industry inside out.<br>
+    Whether you have a project in mind or a question you’re burning to ask, fire away!
+  </p>
+  <div class="mt-3 flex gap-4">
+    <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Profile</a>
+    <a href="mailto:hanparkdesign@gmail.com" class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
+    <a href="https://www.instagram.com/hanparkdesign/" target="_blank" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Instagram</a>
+  </div>
+</div>
 
         </article>
       ) : (
@@ -90,11 +122,13 @@ const isWide = frontmatter.format === 'wide';
   </div>
 
   <style>
-    /* 레이아웃 구성용 기본 스타일 - 세부 미디어 속성은 global.css 변수로 관리됩니다. */
+    /* 레이아웃 구성용 기본 스타일 - 세부 미디어 속성은 global.css 변수로 관리됩니다.
+*/
     .card-shell {
       border-radius: 16px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02);
-      overflow: hidden; /* 내부 미디어가 삐져나오지 않도록 설정 */
+      overflow: hidden;
+      /* 내부 미디어가 삐져나오지 않도록 설정 */
     }
 
     .back-btn {

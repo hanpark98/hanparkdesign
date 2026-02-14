@@ -124,10 +124,10 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
     }
 
     /* 클릭 시(active) 색상 변경 */
-    .category-btn.active {
-      background: #009695;
-      color: #fff;
-    }
+.category-btn.active {
+  background: #747e89; /* 기존 #009695에서 수정 */
+  color: #fff;
+}
 
     /* 마우스로 눌렀을 때 약간 눌린 듯한 피드백 */
     .category-btn:active {
@@ -148,10 +148,10 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
       transition: border 0.18s ease;
       display: block;
     }
-    .post-card:hover {
-      border-width: 6px;
-      border-color: #009695;
-    }
+.post-card:hover {
+  border-width: 6px;
+  border-color: #747e89; /* 기존 #009695에서 수정 */
+}
     .post-card-content { padding: 1.2rem; }
     .post-card-date { font-size: .8rem; color: #A0A0A0; margin-bottom: 0.3rem; }
     .post-card-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0rem; }
