@@ -32,18 +32,31 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
 
     <!-- 카테고리 Navigation -->
-    <div id="category-nav" class="flex items-start gap-0 px-3 sm:px-6 mb-0">
-      <a href="/profile" class="profile-btn mr-6" data-category="profile">Profile</a>
+<div id="category-nav" class="flex items-center gap-0 px-3 sm:px-6 mb-0">
+  <a href="/profile" class="profile-btn mr-6" data-category="profile">Profile</a>
 
-      <!-- 가로 스크롤 트랙 -->
-      <div id="cat-track"
-           class="flex flex-nowrap overflow-x-auto gap-2 min-w-0 flex-1 -mr-6 pr-6">
-        <button class="category-btn active" data-category="all">Every Projects</button>
-        {allCategories.map(c => (
-          <button class="category-btn" data-category={c}>{c}</button>
-        ))}
-      </div>
+  <div class="relative flex-1 sm:hidden">
+    <select id="cat-select" class="w-full bg-white border border-gray-200 rounded-3xl px-4 py-2 font-bold text-[#111] appearance-none cursor-pointer outline-none">
+      <option value="all">Every Projects</option>
+      {allCategories.map(c => (
+        <option value={c}>{c}</option>
+      ))}
+    </select>
+    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
     </div>
+  </div>
+
+  <div id="cat-track"
+       class="hidden sm:flex flex-nowrap overflow-x-auto gap-2 min-w-0 flex-1 -mr-6 pr-6">
+    <button class="category-btn active" data-category="all">Every Projects</button>
+    {allCategories.map(c => (
+      <button class="category-btn" data-category={c}>{c}</button>
+    ))}
+  </div>
+</div>
 
     <!-- 포스트 목록 -->
     <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-3 sm:px-6 py-6 justify-items-start">
@@ -65,33 +78,51 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   </div>
 
   <!-- JS : 휠→가로 스크롤 & 필터 -->
-  <script>
-    const track  = document.getElementById('cat-track');
-    const btns   = document.querySelectorAll('.category-btn');
-    const cards  = document.querySelectorAll('.post-card');
+<script>
+  const btns   = document.querySelectorAll('.category-btn');
+  const select = document.getElementById('cat-select');
+  const cards  = document.querySelectorAll('.post-card');
+  const track  = document.getElementById('cat-track');
 
-    /* 세로 휠을 가로 스크롤로 */
-    track.addEventListener('wheel', e => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault();
-        track.scrollLeft += e.deltaY;
-      }
-    }, { passive:false });
+  // 공통 필터링 함수
+  function filterPosts(cat) {
+    localStorage.setItem('lastCategory', cat);
+    
+    // 카드 표시/숨김 처리
+    cards.forEach(c => {
+      const isMatch = cat === 'all' || c.dataset.category.split(',').includes(cat);
+      c.style.display = isMatch ? 'block' : 'none';
+    });
 
-    /* 필터 */
-    btns.forEach(b => b.addEventListener('click', () => {
-      btns.forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      const cat = b.dataset.category;
-      localStorage.setItem('lastCategory', cat);
-      cards.forEach(c => c.style.display =
-        cat==='all' || c.dataset.category.split(',').includes(cat) ? 'block':'none');
-    }));
+    // 버튼 활성화 상태 동기화
+    btns.forEach(b => {
+      b.classList.toggle('active', b.dataset.category === cat);
+    });
 
-    /* 복원 */
-    const last = localStorage.getItem('lastCategory');
-    last && document.querySelector(`.category-btn[data-category="${last}"]`)?.click();
-  </script>
+    // 드롭다운 값 동기화
+    if (select) {
+      select.value = cat;
+    }
+  }
+
+  // 데스크톱 버튼 클릭 이벤트
+  btns.forEach(b => b.addEventListener('click', () => filterPosts(b.dataset.category)));
+
+  // 모바일 드롭다운 변경 이벤트 추가
+  select?.addEventListener('change', (e) => filterPosts(e.target.value));
+
+  // 기존 가로 스크롤 유지
+  track?.addEventListener('wheel', e => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      track.scrollLeft += e.deltaY;
+    }
+  }, { passive:false });
+
+  // 페이지 로드 시 상태 복원
+  const last = localStorage.getItem('lastCategory') || 'all';
+  filterPosts(last);
+</script>
 
   <style>
     /* 프로필 버튼 */
@@ -173,5 +204,13 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
       pointer-events: none;
       background: linear-gradient(to right, rgba(248,248,255,0) 0%, #ebe9e5 100%);
     }
+
+  /* 모바일에서는 네비게이션 우측 그라데이션 제거 */
+  @media (max-width: 640px) {
+    #category-nav::after {
+      display: none;
+    }
+  }
+
   </style>
 </Layout>

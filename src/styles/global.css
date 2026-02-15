@@ -90,7 +90,7 @@ h3 {
   line-height: 1.25 !important;
   letter-spacing: -0.02em !important;
   font-size: 1.2rem !important;
-  font-weight: 550 !important;
+  font-weight: 650 !important;
 }
 h4 {
   margin-top: 0.4em !important;
@@ -249,12 +249,12 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 36px;
+  bottom: 0; /* 수정: 36px에서 0으로 변경 (정중앙 배치) */
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  z-index: 20;
+  z-index: 10 !important;
   opacity: 1;
   transform: scale(1);
   transition: opacity 0.18s ease-out, transform 0.18s ease-out;
@@ -289,6 +289,7 @@ video {
 video::-webkit-media-controls-start-playback-button { display: none !important; }
 video::-webkit-media-controls,
 video::-webkit-media-controls-enclosure { display: none !important; }
+
 
 .video-wrapper { position: relative; display: block; overflow: hidden; }
 .video-wrapper video { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -364,10 +365,18 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 /* 3. 그리드 시스템 */
 .img-row {
   display: flex;
-  gap: 10px;        
+  flex-direction: column; /* 모바일: 기본적으로 세로로 쌓임 */
+  gap: 8px;               /* 모바일 간격 */
   width: 100%;
-  /* 기본적으로는 옆 친구와 키를 맞춤 (stretch) */
   align-items: stretch; 
+}
+
+/* 640px 이상의 화면(PC)에서만 가로 2열로 배치 */
+@media (min-width: 640px) {
+  .img-row {
+    flex-direction: row;  /* PC: 가로 정렬 */
+    gap: 10px;            /* PC 간격 */
+  }
 }
 
 .img-col {
@@ -376,6 +385,18 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   flex-direction: column;
   min-width: 0;
   position: relative; /* 중요 */
+}
+
+.img-col .video-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.img-col video.my-carousel-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important; /* 이미지와 동일하게 꽉 채움 */
+  border-radius: 10px;
 }
 
 /* 4. 비율 유틸리티 클래스 (이걸 마크다운에서 씁니다) */

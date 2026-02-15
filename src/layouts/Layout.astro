@@ -14,15 +14,19 @@ const showFooter = Astro.url.pathname !== '/';
 
     <style is:global>
       main { flex: 1 1 auto; min-height: 0; }
+      /* 그리드 내부 비디오 오버레이 중앙 정렬 교정 */
+      .img-col .carousel-video-overlay {
+        bottom: 0 !important;
+      }
     </style>
 
     <style>
       :root{
-        --nav-radius: 16px; /* postcard와 동일 */
-        --nav-pad-x: 27px;  /* 내부 좌우 패딩 */
-        --nav-pad-t: 22px;  /* 내부 상단 패딩 */
-        --nav-pad-b: 22px;  /* 내부 하단 패딩(필요 시 0으로) */
-        --nav-side-gap: 24px; /* 양옆 마진(상자 외부 여백) */
+        --nav-radius: 16px; 
+        --nav-pad-x: 27px;  
+        --nav-pad-t: 22px;  
+        --nav-pad-b: 22px;  
+        --nav-side-gap: 24px; 
         --nav-gradient: linear-gradient(
           to bottom,
           #040404 0%,
@@ -38,26 +42,22 @@ const showFooter = Astro.url.pathname !== '/';
         min-height: 100vh;
       }
 
-      /* 배경 레일(페이지 톤 유지 + sticky) */
       .site-nav{
         position: sticky; top: 0; z-index: 50;
-        background: transparent; /* 페이지 배경 */
+        background: transparent; 
         padding-top: 0; padding-left: 0; padding-right: 0; padding-bottom: 0;
       }
 
-      /* 실제 네비 상자 */
       .site-nav-box{
         display:flex;
         justify-content:space-between;
         align-items:flex-start;
         margin: 0 max(var(--nav-side-gap), env(safe-area-inset-left)) 0 max(var(--nav-side-gap), env(safe-area-inset-right));
         background: var(--nav-gradient);
-        border-radius: 0 0 var(--nav-radius) var(--nav-radius); /* 아래만 라운드 */
+        border-radius: 0 0 var(--nav-radius) var(--nav-radius); 
         padding: var(--nav-pad-t) var(--nav-pad-x) var(--nav-pad-b);
         box-sizing: border-box;
-
         -webkit-transform: translateZ(0);
-
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.18);
         transition: box-shadow 0.25s ease, transform 0.25s ease;
       }
@@ -67,7 +67,6 @@ const showFooter = Astro.url.pathname !== '/';
         transform: translateY(-2px);
       }
 
-      /* 좌측 브랜드 */
       .site-brand{
         display:flex; align-items:center; gap: 12px; min-width:0;
         text-decoration:none; color:#fff;
@@ -82,7 +81,6 @@ const showFooter = Astro.url.pathname !== '/';
         overflow:hidden; text-overflow:ellipsis;
       }
 
-      /* 검색창: 다크 배경 대비 */
       #search-form{
         position: relative; display:flex; align-items:center; flex:0 0 auto;
         width: min(11rem, 46vw); margin-top: 0;
@@ -101,19 +99,16 @@ const showFooter = Astro.url.pathname !== '/';
         background:none; border:none; color:#111; cursor:pointer;
       }
       #search-form svg{ width:1rem; height:1rem; }
-
       #search-input:focus{ box-shadow: 0 0 0 0px rgba(255,255,255,.6), 0 0 0 5px rgba(0,0,0,.2) inset; }
 
-/* 변경 후 (모바일에서 여백을 12px로 축소) */
-@media (max-width: 640px){
-  .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
-  #search-form{ width: min(10rem, 52vw); }
-}
-@media (max-width: 400px){
-  /* 400px 이하에서도 동일하게 12px 유지 */
-  .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
-  #search-form{ width: min(9.2rem, 56vw); }
-}
+      @media (max-width: 640px){
+        .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
+        #search-form{ width: min(10rem, 52vw); }
+      }
+      @media (max-width: 400px){
+        .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
+        #search-form{ width: min(9.2rem, 56vw); }
+      }
     </style>
   </head>
 
@@ -163,82 +158,67 @@ const showFooter = Astro.url.pathname !== '/';
     <Analytics/>
 
     <script>
-      // 비디오 구조/오버레이 세팅
-function enhanceVideo(video) {
-  const isCarousel = video.classList.contains('my-carousel-img');
+      function enhanceVideo(video) {
+        const isCarousel = video.classList.contains('my-carousel-img');
 
-  if (isCarousel) {
-    // 캐러셀 비디오는 래퍼 사용 안 함. 혹시 예전 래퍼 있으면 풀어준다.
-    const existingWrapper = video.closest('.video-wrapper');
-    if (existingWrapper) {
-      const parent = existingWrapper.parentNode;
-      if (parent) {
-        parent.insertBefore(video, existingWrapper);
+        if (isCarousel) {
+          const existingWrapper = video.closest('.video-wrapper');
+          if (existingWrapper) {
+            const parent = existingWrapper.parentNode;
+            if (parent) {
+              parent.insertBefore(video, existingWrapper);
+            }
+            existingWrapper.remove();
+          }
+
+          // 캐러셀 아이템 혹은 그리드(img-col) 컨테이너 탐색
+          const container = video.closest('.my-carousel-item') || video.closest('.img-col');
+          if (container && !container.querySelector('.carousel-video-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'carousel-video-overlay';
+            container.appendChild(overlay);
+          }
+          return null;
+        }
+
+        let wrapper = video.closest('.video-wrapper');
+        if (wrapper) return wrapper;
+
+        wrapper = document.createElement('div');
+        wrapper.className = 'video-wrapper';
+
+        const parent = video.parentNode;
+        if (!parent) return null;
+
+        parent.insertBefore(wrapper, video);
+        wrapper.appendChild(video);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'video-play-overlay';
+        wrapper.appendChild(overlay);
+
+        let hasPlayed = false;
+        const syncOverlay = () => {
+          if (video.paused) {
+            if (hasPlayed) wrapper.classList.add('is-paused');
+            wrapper.classList.remove('is-playing');
+          } else {
+            hasPlayed = true;
+            wrapper.classList.add('is-playing');
+            wrapper.classList.remove('is-paused');
+          }
+        };
+
+        video.addEventListener('play', syncOverlay);
+        video.addEventListener('pause', syncOverlay);
+        video.addEventListener('ended', () => {
+          hasPlayed = false;
+          syncOverlay();
+        });
+
+        syncOverlay();
+        return wrapper;
       }
-      existingWrapper.remove();
-    }
-
-    // 캐러셀 비디오 오버레이 생성
-    const item = video.closest('.my-carousel-item');
-    if (item && !item.querySelector('.carousel-video-overlay')) {
-      const overlay = document.createElement('div');
-      overlay.className = 'carousel-video-overlay';
-      item.appendChild(overlay);
-    }
-    return null;
-  }
-
-  // 그 외(일반) 비디오는 래퍼 + video-play-overlay 사용
-  let wrapper = video.closest('.video-wrapper');
-  if (wrapper) {
-    return wrapper;
-  }
-
-  wrapper = document.createElement('div');
-  wrapper.className = 'video-wrapper';
-
-  const parent = video.parentNode;
-  if (!parent) return null;
-
-  parent.insertBefore(wrapper, video);
-  wrapper.appendChild(video);
-
-  const overlay = document.createElement('div');
-  overlay.className = 'video-play-overlay';
-  wrapper.appendChild(overlay);
-
-  // 🔹 재생/정지 상태에 따라 아이콘 바꿔주기
-  let hasPlayed = false;
-
-  const syncOverlay = () => {
-    if (video.paused) {
-      // 아직 한 번도 재생 안 했으면 → 기본 삼각형 유지
-      if (hasPlayed) {
-        wrapper.classList.add('is-paused');
-      }
-      wrapper.classList.remove('is-playing');
-    } else {
-      // 재생 중
-      hasPlayed = true;
-      wrapper.classList.add('is-playing');
-      wrapper.classList.remove('is-paused');
-    }
-  };
-
-  video.addEventListener('play', syncOverlay);
-  video.addEventListener('pause', syncOverlay);
-  video.addEventListener('ended', () => {
-    // 끝났을 때는 다시 "처음부터 재생" 느낌 → 삼각형으로 복귀
-    hasPlayed = false;
-    syncOverlay();
-  });
-
-  // 초기 상태 반영
-  syncOverlay();
-
-  return wrapper;
-}
-
 
       function setupVideoControls() {
         const videos = document.querySelectorAll('video');
@@ -246,71 +226,59 @@ function enhanceVideo(video) {
         videos.forEach((video) => {
           const isCarousel = video.classList.contains('my-carousel-img');
 
-          // 네이티브 컨트롤 제거
           if (video.hasAttribute('controls')) {
             video.removeAttribute('controls');
           }
 
-          // 인라인 재생 강제
           video.setAttribute('playsinline', '');
           video.setAttribute('webkit-playsinline', '');
 
-          // 구조 세팅 (캐러셀: 오버레이만, 일반: 래퍼+오버레이)
           enhanceVideo(video);
 
           if (video.dataset.hasListener) return;
 
-          // 캐러셀 비디오용 오버레이 상태 싱크
+          if (isCarousel) {
+            const container = video.closest('.my-carousel-item') || video.closest('.img-col');
+            const overlay = container ? container.querySelector('.carousel-video-overlay') : null;
+            let hasPlayed = false;
 
-if (isCarousel) {
-  const item = video.closest('.my-carousel-item');
-  const overlay = item ? item.querySelector('.carousel-video-overlay') : null;
-  let hasPlayed = false;
+            const syncCarouselOverlay = () => {
+              if (!overlay) return;
+              if (!hasPlayed && video.paused) {
+                overlay.classList.remove('is-playing', 'is-paused');
+              } else if (!video.paused) {
+                hasPlayed = true;
+                overlay.classList.add('is-playing');
+                overlay.classList.remove('is-paused');
+              } else {
+                overlay.classList.remove('is-playing');
+                overlay.classList.add('is-paused');
+              }
+            };
 
-  const syncCarouselOverlay = () => {
-    if (!overlay) return;
+            video.addEventListener('play', syncCarouselOverlay);
+            video.addEventListener('pause', syncCarouselOverlay);
+            video.addEventListener('ended', () => {
+              hasPlayed = false;
+              syncCarouselOverlay();
+            });
 
-    if (!hasPlayed && video.paused) {
-      // 아직 한 번도 재생 안 한 초기 상태 → 삼각형
-      overlay.classList.remove('is-playing', 'is-paused');
-    } else if (!video.paused) {
-      // 재생 중
-      hasPlayed = true;
-      overlay.classList.add('is-playing');
-      overlay.classList.remove('is-paused');
-    } else {
-      // 한 번 이상 재생했고, 지금은 멈춘 상태 → 정지 아이콘
-      overlay.classList.remove('is-playing');
-      overlay.classList.add('is-paused');
-    }
-  };
+            syncCarouselOverlay();
+          }
 
-  video.addEventListener('play', syncCarouselOverlay);
-  video.addEventListener('pause', syncCarouselOverlay);
-  video.addEventListener('ended', () => {
-    // 끝난 뒤에는 다시 "재생 준비" 상태로 돌려놓고 싶으면:
-    hasPlayed = false;
-    syncCarouselOverlay();
-  });
-
-  // 초기 상태 반영
-  syncCarouselOverlay();
-}
-
-
-          // 공통 클릭 재생/일시정지
           video.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
 
             if (video.paused) {
+              // 클릭 시 음소거 해제 후 재생
+              video.muted = false;
               video.play();
             } else {
               video.pause();
             }
           });
 
-          // 모바일 더블탭 확대 방지
           video.addEventListener('dblclick', function (e) {
             e.preventDefault();
           });
@@ -320,30 +288,17 @@ if (isCarousel) {
       }
 
       function setupAntiCopy() {
-        // 우클릭 전체 차단
-        document.addEventListener('contextmenu', function (e) {
-          e.preventDefault();
-        });
-
-        // 이미지/비디오 드래그 방지
+        document.addEventListener('contextmenu', e => e.preventDefault());
         function applyNoDrag() {
           document.querySelectorAll('img, video').forEach((el) => {
             el.setAttribute('draggable', 'false');
           });
         }
         applyNoDrag();
-
-        // 일부 단축키 차단
         document.addEventListener('keydown', function (e) {
           const key = e.key.toLowerCase();
-
-          if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u', 'c'].includes(key)) {
-            e.preventDefault();
-          }
-
-          if (key === 'f12') {
-            e.preventDefault();
-          }
+          if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u', 'c'].includes(key)) e.preventDefault();
+          if (key === 'f12') e.preventDefault();
         });
       }
 

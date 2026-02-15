@@ -31,14 +31,22 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
           
           {/* 1. 상단 정보 컨테이너 (기존 description 유지) */}
           <div class="bg-white p-6 sm:p-8 mb-4 card-shell">
-            <div class="mb-2 flex gap-3 items-center text-gray-400 text-[0.96rem]">
-              <span>
-                {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </span>
-              <span class="mx-1">&middot;</span>
-              <span>{frontmatter.category}</span>
-            </div>
-            <h1 class="text-4xl font-bold !mb-1">{frontmatter.title}</h1>
+            <div class="mb-2 flex flex-wrap items-center text-gray-400 text-[0.96rem] gap-y-1">
+  {/* 1. 날짜와 구분선을 하나의 묶음으로 처리 */}
+  <div class="flex items-center">
+    <span>
+      {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+    </span>
+    {/* PC 화면에서만 구분선을 보여주고, 줄바꿈이 일어나는 좁은 화면에서는 숨김 처리 */}
+    <span class="mx-3 hidden sm:inline">&middot;</span>
+  </div>
+
+  {/* 2. 카테고리 영역: 공간이 부족하면 이 블록 전체가 다음 행으로 내려감 */}
+  <span class="whitespace-normal">
+    {Array.isArray(frontmatter.category) ? frontmatter.category.join(' · ') : frontmatter.category}
+  </span>
+</div>
+            <h1 class="!text-3xl sm:!text-4xl font-bold !mb-1">{frontmatter.title}</h1>
             {frontmatter.description && (
               <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>
             )}
@@ -60,7 +68,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
               {frontmatter.tags && (
     <div class="flex flex-wrap gap-2">
       {frontmatter.tags.map((tag) => (
-        <span class="text-s text-gray-400 italic">#{tag}</span>
+        <span class="text-[0.9rem] text-gray-400 italic leading-[1.0]">#{tag}</span>
       ))}
     </div>
   )}
@@ -69,20 +77,18 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
           )}
 
 {/* 4. 하단 Contact 영역 */}
-{/* 4. 하단 Contact 영역 */}
 <div 
   class="p-6 sm:p-8 mb-4 card-shell" 
   style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;"
 >
-  <div class="mb-0 flex gap-3 items-center text-white/70 text-[0.96rem]">
+  <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]">
     <span>Got any Questions?</span>
   </div>
-  <h2 class="text-6xl font-bold !mb-4 text-white">I've got answers !</h2>
   <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
     With 9+ years of experience ranging from marketing to motion graphics, I know the industry inside out.<br>
     Whether you have a project in mind or a question you’re burning to ask, fire away!
   </p>
-  <div class="mt-3 flex gap-4">
+  <div class="text-[1rem] mt-3 flex gap-4">
     <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Profile</a>
     <a href="mailto:hanparkdesign@gmail.com" class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
     <a href="https://www.instagram.com/hanparkdesign/" target="_blank" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Instagram</a>
