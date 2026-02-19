@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { marked } from 'marked'; // 마크다운 파서가 필요합니다.
+import { marked } from 'marked'; 
 
 export async function getStaticPaths() {
   const postImportResult = import.meta.glob('../../content/posts/*.md');
@@ -14,8 +14,6 @@ export async function getStaticPaths() {
 
 const { default: Content, frontmatter } = await import(`../../content/posts/${Astro.params.slug}.md`);
 const isWide = frontmatter.format === 'wide';
-
-// intro 내용을 마크다운으로 변환합니다.
 const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : null;
 ---
 
@@ -28,98 +26,57 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     <div class="px-4 sm:px-6">
       {isWide ? (
         <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
-          
-          {/* 1. 상단 정보 컨테이너 (기존 description 유지) */}
           <div class="bg-white p-6 sm:p-8 mb-4 card-shell">
             <div class="mb-2 flex flex-wrap items-center text-gray-400 text-[0.96rem] gap-y-1">
-  {/* 1. 날짜와 구분선을 하나의 묶음으로 처리 */}
-  <div class="flex items-center">
-    <span>
-      {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
-    </span>
-    {/* PC 화면에서만 구분선을 보여주고, 줄바꿈이 일어나는 좁은 화면에서는 숨김 처리 */}
-    <span class="mx-3 hidden sm:inline">&middot;</span>
-  </div>
-
-  {/* 2. 카테고리 영역: 공간이 부족하면 이 블록 전체가 다음 행으로 내려감 */}
-  <span class="whitespace-normal">
-    {Array.isArray(frontmatter.category) ? frontmatter.category.join(' · ') : frontmatter.category}
-  </span>
-</div>
+              <div class="flex items-center">
+                <span>{frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span class="mx-3 hidden sm:inline">&middot;</span>
+              </div>
+              <span class="whitespace-normal">{Array.isArray(frontmatter.category) ? frontmatter.category.join(' · ') : frontmatter.category}</span>
+            </div>
             <h1 class="!text-3xl sm:!text-4xl font-bold !mb-1">{frontmatter.title}</h1>
-            {frontmatter.description && (
-              <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>
-            )}
+            {frontmatter.description && <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>}
           </div>
           
-          {/* 2. 메인 본문 컨테이너 (이미지 등) */}
           <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content">
             <Content />
           </div>
 
-          {/* 3. 새로운 컨테이너: 본문 하단에 intro 출력 */}
           {introHtml && (
             <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content">
-              <div 
-                class="prose prose-lg max-w-none text-gray-800"
-                set:html={introHtml} 
-              />
-
+              <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
               {frontmatter.tags && (
-    <div class="flex flex-wrap gap-2">
-      {frontmatter.tags.map((tag) => (
-        <span class="text-[0.9rem] text-gray-400 italic leading-[1.0]">#{tag}</span>
-      ))}
-    </div>
-  )}
-</div>
+                <div class="flex flex-wrap gap-2">
+                  {frontmatter.tags.map((tag) => <span class="text-[0.9rem] text-gray-400 italic leading-[1.0]">#{tag}</span>)}
+                </div>
+              )}
             </div>
           )}
 
-{/* 4. 하단 Contact 영역 */}
-<div 
-  class="p-6 sm:p-8 mb-4 card-shell" 
-  style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;"
->
-  <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]">
-    <span>Got any Questions?</span>
-  </div>
-  <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
-    With 9+ years of experience ranging from marketing to motion graphics, I know the industry inside out.<br>
-    Whether you have a project in mind or a question you’re burning to ask, fire away!
-  </p>
-  <div class="text-[1rem] mt-3 flex gap-4">
-    <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Profile</a>
-    <a href="mailto:hanparkdesign@gmail.com" class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
-    <a href="https://www.instagram.com/hanparkdesign/" target="_blank" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Instagram</a>
-  </div>
-</div>
-
+          <div class="p-6 sm:p-8 mb-4 card-shell" style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;">
+            <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]"><span>Got any Questions?</span></div>
+            <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
+              With 9+ years of experience ranging from marketing to motion graphics, I know the industry out.<br>
+              Whether you have a project in mind or a question you’re burning to ask, fire away!
+            </p>
+            <div class="text-[1rem] mt-3 flex gap-4">
+              <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Profile</a>
+              <a href="mailto:hanparkdesign@gmail.com" class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
+              <a href="https://www.instagram.com/hanparkdesign/" target="_blank" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Instagram</a>
+            </div>
+          </div>
         </article>
       ) : (
-        /* ✅ 2. Legacy 포맷 디자인 */
         <article class="prose prose-lg max-w-3xl mx-auto mt-4">
           <div class="bg-white px-5 py-5 mb-7 card-shell">
             <div class="mb-1 flex gap-3 items-center text-gray-400 text-[0.96rem]">
-              <span>
-                {frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </span>
+              <span>{frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               <span class="mx-1">&middot;</span>
               <span>{frontmatter.category}</span>
             </div>
             <h1 class="mb-1">{frontmatter.title}</h1>
-            {frontmatter.description && (
-              <p class="text-gray-600 text-lg mt-2 mb-3">{frontmatter.description}</p>
-            )}
-            
-            {/* 대표 이미지 (썸네일) */}
-            {frontmatter.image && (
-              <img
-                src={frontmatter.image}
-                alt={frontmatter.title}
-                class="square-img"
-              />
-            )}
+            {frontmatter.description && <p class="text-gray-600 text-lg mt-2 mb-3">{frontmatter.description}</p>}
+            {frontmatter.image && <img src={frontmatter.image} alt={frontmatter.title} class="square-img" />}
           </div>
           <Content />
         </article>
@@ -127,68 +84,164 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     </div>
   </div>
 
-  <style>
-    /* 레이아웃 구성용 기본 스타일 - 세부 미디어 속성은 global.css 변수로 관리됩니다.
-*/
-    .card-shell {
-      border-radius: 16px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02);
-      overflow: hidden;
-      /* 내부 미디어가 삐져나오지 않도록 설정 */
-    }
-
-    .back-btn {
-      flex-shrink: 0;
-      padding: .40rem 1.6rem;
-      border-radius: 6px;
-      background: #fff;
-      color: #111;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      transition: background 0.2s ease;
-      cursor: pointer;
-    }
-
-    .back-btn:hover {
-      background: #f4f4f4;
-    }
-
+<style>
+    .card-shell { border-radius: 16px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02); overflow: hidden; }
+    .back-btn { flex-shrink: 0; padding: .40rem 1.6rem; border-radius: 6px; background: #fff; color: #111; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: none; transition: background 0.2s ease; cursor: pointer; }
+    .back-btn:hover { background: #f4f4f4; }
     html, body { background: #ebe9e5; }
+
+    /* --- 마키(Marquee) CSS 최적화 --- */
+    .marquee-mode .marquee-track {
+      display: flex !important;
+      overflow-x: auto !important; 
+      /* ★ 핵심: 기존 캐러셀의 부드러운 스크롤을 강제 해제해야 무한 루프 시 되감기 애니메이션이 안 생깁니다 */
+      scroll-behavior: auto !important; 
+      scroll-snap-type: none !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      gap: 0 !important;
+      will-change: scroll-position;
+    }
+    .marquee-mode .marquee-track::-webkit-scrollbar { 
+      display: none !important; 
+    }
+    
+    .marquee-mode .my-carousel-item { 
+      flex: 0 0 auto !important; 
+      margin: 0 !important; 
+      padding: 0 !important;
+    }
+    
+    .marquee-mode .my-carousel-img {
+      display: block !important;
+      max-width: none !important;
+      border-radius: 0 !important; 
+    }
   </style>
 
-  <script>
+<script>
+    function setupMarquee(speed = 0.8) {
+      const marquees = document.querySelectorAll('.marquee-mode');
+      
+      marquees.forEach(marquee => {
+        const track = marquee.querySelector('.marquee-track');
+        if (!track) return;
+
+        track.style.setProperty('scroll-behavior', 'auto', 'important');
+
+        const originalItems = Array.from(track.children);
+        if (originalItems.length === 0) return;
+
+        // 원본 3세트를 뒤에 복제하여 충분히 여유로운 트랙 생성 (총 4세트)
+        originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
+        originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
+        originalItems.forEach(item => track.appendChild(item.cloneNode(true)));
+
+        let isPaused = false;
+        let resetPoint = 0;
+        
+        // Lerp(부드러운 스크롤)를 위한 변수
+        let currentScroll = 0; // 화면에 보이는 실제 위치
+        let targetScroll = 0;  // 휠을 굴렸을 때 도달해야 할 목표 위치
+
+        function calculateWidth() {
+          resetPoint = originalItems.reduce((acc, item) => acc + item.offsetWidth, 0);
+          
+          // 처음 로드 시, 두 번째 세트의 시작 지점을 기준으로 잡음 (왼쪽으로 굴려도 안 끊기게)
+          if (currentScroll === 0 && resetPoint > 0) {
+            currentScroll = resetPoint;
+            targetScroll = resetPoint;
+            track.scrollLeft = resetPoint;
+          }
+        }
+
+        // 1. 애니메이션 루프 (자동 재생 + 부드러운 관성 스크롤)
+        function step() {
+          if (resetPoint > 0) {
+            // 마우스가 올라가 있지 않으면 목표 위치를 계속 이동시킴 (자동 마키)
+            if (!isPaused) {
+              targetScroll += speed;
+            }
+
+            // 부드러운 스크롤의 핵심: 남은 거리의 8%만큼만 이동하여 미끄러지는 효과
+            currentScroll += (targetScroll - currentScroll) * 0.08;
+            
+            // 무한 루프 경계 처리 (티 안 나게 목표/실제 위치를 동시에 순간이동)
+            if (currentScroll >= resetPoint * 2) {
+              // 오른쪽 끝으로 가면 한 세트 앞으로 뺌
+              currentScroll -= resetPoint;
+              targetScroll -= resetPoint;
+            } else if (currentScroll < resetPoint) {
+              // 왼쪽 끝으로 가면 한 세트 뒤로 더함
+              currentScroll += resetPoint;
+              targetScroll += resetPoint;
+            }
+
+            track.scrollLeft = currentScroll;
+          }
+          requestAnimationFrame(step);
+        }
+
+        // 2. 마우스 휠 부드러운 조작
+        track.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            e.preventDefault();
+            // 휠 이동량만큼 목표 위치만 변경 (화면은 step 함수에서 부드럽게 쫓아감)
+            targetScroll += e.deltaY * 1.2; 
+          }
+        }, { passive: false });
+
+        // 3. 모바일 터치 스와이프 조작 보완
+        let isTouching = false;
+        let touchStartX = 0;
+        let touchStartTarget = 0;
+
+        track.addEventListener('touchstart', (e) => {
+          isTouching = true;
+          touchStartX = e.touches[0].clientX;
+          touchStartTarget = targetScroll;
+        }, { passive: true });
+
+        track.addEventListener('touchmove', (e) => {
+          if (!isTouching) return;
+          const diff = touchStartX - e.touches[0].clientX;
+          targetScroll = touchStartTarget + diff * 1.5; // 손가락 이동량만큼 목표 위치 변경
+        }, { passive: true });
+
+        track.addEventListener('touchend', () => {
+          isTouching = false;
+        });
+
+        // 호버 시 일시 정지
+        track.addEventListener('mouseenter', () => { isPaused = true; });
+        track.addEventListener('mouseleave', () => { isPaused = false; });
+
+        window.addEventListener('resize', calculateWidth);
+        
+        setTimeout(() => {
+          calculateWidth();
+          step();
+        }, 100);
+      });
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
-      // 캐러셀 페이드 효과 제어
       document.querySelectorAll('.my-carousel').forEach(function(carousel) {
+        if (carousel.classList.contains('marquee-mode')) return;
         const scrollArea = carousel.querySelector('.my-carousel-scroll');
         if (!scrollArea) return;
 
         function updateFade() {
-          const scrollLeft = scrollArea.scrollLeft;
-          const maxScroll = scrollArea.scrollWidth - scrollArea.clientWidth;
-          
-          // 좌측 페이드 제어
-          carousel.classList.toggle('hide-left', scrollLeft <= 2);
-          // 우측 페이드 제어
-          carousel.classList.toggle('hide-right', scrollLeft >= maxScroll - 2);
+          const sl = scrollArea.scrollLeft;
+          const max = scrollArea.scrollWidth - scrollArea.clientWidth;
+          carousel.classList.toggle('hide-left', sl <= 2);
+          carousel.classList.toggle('hide-right', sl >= max - 2);
         }
-
         updateFade();
         scrollArea.addEventListener('scroll', updateFade);
-        window.addEventListener('resize', updateFade);
       });
 
-      // 브라우저 렌더링 최적화 (Safari 호환성)
-      window.addEventListener('load', function() {
-        document.querySelectorAll('.my-carousel-scroll').forEach(function(scrollArea) {
-          scrollArea.style.display = 'none';
-          scrollArea.offsetHeight; // 레이아웃 강제 재계산
-          scrollArea.style.display = '';
-        });
-      });
+      window.addEventListener('load', () => setupMarquee(1.));
     });
   </script>
 </Layout>

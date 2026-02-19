@@ -331,6 +331,41 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   padding-inline-start: 2rem !important;
 }
 
+/* --- 마키(Marquee) 모드 스타일 수정 --- */
+    .marquee-mode .marquee-track {
+      display: flex !important;
+      overflow-x: auto !important;
+      scroll-snap-type: none !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      cursor: grab;
+      gap: 0 !important; /* 간격 완벽 제거 */
+      will-change: scroll-position;
+    }
+    .marquee-mode .marquee-track::-webkit-scrollbar { 
+      display: none !important;
+    }
+    
+    .marquee-mode .my-carousel-item { 
+      flex: 0 0 auto !important;
+      min-width: 0 !important; 
+      margin: 0 !important; /* 음수 마진 대신 0으로 밀착 */
+      padding: 0 !important;
+    }
+    
+    .marquee-mode .my-carousel-img {
+      display: block !important;
+      max-width: none !important;
+      margin: 0 !important;
+      border-radius: 0 !important; /* 이어지는 부분이 둥글면 틈처럼 보일 수 있으므로 제거 */
+    }
+
+    @media (max-width: 640px) {
+      .marquee-mode {
+        /* 기본 50vw보다 크게 설정 (원하는 높이에 맞게 70vw~90vw 사이로 조절 가능) */
+        --carousel-height: 80vw !important; 
+      }
+    }
 
 /* =========================================
    [slug] 포스트 내부 스타일링 규칙 (Final)

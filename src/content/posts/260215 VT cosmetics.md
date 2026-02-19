@@ -3,7 +3,7 @@ title: "VT Cosmetics"
 format: wide
 description: "Secret Society - Exclusive Beauty Event"
 image: "/images/posts/260215 VT cosmetics/thumb.webp"
-category: ["Event Design", "Package Design", "Illustration", "AI Augmented", "Marketing"]
+category: ["Event Design", "Package Design", "Illustration"]
 tags: ["k-beauty", "skincare", "cosmetics", "package design", "product design"]
 date: "2023-02-01"
 intro: |
@@ -17,6 +17,10 @@ intro: |
 <div class="img-col ar-2-1">
   <img src="/images/posts/260215 VT cosmetics/main-title.webp" />
 </div>
+
+</br>
+
+#### Invitaion Box Design
 
 <div class="img-col">
   <img src="/images/posts/260215 VT cosmetics/vt-package3.webp" />
@@ -55,10 +59,35 @@ intro: |
   </div>
 </div>
 
+</br>
+
+#### Product Display / Illustration
+
 <div class="img-col">
   <img src="/images/posts/260215 VT cosmetics/vt-vibe6.webp" />
 </div>
 
+<div class="my-carousel marquee-mode" style="--marquee-gap: -10px;">
+  <div class="my-carousel-scroll marquee-track">
+    <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/tablematt1-2.webp" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/tablematt1-2.webp" class="my-carousel-img" />
+    </div>
+  </div>
+</div>
+
+<div class="img-row">
+  <div class="img-col">
+    <img src="/images/posts/260215 VT cosmetics/vt-dp2.webp" />
+  </div>
+  <div class="img-col">
+    <img src="/images/posts/260215 VT cosmetics/vt-dp1.webp" />
+  </div>
+</div>
+
+<!--
 <div class="my-carousel">
   <div
     class="my-carousel-scroll"
@@ -83,7 +112,15 @@ intro: |
     </div>
   </div>
 </div>
+-->
 
+</br>
+
+#### Venue Design
+
+<div class="img-col">
+  <img src="/images/posts/260215 VT cosmetics/vt-vibe5.webp" />
+</div>
 
 <div class="img-row">
   <div class="img-col ar-3-4"> 
@@ -92,10 +129,6 @@ intro: |
   <div class="img-col ar-3-4">
     <img src="/images/posts/260215 VT cosmetics/vt-vibe1.webp" />
   </div>
-</div>
-
-<div class="img-col">
-  <img src="/images/posts/260215 VT cosmetics/vt-vibe4.webp" />
 </div>
 
 <div class="my-carousel">
@@ -108,22 +141,21 @@ intro: |
       }
     "
   > <div class="my-carousel-item">
-      <img src="/images/posts/260215 VT cosmetics/sub-4.webp" class="my-carousel-img" />
-    </div>
-    <div class="my-carousel-item">
-      <img src="/images/posts/260215 VT cosmetics/sub-2.webp" class="my-carousel-img" />
+      <img src="/images/posts/260215 VT cosmetics/main-2.webp" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
       <img src="/images/posts/260215 VT cosmetics/sub-6.webp" class="my-carousel-img" />
     </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/sub-2.webp" class="my-carousel-img" />
+    </div>
         <div class="my-carousel-item">
-      <img src="/images/posts/260215 VT cosmetics/main-2.webp" class="my-carousel-img" />
+      <img src="/images/posts/260215 VT cosmetics/sub-4.webp" class="my-carousel-img" />
     </div>
 </div>
 </div>
 
-
-
 <div class="img-col">
-  <img src="/images/posts/260215 VT cosmetics/vt-vibe5.webp" />
+  <img src="/images/posts/260215 VT cosmetics/vt-vibe4.webp" />
 </div>
+
