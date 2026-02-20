@@ -28,27 +28,20 @@ intro: |
 </div>
 
 <div class="my-carousel">
-  <div
-    class="my-carousel-scroll"
-    onwheel="
-      if (this.matches(':hover')) {
-        event.preventDefault();
-        this.scrollBy({left: event.deltaY, behavior: 'auto'});
-      }
-    "
-  > <div class="my-carousel-item">
+  <div class="my-carousel-scroll">
+      <div class="my-carousel-item">
       <img src="/images/posts/260214 bazzaalbox/sub-2.webp" class="my-carousel-img" />
     </div>
-    <div class="my-carousel-item">
+  <div class="my-carousel-item">
       <img src="/images/posts/260214 bazzaalbox/sub-4.webp" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
       <img src="/images/posts/260214 bazzaalbox/sub-3.webp" class="my-carousel-img" />
     </div>
-        <div class="my-carousel-item">
+    <div class="my-carousel-item">
       <img src="/images/posts/260214 bazzaalbox/main1x1-b.png" class="my-carousel-img" />
     </div>
-            <div class="my-carousel-item">
+        <div class="my-carousel-item">
       <img src="/images/posts/260214 bazzaalbox/sub-1.webp" class="my-carousel-img" />
     </div>
 </div>

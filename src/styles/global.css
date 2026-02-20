@@ -170,7 +170,7 @@ body {
   flex-wrap: nowrap;
   gap: 10px;
   padding: 0;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: none;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -192,7 +192,7 @@ body {
   /* 수정: 내부 요소도 상단 정렬 */
   align-items: center;
   justify-content: flex-start; 
-  scroll-snap-align: center;
+  scroll-snap-align: none;
   position: relative;
 }
 
@@ -333,15 +333,16 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 
 /* --- 마키(Marquee) 모드 스타일 수정 --- */
     .marquee-mode .marquee-track {
-      display: flex !important;
-      overflow-x: auto !important;
-      scroll-snap-type: none !important;
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
-      cursor: grab;
-      gap: 0 !important; /* 간격 완벽 제거 */
-      will-change: scroll-position;
-    }
+  display: flex !important;
+  overflow-x: hidden !important; /* 브라우저 스크롤 개입 차단 */
+  touch-action: pan-y; /* 세로 스크롤만 브라우저가 처리, 가로 터치는 JS에 위임 */
+  scroll-behavior: auto !important;
+  scroll-snap-type: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  gap: 0 !important;
+  will-change: scroll-position;
+}
     .marquee-mode .marquee-track::-webkit-scrollbar { 
       display: none !important;
     }
@@ -360,12 +361,27 @@ video::-webkit-media-controls-enclosure { display: none !important; }
       border-radius: 0 !important; /* 이어지는 부분이 둥글면 틈처럼 보일 수 있으므로 제거 */
     }
 
+
     @media (max-width: 640px) {
       .marquee-mode {
         /* 기본 50vw보다 크게 설정 (원하는 높이에 맞게 70vw~90vw 사이로 조절 가능) */
         --carousel-height: 80vw !important; 
       }
     }
+
+/* 일반 캐러셀 및 마키 트랙 마우스 커서 설정 */
+.my-carousel-scroll,
+.marquee-mode .marquee-track {
+  cursor: grab;
+}
+
+/* 마우스를 쥐고 드래그 중일 때 스냅 및 자동 스무스 스크롤 해제 */
+.my-carousel-scroll.is-dragging,
+.marquee-mode .marquee-track.is-dragging {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto !important;
+  cursor: grabbing !important;
+}
 
 /* =========================================
    [slug] 포스트 내부 스타일링 규칙 (Final)

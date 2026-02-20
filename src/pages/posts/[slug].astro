@@ -24,7 +24,8 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     </div>
 
     <div class="px-4 sm:px-6">
-      {isWide ? (
+      {isWide ?
+      (
         <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
           <div class="bg-white p-6 sm:p-8 mb-4 card-shell">
             <div class="mb-2 flex flex-wrap items-center text-gray-400 text-[0.96rem] gap-y-1">
@@ -84,17 +85,34 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     </div>
   </div>
 
-<style>
+<style is:global>
     .card-shell { border-radius: 16px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02); overflow: hidden; }
     .back-btn { flex-shrink: 0; padding: .40rem 1.6rem; border-radius: 6px; background: #fff; color: #111; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: none; transition: background 0.2s ease; cursor: pointer; }
     .back-btn:hover { background: #f4f4f4; }
     html, body { background: #ebe9e5; }
 
+    /* --- 캐러셀 & 마키 마우스 드래그 커서 및 충돌 방지 CSS --- */
+    .my-carousel-scroll,
+    .marquee-mode .marquee-track {
+      cursor: grab;
+    }
+    
+    .my-carousel-scroll.is-dragging,
+    .marquee-mode .marquee-track.is-dragging {
+      cursor: grabbing !important;
+    }
+
+    /* 드래그 중 내부 이미지/비디오 선택 방지 및 마우스 간섭 완벽 차단 */
+    .my-carousel-scroll.is-dragging *,
+    .marquee-mode .marquee-track.is-dragging * {
+      pointer-events: none !important;
+      user-select: none !important;
+    }
+
     /* --- 마키(Marquee) CSS 최적화 --- */
     .marquee-mode .marquee-track {
       display: flex !important;
       overflow-x: auto !important; 
-      /* ★ 핵심: 기존 캐러셀의 부드러운 스크롤을 강제 해제해야 무한 루프 시 되감기 애니메이션이 안 생깁니다 */
       scroll-behavior: auto !important; 
       scroll-snap-type: none !important;
       scrollbar-width: none !important;
@@ -103,11 +121,11 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
       will-change: scroll-position;
     }
     .marquee-mode .marquee-track::-webkit-scrollbar { 
-      display: none !important; 
+      display: none !important;
     }
     
     .marquee-mode .my-carousel-item { 
-      flex: 0 0 auto !important; 
+      flex: 0 0 auto !important;
       margin: 0 !important; 
       padding: 0 !important;
     }
@@ -122,7 +140,6 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
 <script>
     function setupMarquee(speed = 0.8) {
       const marquees = document.querySelectorAll('.marquee-mode');
-      
       marquees.forEach(marquee => {
         const track = marquee.querySelector('.marquee-track');
         if (!track) return;
@@ -140,14 +157,12 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
         let isPaused = false;
         let resetPoint = 0;
         
-        // Lerp(부드러운 스크롤)를 위한 변수
-        let currentScroll = 0; // 화면에 보이는 실제 위치
-        let targetScroll = 0;  // 휠을 굴렸을 때 도달해야 할 목표 위치
+        let currentScroll = 0; 
+        let targetScroll = 0;  
 
         function calculateWidth() {
           resetPoint = originalItems.reduce((acc, item) => acc + item.offsetWidth, 0);
           
-          // 처음 로드 시, 두 번째 세트의 시작 지점을 기준으로 잡음 (왼쪽으로 굴려도 안 끊기게)
           if (currentScroll === 0 && resetPoint > 0) {
             currentScroll = resetPoint;
             targetScroll = resetPoint;
@@ -155,24 +170,20 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
           }
         }
 
-        // 1. 애니메이션 루프 (자동 재생 + 부드러운 관성 스크롤)
+        // 1. 애니메이션 루프
         function step() {
           if (resetPoint > 0) {
-            // 마우스가 올라가 있지 않으면 목표 위치를 계속 이동시킴 (자동 마키)
             if (!isPaused) {
               targetScroll += speed;
             }
 
-            // 부드러운 스크롤의 핵심: 남은 거리의 8%만큼만 이동하여 미끄러지는 효과
             currentScroll += (targetScroll - currentScroll) * 0.08;
-            
-            // 무한 루프 경계 처리 (티 안 나게 목표/실제 위치를 동시에 순간이동)
+
+            // 루프 경계 처리 시, delta 계산에 영향을 주지 않도록 내부에서만 값을 보정
             if (currentScroll >= resetPoint * 2) {
-              // 오른쪽 끝으로 가면 한 세트 앞으로 뺌
               currentScroll -= resetPoint;
               targetScroll -= resetPoint;
             } else if (currentScroll < resetPoint) {
-              // 왼쪽 끝으로 가면 한 세트 뒤로 더함
               currentScroll += resetPoint;
               targetScroll += resetPoint;
             }
@@ -186,35 +197,59 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
         track.addEventListener('wheel', (e) => {
           if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
             e.preventDefault();
-            // 휠 이동량만큼 목표 위치만 변경 (화면은 step 함수에서 부드럽게 쫓아감)
             targetScroll += e.deltaY * 1.2; 
           }
         }, { passive: false });
 
-        // 3. 모바일 터치 스와이프 조작 보완
-        let isTouching = false;
-        let touchStartX = 0;
-        let touchStartTarget = 0;
+        // 3. 모바일 터치 및 PC 마우스 드래그 조작
+        let isDragging = false;
+        let lastX = 0;
+        let startX = 0;
 
-        track.addEventListener('touchstart', (e) => {
-          isTouching = true;
-          touchStartX = e.touches[0].clientX;
-          touchStartTarget = targetScroll;
-        }, { passive: true });
+        const onDragStart = (clientX) => {
+          isDragging = true;
+          startX = clientX;
+          lastX = clientX;
+          track.classList.add('is-dragging');
+        };
 
-        track.addEventListener('touchmove', (e) => {
-          if (!isTouching) return;
-          const diff = touchStartX - e.touches[0].clientX;
-          targetScroll = touchStartTarget + diff * 1.5; // 손가락 이동량만큼 목표 위치 변경
-        }, { passive: true });
+        const onDragMove = (clientX) => {
+          if (!isDragging) return;
+          const diff = lastX - clientX;
+          targetScroll += diff * 1.5; 
+          lastX = clientX;
+        };
 
-        track.addEventListener('touchend', () => {
-          isTouching = false;
+        const onDragEnd = () => {
+          isDragging = false;
+          track.classList.remove('is-dragging');
+        };
+
+        track.addEventListener('touchstart', (e) => onDragStart(e.touches[0].clientX), { passive: true });
+        track.addEventListener('touchmove', (e) => onDragMove(e.touches[0].clientX), { passive: true });
+        track.addEventListener('touchend', onDragEnd);
+
+        track.addEventListener('mousedown', (e) => onDragStart(e.clientX));
+        track.addEventListener('mousemove', (e) => {
+          if (isDragging) {
+            e.preventDefault();
+            onDragMove(e.clientX);
+          }
         });
+        track.addEventListener('mouseup', onDragEnd);
 
-        // 호버 시 일시 정지
+        track.addEventListener('click', (e) => {
+          if (isDragging || Math.abs(startX - e.clientX) > 5) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, { capture: true });
+
         track.addEventListener('mouseenter', () => { isPaused = true; });
-        track.addEventListener('mouseleave', () => { isPaused = false; });
+        track.addEventListener('mouseleave', () => { 
+          isPaused = false; 
+          onDragEnd(); 
+        });
 
         window.addEventListener('resize', calculateWidth);
         
@@ -239,6 +274,99 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
         }
         updateFade();
         scrollArea.addEventListener('scroll', updateFade);
+
+        // --- 일반 캐러셀 마우스 드래그 조작 (Lerp 스무스 스크롤 적용 / Jitter 완벽 해결) ---
+        let isDown = false;
+        let isDragging = false;
+        let startX = 0;
+        let lastX = 0;
+
+        // 보간법(Lerp) 변수
+        let currentScroll = scrollArea.scrollLeft;
+        let targetScroll = scrollArea.scrollLeft;
+        let isAnimating = false;
+
+        function smoothScrollLoop() {
+          if (!isAnimating) return;
+
+          // 보간 수치를 마키(0.08)와 동일하게 낮춰 부드러움을 극대화
+          currentScroll += (targetScroll - currentScroll) * 0.08;
+          scrollArea.scrollLeft = currentScroll;
+
+          // 마우스를 쥐고 있거나, 목표 스크롤에 도달하기 전이면 계속 프레임 반복 (관성 유지)
+          if (isDown || Math.abs(targetScroll - currentScroll) > 0.5) {
+            requestAnimationFrame(smoothScrollLoop);
+          } else {
+            // 완전히 부드럽게 멈춘 뒤에 스크롤 종료 및 CSS 스냅 개입 허용
+            isAnimating = false;
+            currentScroll = targetScroll;
+            scrollArea.scrollLeft = currentScroll;
+            scrollArea.classList.remove('is-dragging');
+          }
+        }
+
+        scrollArea.addEventListener('mousedown', (e) => {
+          isDown = true;
+          isDragging = false;
+          scrollArea.classList.add('is-dragging');
+          
+          startX = e.pageX;
+          lastX = e.pageX;
+          
+          // 드래그 시작 시점의 위치 동기화
+          currentScroll = scrollArea.scrollLeft;
+          targetScroll = scrollArea.scrollLeft;
+
+          // 애니메이션 루프 가동
+          if (!isAnimating) {
+            isAnimating = true;
+            requestAnimationFrame(smoothScrollLoop);
+          }
+        });
+
+        const stopDrag = () => {
+          isDown = false;
+          // isAnimating = false 및 classList.remove는 
+          // smoothScrollLoop 내에서 관성이 완전히 끝난 후 실행되도록 맡깁니다.
+        };
+
+        scrollArea.addEventListener('mouseleave', stopDrag);
+        scrollArea.addEventListener('mouseup', stopDrag);
+
+        scrollArea.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          isDragging = true;
+
+          const currentX = e.pageX;
+          const diff = lastX - currentX;
+          
+          // 이동량(Delta)을 타겟 스크롤에 누적
+          targetScroll += diff * 1.5;
+          
+          // 컨테이너 범위를 벗어나지 않도록 타겟 제한 (튕김 현상 방지)
+          const maxScroll = scrollArea.scrollWidth - scrollArea.clientWidth;
+          targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+          
+          lastX = currentX;
+        });
+
+        // 사용자가 터치패드/휠을 사용할 때 충돌하지 않도록 목표점 동기화
+        scrollArea.addEventListener('scroll', () => {
+          // 스크립트가 애니메이션 중일 때는 동기화를 막아 Jitter 현상 완벽 차단
+          if (!isDown && !isAnimating) {
+            targetScroll = scrollArea.scrollLeft;
+            currentScroll = scrollArea.scrollLeft;
+          }
+        });
+
+        // 드래그 중 내부 미디어 재생 및 링크 이동 차단
+        scrollArea.addEventListener('click', (e) => {
+          if (isDragging && Math.abs(startX - e.pageX) > 5) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, { capture: true });
       });
 
       window.addEventListener('load', () => setupMarquee(1.));

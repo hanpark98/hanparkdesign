@@ -7,8 +7,8 @@ category: ["Event Design", "Package Design", "Illustration"]
 tags: ["k-beauty", "skincare", "cosmetics", "package design", "product design"]
 date: "2023-02-01"
 intro: |
-  ### Design Background
-  Bazzaal Box brings the best of K-Beauty to the world through creator-led curations. Unlike traditional subscription services, Bazzaal operates on a "drop" model, requiring a versatile "one-size-fits-all" design system that adapts to diverse product lineups for every launch. I designed a packaging identity that ensures a share-worthy unboxing experience while maintaining structural durability for international shipping, regardless of the collection's theme.
+  ### VT Cosmetics: Secret Society
+  An invitation-only event held in Los Angeles and New York, centered around the theme of hidden beauty rituals. The 'Secret Recipe', a unique pairing of products for glowing skin was introduced through artistic illustrations that captivated an audience of 100+ top beauty influencers. This creative approach transformed product education into a visual journey, accumulating 24M+ social media reach.
 
 ---
 
@@ -41,15 +41,7 @@ intro: |
 </div>
 
 <div class="my-carousel">
-  <div
-    class="my-carousel-scroll"
-    onwheel="
-      if (this.matches(':hover')) {
-        event.preventDefault();
-        this.scrollBy({left: event.deltaY, behavior: 'auto'});
-      }
-    "
-  >
+  <div class="my-carousel-scroll">
     <div class="my-carousel-item">
       <img src="/images/posts/260215 VT cosmetics/vt-package2b.webp" class="my-carousel-img" />
     </div>
@@ -132,15 +124,8 @@ intro: |
 </div>
 
 <div class="my-carousel">
-  <div
-    class="my-carousel-scroll"
-    onwheel="
-      if (this.matches(':hover')) {
-        event.preventDefault();
-        this.scrollBy({left: event.deltaY, behavior: 'auto'});
-      }
-    "
-  > <div class="my-carousel-item">
+  <div class="my-carousel-scroll">
+   <div class="my-carousel-item">
       <img src="/images/posts/260215 VT cosmetics/main-2.webp" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
@@ -159,3 +144,26 @@ intro: |
   <img src="/images/posts/260215 VT cosmetics/vt-vibe4.webp" />
 </div>
 
+</br>
+
+#### The Making Of
+
+<div class="my-carousel">
+  <div class="my-carousel-scroll">
+      <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/behind5.webp" class="my-carousel-img" />
+    </div>
+  <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/behind1.webp" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/behind3.webp" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/behind4.webp" class="my-carousel-img" />
+    </div>
+        <div class="my-carousel-item">
+      <img src="/images/posts/260215 VT cosmetics/behind6.webp" class="my-carousel-img" />
+    </div>
+</div>
+</div>
