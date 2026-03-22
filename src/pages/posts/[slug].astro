@@ -308,7 +308,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
         scrollArea.addEventListener('mousedown', (e) => {
           isDown = true;
           isDragging = false;
-          scrollArea.classList.add('is-dragging');
+          // is-dragging 클래스 추가 부분을 아래 mousemove로 이동했습니다.
           
           startX = e.pageX;
           lastX = e.pageX;
@@ -337,6 +337,10 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
           if (!isDown) return;
           e.preventDefault();
           isDragging = true;
+          
+          // 사용자가 마우스를 실제로 움직이기 시작할 때 클래스를 추가하여
+          // 단순 클릭 시 요소들의 이벤트를 차단하지 않도록 수정했습니다.
+          scrollArea.classList.add('is-dragging');
 
           const currentX = e.pageX;
           const diff = lastX - currentX;
