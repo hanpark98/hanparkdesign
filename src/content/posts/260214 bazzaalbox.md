@@ -3,8 +3,8 @@ title: "Bazzaal Box"
 format: wide
 description: "The First Beauty Box Curated by Creators"
 image: "/images/posts/260214 bazzaalbox/thumb.webp"
-category: ["Package", "Branding"]
-tags: ["k-beauty", "skincare", "cosmetics", "package design", "product design"]
+category: ["Package", "Branding", "Print"]
+tags: ["k-beauty", "skincare", "cosmetics", "package design", "product design", "Poster"]
 date: "2023-02-01"
 intro: |
   ### Design Background
@@ -27,24 +27,25 @@ intro: |
   </div>
 </div>
 
-<div class="my-carousel">
-  <div class="my-carousel-scroll">
-      <div class="my-carousel-item">
-      <img src="/images/posts/260214 bazzaalbox/sub-2.webp" class="my-carousel-img" />
-    </div>
-  <div class="my-carousel-item">
-      <img src="/images/posts/260214 bazzaalbox/sub-4.webp" class="my-carousel-img" />
+<div class="my-carousel marquee-mode" style="--marquee-gap: -10px;">
+  <div class="my-carousel-scroll marquee-track">
+    <div class="my-carousel-item">
+      <img src="/images/posts/260214 bazzaalbox/bazzaalbox-graphics-marquee1.webp" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
-      <img src="/images/posts/260214 bazzaalbox/sub-3.webp" class="my-carousel-img" />
+      <img src="/images/posts/260214 bazzaalbox/bazzaalbox-graphics-marquee1.webp" class="my-carousel-img" />
     </div>
-    <div class="my-carousel-item">
-      <img src="/images/posts/260214 bazzaalbox/main1x1-b.png" class="my-carousel-img" />
-    </div>
-        <div class="my-carousel-item">
-      <img src="/images/posts/260214 bazzaalbox/sub-1.webp" class="my-carousel-img" />
-    </div>
+  </div>
 </div>
+
+
+<div class="img-row">
+  <div class="img-col"> 
+    <img src="/images/posts/260214 bazzaalbox/main1x1-b.png" />
+  </div>
+  <div class="img-col">
+    <img src="/images/posts/260214 bazzaalbox/sub-1b.webp" />
+  </div>
 </div>
 
 <div class="img-col ar-3-1">

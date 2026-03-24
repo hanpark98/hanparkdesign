@@ -5,7 +5,7 @@ description: "Winter Sale 2025"
 image: "/images/posts/260322 Oliveyoung/oliveyoung package.webp"
 category: ["Marketing", "Print", "Illustration"]
 tags: ["Olive Young", "Graphic Design", "Skincare", "Social Media"]
-date: "2023-02-01"
+date: "2025-11-30"
 intro: |
   ### Introduction
   This campaign focused on expanding the Olive Young Winter Sale's presence in the international market through strategic influencer outreach. We collaborated with 100 skincare influencers, providing them with the necessary tools to share their authentic experiences. The project resulted in 858.6k cumulative reach and a 39% engagement rate, marking a successful organic milestone for the brand's global expansion.
