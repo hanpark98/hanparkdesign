@@ -8,8 +8,11 @@ tags: ["BI", "graphic design", "photography", "Print"]
 date: "2024-07-07"
 intro:
   ### Introduction
-  Ki·ji·bae / (noun) / Originally a derogatory Korean slang, we’ve reclaimed '키지배' to define our community. Now Kijibae a friend who is bold, takes the lead, and isn’t afraid to show her thorns to the world. 
-  Frustrated by expensive salon visits and DIY press-ons that lacked both comfort and quality, we knew there had to be a better way. Kijibae was created to bring Korea’s innovative DIY nail revolution to the United States, offering a perfect professional look you can achieve yourself.
+  기지배 / Ki·ji·bae / (noun) / Korean
+
+  Originally a derogatory slang, we’ve reclaimed 'Kijibae' to represent our community. Now, a Kijibae is a friend who is bold, takes the lead, and isn’t afraid to show their thorns.
+  
+  Kijibae brings Korea’s innovative DIY nail technology to the United States. We deliver a flawless, salon-grade finish you can easily achieve on your own.
 ---
 
 
@@ -26,4 +29,15 @@ intro:
   playsinline
   muted  ></video>
     </div>
+</div>
+
+<div class="my-carousel marquee-mode" style="--marquee-gap: -10px;">
+  <div class="my-carousel-scroll marquee-track">
+    <div class="my-carousel-item">
+      <img src="/images/posts/260326 Kijibae/kjb_marquee.webp" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260326 Kijibae/kjb_marquee.webp" class="my-carousel-img" />
+    </div>
+  </div>
 </div>
