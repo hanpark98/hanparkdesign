@@ -20,19 +20,19 @@ intro:
 <div class="my-carousel">
   <div class="my-carousel-scroll">
     <div class="my-carousel-item">
-      <img src="/images/posts/260331 Mediheal/gif1.gif" class="my-carousel-img" />
+      <img src="/images/posts/260331 Mediheal/gif_opt1.gif" class="my-carousel-img" />
     </div>
         <div class="my-carousel-item">
-      <img src="/images/posts/260331 Mediheal/gif2.gif" class="my-carousel-img" />
+      <img src="/images/posts/260331 Mediheal/gif_opt2.gif" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
-      <img src="/images/posts/260331 Mediheal/gif3.gif" class="my-carousel-img" />
+      <img src="/images/posts/260331 Mediheal/gif_opt3.gif" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
-      <img src="/images/posts/260331 Mediheal/gif4.gif" class="my-carousel-img" />
+      <img src="/images/posts/260331 Mediheal/gif_opt4.gif" class="my-carousel-img" />
     </div>
     <div class="my-carousel-item">
-      <img src="/images/posts/260331 Mediheal/gif5.gif" class="my-carousel-img" />
+      <img src="/images/posts/260331 Mediheal/gif_opt5.gif" class="my-carousel-img" />
     </div>
   </div>
 </div>
