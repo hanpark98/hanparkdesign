@@ -17,7 +17,25 @@ intro:
  I established cohesive customer journey by unifying visual identities across E-mail/SNS/Shopify Shopfront, while using generative AI to overcome asset limitations and maximize creative diversity.
 ---
 
-
+<div class="my-carousel">
+  <div class="my-carousel-scroll">
+    <div class="my-carousel-item">
+      <img src="/images/posts/260331 Mediheal/gif1.gif" class="my-carousel-img" />
+    </div>
+        <div class="my-carousel-item">
+      <img src="/images/posts/260331 Mediheal/gif2.gif" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260331 Mediheal/gif3.gif" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260331 Mediheal/gif4.gif" class="my-carousel-img" />
+    </div>
+    <div class="my-carousel-item">
+      <img src="/images/posts/260331 Mediheal/gif5.gif" class="my-carousel-img" />
+    </div>
+  </div>
+</div>
 
 <div class="img-col">
   <img src="/images/posts/260331 Mediheal/email_111.webp" />
