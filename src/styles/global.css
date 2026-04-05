@@ -149,9 +149,11 @@ body {
 
 /* ----------- 캐러셀 수정본 ----------- */
 .my-carousel {
-  --carousel-height: 600px;
+  --ch-pc: 600px;
+  --ch-mo: 50vw;
+  --carousel-height: var(--ch-pc);
+  
   position: relative;
-  /* 수정: 고정 높이 대신 auto와 margin 초기화 적용 */
   height: auto; 
   min-height: 140px; 
   margin-top: 10px !important; 
@@ -160,7 +162,7 @@ body {
 }
 @media (max-width: 640px) {
   .my-carousel {
-    --carousel-height: 50vw;
+    --carousel-height: var(--ch-mo);
   }
 }
 
@@ -363,11 +365,11 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 
 
     @media (max-width: 640px) {
-      .marquee-mode {
-        /* 기본 50vw보다 크게 설정 (원하는 높이에 맞게 70vw~90vw 사이로 조절 가능) */
-        --carousel-height: 80vw !important; 
-      }
-    }
+  .marquee-mode {
+    /* 마키 모드일 때 모바일 기본값을 80vw로 덮어쓰기 */
+    --ch-mo: 80vw; 
+  }
+}
 
 /* 일반 캐러셀 및 마키 트랙 마우스 커서 설정 */
 .my-carousel-scroll,
@@ -448,6 +450,24 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   height: 100% !important;
   object-fit: cover !important; /* 이미지와 동일하게 꽉 채움 */
   border-radius: 10px;
+}
+
+/* 유튜브 전용 컨테이너 */
+.youtube-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9; /* 최신 브라우저 대응 */
+    overflow: hidden;
+    border-radius: 8px; /* 선택사항: 모서리 둥글게 */
+}
+
+/* 내부 iframe 스타일 */
+.youtube-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 /* 4. 비율 유틸리티 클래스 (이걸 마크다운에서 씁니다) */
