@@ -424,6 +424,10 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   align-items: stretch; 
 }
 
+.img-row.keep-row {
+  flex-direction: row;
+}
+
 /* 640px 이상의 화면(PC)에서만 가로 2열로 배치 */
 @media (min-width: 640px) {
   .img-row {
