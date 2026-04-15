@@ -159,6 +159,9 @@ body {
   margin-top: 10px !important; 
   margin-left: -12px;
   margin-right: -12px;
+  
+  /* z-index 오류 해결: 자식 요소들의 GPU 가속 레이어를 이 컨테이너 안에 가둡니다 */
+  isolation: isolate; 
 }
 @media (max-width: 640px) {
   .my-carousel {
@@ -176,7 +179,6 @@ body {
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* 수정: flex-end에서 flex-start로 변경하여 상단 밀착 */
   align-items: flex-start; 
   height: auto;
   min-height: 140px;
@@ -191,7 +193,6 @@ body {
   min-width: 80px;
   display: flex;
   flex-direction: column;
-  /* 수정: 내부 요소도 상단 정렬 */
   align-items: center;
   justify-content: flex-start; 
   scroll-snap-align: none;
@@ -199,7 +200,6 @@ body {
 }
 
 .my-carousel-img {
-  /* 수정: 고정 계산식 대신 유연한 높이 부여 */
   height: auto;
   max-height: var(--carousel-height);
   width: auto;
@@ -210,7 +210,7 @@ body {
 }
 
 .my-carousel-title {
-  margin: 8px 0 0 0; /* 제목 상단에 약간의 여백 */
+  margin: 8px 0 0 0;
   line-height: 1.5;
   font-size: 1rem;
   text-align: center;
@@ -228,7 +228,7 @@ body {
   position: absolute;
   top: 0;
   width: 15px;
-  height: 100%; /* 전체 높이 커버 */
+  height: 100%;
   pointer-events: none;
   z-index: 2;
   transition: opacity 0.5s;
@@ -251,7 +251,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0; /* 수정: 36px에서 0으로 변경 (정중앙 배치) */
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -291,7 +291,6 @@ video {
 video::-webkit-media-controls-start-playback-button { display: none !important; }
 video::-webkit-media-controls,
 video::-webkit-media-controls-enclosure { display: none !important; }
-
 
 .video-wrapper { position: relative; display: block; overflow: hidden; }
 .video-wrapper video { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -333,40 +332,46 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   padding-inline-start: 2rem !important;
 }
 
-/* --- 마키(Marquee) 모드 스타일 수정 --- */
-    .marquee-mode .marquee-track {
+/* --- 마키(Marquee) 모드 스타일 (드래그 복구 및 렉 개선 적용) --- */
+.marquee-mode .marquee-track {
   display: flex !important;
-  overflow-x: hidden !important; /* 브라우저 스크롤 개입 차단 */
-  touch-action: pan-y; /* 세로 스크롤만 브라우저가 처리, 가로 터치는 JS에 위임 */
+  overflow-x: hidden !important; /* 브라우저 스크롤 개입 차단 (기존 JS 드래그 로직을 위해 유지) */
+  touch-action: pan-y; 
   scroll-behavior: auto !important;
   scroll-snap-type: none !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
   gap: 0 !important;
+  /* CSS 애니메이션 제거하고 JS 스크롤에 맞게 복구 */
   will-change: scroll-position;
 }
-    .marquee-mode .marquee-track::-webkit-scrollbar { 
-      display: none !important;
-    }
-    
-    .marquee-mode .my-carousel-item { 
-      flex: 0 0 auto !important;
-      min-width: 0 !important; 
-      margin: 0 !important; /* 음수 마진 대신 0으로 밀착 */
-      padding: 0 !important;
-    }
-    
-    .marquee-mode .my-carousel-img {
-      display: block !important;
-      max-width: none !important;
-      margin: 0 !important;
-      border-radius: 0 !important; /* 이어지는 부분이 둥글면 틈처럼 보일 수 있으므로 제거 */
-    }
 
+.marquee-mode .marquee-track::-webkit-scrollbar { 
+  display: none !important;
+}
 
-    @media (max-width: 640px) {
+.marquee-mode .my-carousel-item { 
+  flex: 0 0 auto !important;
+  min-width: 0 !important; 
+  margin: 0 !important; 
+  padding: 0 !important;
+  /* 이미지 렉을 줄이기 위한 하드웨어 가속 옵션 */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.marquee-mode .my-carousel-img {
+  display: block !important;
+  max-width: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  border-radius: 0 !important; 
+  /* 높이 가변 설정은 그대로 유지 */
+  height: var(--carousel-height) !important; 
+}
+
+@media (max-width: 640px) {
   .marquee-mode {
-    /* 마키 모드일 때 모바일 기본값을 80vw로 덮어쓰기 */
     --ch-mo: 80vw; 
   }
 }
@@ -391,14 +396,12 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 
 /* 1. 수직 간격 자동화 */
 .post-content > * {
-  /* Mobile: padding-top/bottom(0.5rem)과 일치하도록 축소 */
   margin-bottom: 0.5rem !important;
   margin-top: 0 !important;
 }
 
 @media (min-width: 640px) {
   .post-content > * {
-    /* Desktop: padding-top/bottom(1rem)과 일치하도록 축소 */
     margin-bottom: 1rem !important;
   }
 }
@@ -418,8 +421,8 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 /* 3. 그리드 시스템 */
 .img-row {
   display: flex;
-  flex-direction: column; /* 모바일: 기본적으로 세로로 쌓임 */
-  gap: 8px;               /* 모바일 간격 */
+  flex-direction: column;
+  gap: 8px;               
   width: 100%;
   align-items: stretch; 
 }
@@ -428,11 +431,10 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   flex-direction: row;
 }
 
-/* 640px 이상의 화면(PC)에서만 가로 2열로 배치 */
 @media (min-width: 640px) {
   .img-row {
-    flex-direction: row;  /* PC: 가로 정렬 */
-    gap: 10px;            /* PC 간격 */
+    flex-direction: row;  
+    gap: 10px;            
   }
 }
 
@@ -441,7 +443,7 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   display: flex;
   flex-direction: column;
   min-width: 0;
-  position: relative; /* 중요 */
+  position: relative; 
 }
 
 .img-col .video-wrapper {
@@ -452,7 +454,7 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 .img-col video.my-carousel-img {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important; /* 이미지와 동일하게 꽉 채움 */
+  object-fit: cover !important; 
   border-radius: 10px;
 }
 
@@ -460,9 +462,9 @@ video::-webkit-media-controls-enclosure { display: none !important; }
 .youtube-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9; /* 최신 브라우저 대응 */
+    aspect-ratio: 16 / 9; 
     overflow: hidden;
-    border-radius: 8px; /* 선택사항: 모서리 둥글게 */
+    border-radius: 8px; 
 }
 
 /* 내부 iframe 스타일 */
@@ -474,22 +476,21 @@ video::-webkit-media-controls-enclosure { display: none !important; }
     height: 100%;
 }
 
-/* 4. 비율 유틸리티 클래스 (이걸 마크다운에서 씁니다) */
-.ar-square    { aspect-ratio: 1 / 1; }   /* 1:1 정방형 */
-.ar-3-4       { aspect-ratio: 3 / 4; }   /* 3:4 세로형 */
-.ar-4-3       { aspect-ratio: 4 / 3; }   /* 4:3 가로형 */
-.ar-5-4       { aspect-ratio: 5 / 4; }   /* 5:4 가로형 */
-.ar-16-9      { aspect-ratio: 16 / 9; }  /* 16:9 와이드 */
-.ar-2-1      { aspect-ratio: 2 / 1; }  /* 2:1 와이드 */
-.ar-3-1      { aspect-ratio: 3 / 1; }  /* 3:1 와이드 */
-.ar-2-3       { aspect-ratio: 2 / 3; }   /* 2:3 포스터형 */
+/* 4. 비율 유틸리티 클래스 */
+.ar-square    { aspect-ratio: 1 / 1; }   
+.ar-3-4       { aspect-ratio: 3 / 4; }   
+.ar-4-3       { aspect-ratio: 4 / 3; }   
+.ar-5-4       { aspect-ratio: 5 / 4; }   
+.ar-16-9      { aspect-ratio: 16 / 9; }  
+.ar-2-1      { aspect-ratio: 2 / 1; }  
+.ar-3-1      { aspect-ratio: 3 / 1; }  
+.ar-2-3       { aspect-ratio: 2 / 3; }   
 
 /* 5. 이미지 채우기 규칙 */
-/* .img-col 안에 있는 이미지는 부모의 높/너비를 꽉 채운다 */
 .img-col img {
   width: 100% !important;
   height: 100% !important; 
-  object-fit: cover;  /* 비율이 안 맞아도 찌그러지지 않고 꽉 채움 (Crop) */
+  object-fit: cover;  
   margin: 0 !important;
   border-radius: 10px;
 }
