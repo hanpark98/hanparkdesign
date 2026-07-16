@@ -36,7 +36,7 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   <a href="/profile" class="profile-btn mr-6" data-category="profile">Profile</a>
 
   <div class="relative flex-1 sm:hidden">
-    <select id="cat-select" class="w-full bg-white border border-gray-200 rounded-3xl px-4 py-2 font-bold text-[#111] appearance-none cursor-pointer outline-none">
+    <select id="cat-select" class="w-full bg-white border border-gray-200 rounded-3xl px-4 pt-[10px] pb-[6px] font-bold text-[#111] appearance-none cursor-pointer outline-none">
       <option value="all">Every Projects</option>
       {allCategories.map(c => (
         <option value={c}>{c}</option>
@@ -50,7 +50,7 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   </div>
 
   <div id="cat-track"
-       class="hidden sm:flex flex-nowrap overflow-x-auto gap-2 min-w-0 flex-1 -mr-6 pr-6">
+       class="hidden sm:flex flex-nowrap overflow-x-auto gap-2 min-w-0 flex-1 -mr-6 pr-6 py-3 -my-3">
     <button class="category-btn active" data-category="all">Every Projects</button>
     {allCategories.map(c => (
       <button class="category-btn" data-category={c}>{c}</button>
@@ -59,18 +59,18 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
 </div>
 
     <!-- 포스트 목록 -->
-    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-3 sm:px-6 py-6 justify-items-start">
+    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-3 sm:px-6 py-6">
       {posts.map(p => (
-        <a href={`/posts/${p.slug}`} class="group post-card"
+        <a href={`/posts/${p.slug}`} class="group post-card tilt-card"
            data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}>
           <div class="w-full aspect-square overflow-hidden">
             <img src={p.image} alt={p.title}
-                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                 class="tilt-card-thumb w-full h-full object-cover"/>
           </div>
           <div class="post-card-content">
             {p.date && <div class="post-card-date">{(new Date(p.date)).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}</div>}
             <h3 class="post-card-title">{p.title}</h3>
-            <p2 class="post-card-desc">{p.description}</p2>
+            <p class="post-card-desc">{p.description}</p>
           </div>
         </a>
       ))}
@@ -122,18 +122,43 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   // 페이지 로드 시 상태 복원
   const last = localStorage.getItem('lastCategory') || 'all';
   filterPosts(last);
+
+  // 스크롤로 뷰포트에 들어오는 카드를 아래→위로 fade in — 나갔다 다시 들어올 때마다 매번 재생
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('is-visible', entry.isIntersecting);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    cards.forEach((card) => io.observe(card));
+  } else {
+    // 미지원 브라우저는 그냥 바로 보이게
+    cards.forEach((card) => card.classList.add('is-visible'));
+  }
 </script>
 
   <style>
     /* 프로필 버튼 */
     .profile-btn {
       flex-shrink: 0;
-      padding: .40rem 1.6rem;
+      padding: .55rem 1.6rem .25rem;
       border-radius: 6px;
       background: #fff;
       color: #111;
       font-weight: 700;
       white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    /* 호버 시 살짝 뜨는 피드백 */
+    .profile-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1);
+    }
+    /* 클릭 시 살짝 눌리는 피드백 */
+    .profile-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
     }
 
     /* pill */
@@ -141,7 +166,7 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
       flex-shrink: 0;
       min-width: 100px;
       max-width: 160px;
-      padding: .42rem 1.3rem;
+      padding: .57rem 1.3rem .27rem;
       border-radius: 9999px;
       background: #fff;
       color: #111;
@@ -151,7 +176,8 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
       align-items: center;
       justify-content: center;
       text-align: center;
-      transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
+      transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     /* 클릭 시(active) 색상 변경 */
@@ -160,9 +186,16 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
   color: #fff;
 }
 
+    /* 호버 시 살짝 뜨는 피드백 */
+    .category-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1);
+    }
+
     /* 마우스로 눌렀을 때 약간 눌린 듯한 피드백 */
     .category-btn:active {
-      transform: scale(0.96);
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
     }
 
     /* 마지막 pill이 잘리지 않도록 트랙에 더미 공간 추가 */
@@ -173,20 +206,49 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
 
     /* 카드 */
     .post-card {
+      position: relative;
       border-radius: 16px;
       background: #fff;
       overflow: hidden;
-      transition: border 0.18s ease;
       display: block;
+      /* 레이어 개수/순서를 hover와 똑같이 맞춰야 box-shadow가 끊기지 않고 부드럽게 보간됨
+         (링 spread가 0 → 4px로, 그림자가 옅게 → 진하게 자연스럽게 애니메이션) */
+      box-shadow:
+        0 0 0 0 rgba(116, 126, 137, 0),
+        0 1px 3px rgba(17, 17, 17, 0.05);
+      opacity: 0;
+      transform: translateY(28px);
+      transition: box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
     }
-.post-card:hover {
-  border-width: 6px;
-  border-color: #747e89; /* 기존 #009695에서 수정 */
-}
+    /* 스크롤로 뷰포트에 들어오면 setupScrollReveal()이 이 클래스를 붙임 */
+    .post-card.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* border-width로 두꺼워지던 기존 효과는 콘텐츠 영역을 실제로 줄여 텍스트 줄바꿈을 유발했음 —
+       box-shadow 링으로 대체해 레이아웃에 전혀 영향 없이 같은 느낌을 냄.
+       transform(기울임/리프트)은 .tilt-card 전역 스크립트(Layout.astro)가 담당 */
+    .post-card:hover {
+      box-shadow:
+        0 0 0 4px #747e89,
+        0 24px 40px -14px rgba(17, 17, 17, 0.32);
+    }
+
     .post-card-content { padding: 1.2rem; }
     .post-card-date { font-size: .8rem; color: #A0A0A0; margin-bottom: 0.3rem; }
     .post-card-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0rem; }
-    .post-card-desc { font-size: 1rem; color: #5B5B5B; margin: 0; }
+    .post-card-desc {
+      font-size: 1rem !important;
+      line-height: 1.4 !important;
+      color: #5B5B5B;
+      margin: 0 !important;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
 
     body, html { background: #F8F8FF; }
 

@@ -18,6 +18,11 @@ const showFooter = Astro.url.pathname !== '/';
       .img-col .carousel-video-overlay {
         bottom: 0 !important;
       }
+
+      /* 마우스를 따라 기울어지는 카드 (전역) — setupTiltCards()가 transform을 담당 */
+      .tilt-card {
+        will-change: transform;
+      }
     </style>
 
     <style>
@@ -67,6 +72,12 @@ const showFooter = Astro.url.pathname !== '/';
         transform: translateY(-2px);
       }
 
+      /* 클릭 시 살짝 눌리는 상하 피드백 */
+      .site-nav-box:active {
+        box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.18);
+        transform: translateY(2px);
+      }
+
       .site-brand{
         display:flex; align-items:center; gap: 12px; min-width:0;
         text-decoration:none; color:#fff;
@@ -79,6 +90,7 @@ const showFooter = Astro.url.pathname !== '/';
         font-weight:500; font-size: clamp(22px, 3.5vw, 25px);
         letter-spacing:0.01em; line-height:1; white-space:nowrap; color:#fff;
         overflow:hidden; text-overflow:ellipsis;
+        position: relative; top: 2px;
       }
 
       #search-form{
@@ -88,7 +100,7 @@ const showFooter = Astro.url.pathname !== '/';
       #search-input{
         width:100%;
         font-size: clamp(14px, 3.6vw, 15px); line-height:1.1;
-        padding: 0.5rem 2.0rem 0.5rem 0.9rem;
+        padding: 0.6rem 2.0rem 0.4rem 0.9rem;
         border-radius: 9999px; border: 0;
         background: rgba(255,255,255,0.92); color:#111;
         outline: none; transition: box-shadow .2s, background .2s;
@@ -224,6 +236,9 @@ const showFooter = Astro.url.pathname !== '/';
         const videos = document.querySelectorAll('video');
 
         videos.forEach((video) => {
+          // 홈 히어로 로고 영상은 자체 호버/역재생 로직을 쓰므로 캐러셀용 wrapper 처리에서 제외
+          if (video.classList.contains('hero-logo-video')) return;
+
           const isCarousel = video.classList.contains('my-carousel-img');
 
           if (video.hasAttribute('controls')) {
@@ -302,9 +317,152 @@ const showFooter = Astro.url.pathname !== '/';
         });
       }
 
+      // 카드 자체는 기울지 않고, 안의 이미지만 마우스를 따라 패럴랙스 이동 (.parallax-card)
+      function setupParallaxOnlyCards() {
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isTouch) return;
+
+        const IMG_SCALE = 1.12;
+        const IMG_PAN = 1.5; // %
+
+        document.querySelectorAll('.parallax-card').forEach((card) => {
+          if (card.dataset.parallaxInit) return;
+          card.dataset.parallaxInit = 'true';
+
+          const thumb = card.querySelector('.tilt-card-thumb');
+          if (!thumb) return;
+
+          card.addEventListener('mouseenter', () => {
+            thumb.style.transition = 'transform 0.15s ease-out';
+          });
+
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const dx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+            const dy = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+            const panX = -dx * IMG_PAN;
+            const panY = -dy * IMG_PAN;
+            thumb.style.transform = `scale(${IMG_SCALE}) translate(${panX}%, ${panY}%)`;
+          });
+
+          card.addEventListener('mouseleave', () => {
+            thumb.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+            thumb.style.transform = '';
+          });
+        });
+      }
+
+      function setupTiltCards() {
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isTouch) return;
+
+        const MAX_TILT = 7; // deg (전체 강도 — 마우스가 올라간 카드에만 적용)
+        const LIFT = 6; // px
+        const IMG_SCALE = 1.12; // 썸네일 기본 확대 — 패럴랙스로 움직여도 빈 여백 안 보이게
+        const IMG_PAN = 1.7; // %, 썸네일이 반대 방향으로 시차 이동하는 폭
+
+        document.querySelectorAll('.tilt-card').forEach((card) => {
+          if (card.dataset.tiltInit) return;
+          card.dataset.tiltInit = 'true';
+
+          let pressed = false;
+          let lastDx = 0, lastDy = 0;
+          const thumb = card.querySelector('.tilt-card-thumb');
+
+          function apply(dx, dy) {
+            lastDx = dx; lastDy = dy;
+            const rotY = dx * MAX_TILT;
+            const rotX = -dy * MAX_TILT;
+            const scale = pressed ? 0.98 : 1.02;
+            card.style.transform =
+              `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-${LIFT}px) scale(${scale})`;
+            if (thumb) {
+              const panX = -dx * IMG_PAN;
+              const panY = -dy * IMG_PAN;
+              thumb.style.transform = `scale(${IMG_SCALE}) translate(${panX}%, ${panY}%)`;
+            }
+          }
+
+          // 카드의 CSS transition(box-shadow 등)을 인라인으로 덮어쓰지 않도록
+          // transform 속도만 바꿀 때도 box-shadow transition은 항상 같이 명시
+          const RING_T = 'box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1)';
+
+          card.addEventListener('mouseenter', () => {
+            card.style.transition = `transform 0.15s ease-out, ${RING_T}`;
+            if (thumb) thumb.style.transition = 'transform 0.15s ease-out';
+          });
+
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const dx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+            const dy = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+            apply(dx, dy);
+          });
+
+          // mousedown/up 시점에 마우스가 멈춰있어도(=mousemove 없이도) 눌림 피드백이 즉시 보이도록
+          card.addEventListener('mousedown', () => {
+            pressed = true;
+            card.style.transition = `transform 0.08s ease-out, ${RING_T}`;
+            apply(lastDx, lastDy);
+          });
+          card.addEventListener('mouseup', () => {
+            pressed = false;
+            card.style.transition = `transform 0.15s ease-out, ${RING_T}`;
+            apply(lastDx, lastDy);
+          });
+
+          card.addEventListener('mouseleave', () => {
+            pressed = false;
+            card.style.transition = `transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), ${RING_T}`;
+            card.style.transform = '';
+            if (thumb) {
+              thumb.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+              thumb.style.transform = '';
+            }
+          });
+        });
+      }
+
+      // 모바일(터치) 전용: 화면 중앙에 가까운 카드일수록 썸네일이 상하로만 시차 이동
+      function setupScrollParallax() {
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (!isTouch) return;
+        if (window.__scrollParallaxBound) return;
+        window.__scrollParallaxBound = true;
+
+        const IMG_SCALE = 1.12;
+        const PAN = 4; // %, 상하로만
+
+        let ticking = false;
+        function update() {
+          const viewportCenter = window.innerHeight / 2;
+          document.querySelectorAll('.tilt-card-thumb').forEach((thumb) => {
+            const card = thumb.closest('.tilt-card');
+            if (!card) return;
+            const rect = card.getBoundingClientRect();
+            if (rect.height === 0) return;
+            const cardCenter = rect.top + rect.height / 2;
+            const dy = Math.max(-1, Math.min(1, (viewportCenter - cardCenter) / (rect.height / 2)));
+            thumb.style.transform = `scale(${IMG_SCALE}) translateY(${dy * PAN}%)`;
+          });
+          ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(update);
+        }, { passive: true });
+
+        update();
+      }
+
       function setupAll() {
         setupVideoControls();
         setupAntiCopy();
+        setupTiltCards();
+        setupParallaxOnlyCards();
+        setupScrollParallax();
       }
 
       document.addEventListener('astro:page-load', setupAll);

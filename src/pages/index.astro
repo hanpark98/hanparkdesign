@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Welcome">
-  <section id="home-hero" class="w-full flex flex-col bg-white full-viewport section-clip" style="position:relative;">
+  <section id="home-hero" class="w-full flex flex-col full-viewport section-clip" style="position:relative;">
 
     <div id="home-bar" class="w-full">
       <div class="home-bar">
@@ -20,11 +20,17 @@ import Layout from '../layouts/Layout.astro';
 
     <div class="anim-wrap">
       <div class="anim-panel">
-        <div class="text-block">
-          <p>
-            Graphic Design is more than just a visual. It is an interaction between the product and the user, where every pixel tells a story.
-          </p>
+        <div class="hero-hint" aria-hidden="true">
+          <svg class="hero-hint-chevron" viewBox="0 0 20 10"><path d="M2 8L10 2L18 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="hero-hint-chevron hero-hint-chevron-2" viewBox="0 0 20 10"><path d="M2 8L10 2L18 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
+        <div class="hero-logo-stage">
+          <video class="hero-logo-video hero-logo-loop" src="/videos/han-logo-rep.webm" autoplay muted loop playsinline></video>
+          <video class="hero-logo-video hero-logo-hover" src="/videos/han-logo-react.webm" muted playsinline></video>
+          <canvas class="hero-logo-canvas hero-logo-canvas-loop"></canvas>
+          <canvas class="hero-logo-canvas hero-logo-canvas-hover"></canvas>
+        </div>
+        <span class="sr-only">Han Park — Graphic Design Portfolio</span>
       </div>
     </div>
 
@@ -35,207 +41,224 @@ import Layout from '../layouts/Layout.astro';
           const h = (window.visualViewport?.height || window.innerHeight);
           root.style.setProperty('--vh', (h * 0.01) + 'px');
         }
-        function setBarH() {
-          const bar = document.getElementById('home-bar');
-          if (!bar) return;
-          const h = Math.round(bar.getBoundingClientRect().height);
-          root.style.setProperty('--bar-h-actual', h + 'px');
-        }
-        const init = () => { setVH(); setBarH(); };
-        const barEl = document.getElementById('home-bar');
-        if (barEl && 'ResizeObserver' in window) {
-          const ro = new ResizeObserver(setBarH);
-          ro.observe(barEl);
-        }
         window.addEventListener('resize', setVH, { passive: true });
         if (window.visualViewport) {
           window.visualViewport.addEventListener('resize', setVH, { passive: true });
         }
         window.addEventListener('orientationchange', () => setTimeout(setVH, 250), { passive: true });
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', init);
+          document.addEventListener('DOMContentLoaded', setVH);
         } else {
-          init();
+          setVH();
         }
       })();
     </script>
 
     <script>
       (() => {
-        const RADIUS = 100;
-        const MAX_DUR = 600;
-        const MIN_DUR = 200;
-        const SCRAMBLE_GLYPH = ":";
-        const REVERT_MIN_MS = 5000;
-        const REVERT_MAX_MS = 6000;
-        const REVERT_MIN_MS_TOUCH = 6000;
-        const REVERT_MAX_MS_TOUCH = 7500;
-        const MOBILE_REVEAL_DELAY = 500;
-        const REVERT_BACK_DUR = 220;
+        const panel = document.querySelector('#home-hero .anim-panel');
+        if (!panel) return;
+        panel.classList.add('is-clickable');
 
-        const mql = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-        const prefersReduced = !!(mql && mql.matches);
+        // 클릭(탭) 시 그라디언트 영역 자체에 눌리는 듯한 시각 피드백
+        panel.addEventListener('mousedown', () => panel.classList.add('is-pressed'));
+        panel.addEventListener('mouseup', () => panel.classList.remove('is-pressed'));
+        panel.addEventListener('mouseleave', () => panel.classList.remove('is-pressed'));
+        panel.addEventListener('touchstart', () => panel.classList.add('is-pressed'), { passive: true });
+        panel.addEventListener('touchend', () => panel.classList.remove('is-pressed'), { passive: true });
+        panel.addEventListener('touchcancel', () => panel.classList.remove('is-pressed'), { passive: true });
+
+        const stage = panel.querySelector('.hero-logo-stage');
+
+        // 로고를 직접 클릭했을 때만 들어가는 추가 스케일 피드백 (패널 전체의 translateY 피드백은 버블링으로 별도 발생)
+        if (stage) {
+          stage.addEventListener('mousedown', () => stage.classList.add('is-logo-pressed'));
+          stage.addEventListener('mouseup', () => stage.classList.remove('is-logo-pressed'));
+          stage.addEventListener('mouseleave', () => stage.classList.remove('is-logo-pressed'));
+          stage.addEventListener('touchstart', () => stage.classList.add('is-logo-pressed'), { passive: true });
+          stage.addEventListener('touchend', () => stage.classList.remove('is-logo-pressed'), { passive: true });
+          stage.addEventListener('touchcancel', () => stage.classList.remove('is-logo-pressed'), { passive: true });
+        }
+
+        const loopVideo = panel.querySelector('.hero-logo-loop');
+        const hoverVideo = panel.querySelector('.hero-logo-hover');
+        const canvasLoop = panel.querySelector('.hero-logo-canvas-loop');
+        const canvasHover = panel.querySelector('.hero-logo-canvas-hover');
+
+        // 로고 색: 호버 여부와 상관없이 항상 흰색
+        if (loopVideo && hoverVideo && canvasLoop && canvasHover) {
+          const ctxLoop = canvasLoop.getContext('2d');
+          const ctxHover = canvasHover.getContext('2d');
+          const SIZE = 500;
+          canvasLoop.width = canvasLoop.height = SIZE;
+          canvasHover.width = canvasHover.height = SIZE;
+
+          // 영상의 실루엣(알파 형태)은 그대로 두고 흰색으로 재채색
+          function paintWhite(ctx) {
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, SIZE, SIZE);
+            ctx.globalCompositeOperation = 'source-over';
+          }
+
+          function draw() {
+            if (loopVideo.readyState >= 2) {
+              ctxLoop.clearRect(0, 0, SIZE, SIZE);
+              ctxLoop.drawImage(loopVideo, 0, 0, SIZE, SIZE);
+              paintWhite(ctxLoop);
+            }
+            if (hoverVideo.readyState >= 2) {
+              ctxHover.clearRect(0, 0, SIZE, SIZE);
+              ctxHover.drawImage(hoverVideo, 0, 0, SIZE, SIZE);
+              paintWhite(ctxHover);
+            }
+            requestAnimationFrame(draw);
+          }
+          requestAnimationFrame(draw);
+        }
+
+        // 그라디언트 영역 전체에 호버하면 패널이 50% → 80% 높이로 확장
+        const wrap = panel.closest('.anim-wrap');
+        if (wrap) {
+          panel.addEventListener('mouseenter', () => wrap.classList.add('is-expanded'));
+          panel.addEventListener('mouseleave', () => wrap.classList.remove('is-expanded'));
+        }
+
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-        const isASCII = (ch) => ch && ch.charCodeAt(0) <= 0x7F;
-        const debounce = (fn, wait)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), wait); }; };
+        if (!stage || !loopVideo || !hoverVideo || prefersReduced || isTouch) {
+          if (prefersReduced && loopVideo) loopVideo.pause();
+          if (isTouch && wrap) {
+            // 터치 기기는 호버가 없으니, 스크롤을 내리거나 위로 스와이프하거나 탭하면
+            // 전부 패널이 확장되는 걸 잠깐 보여준 뒤 이동
+            let mobileTriggered = false;
+            function triggerMobileGo() {
+              if (mobileTriggered) return;
+              mobileTriggered = true;
+              wrap.classList.add('is-expanded');
+              setTimeout(() => { window.location.href = '/posts'; }, 500);
+            }
 
-        function boot(){
-          const textRoot = document.querySelector('#home-hero .text-block');
-          if (!textRoot) return;
-          const p = textRoot.querySelector('p');
-          if (!p) return;
+            panel.addEventListener('click', triggerMobileGo);
 
-          const panel = document.querySelector('#home-hero .anim-panel');
-          if (panel){
-            panel.classList.add('is-clickable');
+            window.addEventListener('wheel', (e) => {
+              if (e.deltaY > 5) triggerMobileGo();
+            }, { passive: true });
+
+            window.addEventListener('scroll', () => {
+              if (window.scrollY > 5) triggerMobileGo();
+            }, { passive: true });
+
+            let touchStartY = null;
+            window.addEventListener('touchstart', (e) => {
+              touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+              if (touchStartY == null) return;
+              const dy = touchStartY - e.touches[0].clientY;
+              if (dy > 40) triggerMobileGo(); // 위로 40px 이상 스와이프
+            }, { passive: true });
+          } else {
             panel.addEventListener('click', () => { window.location.href = '/posts'; });
           }
-
-          const original = p.textContent || '';
-          const sr = document.createElement('p');
-          sr.className = 'sr-only';
-          sr.textContent = original;
-          p.setAttribute('aria-hidden', 'true');
-          textRoot.insertBefore(sr, p);
-
-          function splitWithWordsAndBr(node){
-            const frag = document.createDocumentFragment();
-
-            function makeASCIIChar(ch){
-              const wrap = document.createElement('span');
-              wrap.className = 'char ascii';
-              wrap.dataset.state = 'gib';
-              const gib = document.createElement('span');
-              gib.className = 'g gib';
-              gib.textContent = SCRAMBLE_GLYPH;
-              const orig = document.createElement('span');
-              orig.className = 'g orig';
-              orig.textContent = ch;
-              wrap.appendChild(gib);
-              wrap.appendChild(orig);
-              return wrap;
-            }
-
-            function pushSpaces(seq){
-              for (let i=0; i<seq.length; i++){
-                const span = document.createElement('span');
-                span.className = 'char ws';
-                span.textContent = seq[i];
-                frag.appendChild(span);
-              }
-            }
-
-            function pushWord(seq){
-              const w = document.createElement('span');
-              w.className = 'word';
-              for (let i=0; i<seq.length; i++){
-                const ch = seq[i];
-                if (prefersReduced || !isASCII(ch)){
-                  const span = document.createElement('span');
-                  span.className = 'char fixed';
-                  span.textContent = ch;
-                  w.appendChild(span);
-                } else {
-                  w.appendChild(makeASCIIChar(ch));
-                }
-              }
-              frag.appendChild(w);
-            }
-
-            function tokenize(text){
-              const tokens = text.split(/(\s+)/);
-              tokens.forEach(tok=>{
-                if (!tok) return;
-                if (/^\s+$/.test(tok)) pushSpaces(tok);
-                else pushWord(tok);
-              });
-            }
-
-            function walk(n){
-              if (n.nodeType === 3){
-                const t = (n.nodeValue || '').replace(/\s*\n+\s*/g, ' ');
-                if (t) tokenize(t);
-              } else if (n.nodeType === 1){
-                if (n.tagName === 'BR'){
-                  const br = document.createElement('br');
-                  br.className = 'hard-br';
-                  frag.appendChild(br);
-                } else {
-                  Array.from(n.childNodes).forEach(walk);
-                }
-              }
-            }
-            Array.from(node.childNodes).forEach(walk);
-            node.replaceChildren(frag);
-          }
-          splitWithWordsAndBr(p);
-
-          const asciiChars = Array.from(p.querySelectorAll('.char.ascii'));
-          let boxes = [];
-          function measure(){
-            boxes = asciiChars.map((el)=>{
-              const r = el.getBoundingClientRect();
-              return { el, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
-            });
-          }
-          requestAnimationFrame(measure);
-          window.addEventListener('resize', debounce(()=>requestAnimationFrame(measure), 150));
-
-          function clearRevert(el){ if (el._rt){ clearTimeout(el._rt); el._rt = null; } }
-          function revertToGib(el, dur){
-            const gib = el.querySelector('.g.gib');
-            const orig = el.querySelector('.g.orig');
-            if (!gib || !orig) return;
-            gib.style.transition = orig.style.transition = `opacity ${dur}ms linear`;
-            gib.style.opacity = '1'; orig.style.opacity = '0';
-            el.dataset.state = 'gib';
-            clearRevert(el);
-          }
-          function resolveToOrig(el, dur){
-            if (el.dataset.state === 'orig') return;
-            const gib = el.querySelector('.g.gib');
-            const orig = el.querySelector('.g.orig');
-            if (!gib || !orig) return;
-            gib.style.transition = orig.style.transition = `opacity ${dur}ms linear`;
-            gib.style.opacity = '0'; orig.style.opacity = '1';
-            el.dataset.state = 'orig';
-            const min = isTouch ? REVERT_MIN_MS_TOUCH : REVERT_MIN_MS;
-            const max = isTouch ? REVERT_MAX_MS_TOUCH : REVERT_MAX_MS;
-            clearRevert(el);
-            el._rt = setTimeout(() => revertToGib(el, REVERT_BACK_DUR), randMs(min, max));
-          }
-          function randMs(min, max) { return Math.floor(min + Math.random() * (max - min)); }
-
-          if (!isTouch){
-            textRoot.addEventListener('pointermove', (e)=>{
-              const ex = e.clientX, ey = e.clientY;
-              for (let i=0;i<boxes.length;i++){
-                const b = boxes[i];
-                const dist = Math.hypot(ex - b.cx, ey - b.cy);
-                if (dist < RADIUS){
-                  const dur = Math.round(MIN_DUR + (1 - dist/RADIUS) * (MAX_DUR - MIN_DUR));
-                  resolveToOrig(b.el, dur);
-                }
-              }
-            });
-          } else {
-            const io = new IntersectionObserver((ents)=>{
-              ents.forEach(e=>{
-                if (e.isIntersecting){
-                  setTimeout(() => {
-                    asciiChars.forEach((el) => {
-                      setTimeout(() => resolveToOrig(el, 320 + Math.random() * 860), Math.random() * 720);
-                    });
-                  }, MOBILE_REVEAL_DELAY);
-                  io.disconnect();
-                }
-              });
-            }, { threshold: 0.25 });
-            io.observe(textRoot);
-          }
+          return;
         }
-        boot();
+
+        const REVERSE_SPEED = 3.2; // 호버 해제 시 되감기 속도 배율 — 빠릿빠릿하게
+
+        let reverseRAF = null;
+        function stopReverse() {
+          if (reverseRAF) { cancelAnimationFrame(reverseRAF); reverseRAF = null; }
+        }
+
+        function playForward() {
+          stopReverse();
+          panel.classList.add('is-hovering');
+          hoverVideo.play();
+        }
+
+        // 로고 크기 전환은 반응 영상 재생과 별개로 즉시 반응 (빠릿빠릿하게)
+        function activateLogo() {
+          stage.classList.add('is-active');
+        }
+        function deactivateLogo() {
+          stage.classList.remove('is-active');
+        }
+
+        // 진짜 역재생은 <video>가 지원하지 않아서(음수 playbackRate 불가),
+        // currentTime을 매 프레임 되감아 수동으로 역재생을 흉내냄 — 재인코딩이 없으니 알파 채널도 그대로 유지됨
+        function playReverse() {
+          stopReverse();
+          hoverVideo.pause();
+          let last = performance.now();
+          function step(now) {
+            const dt = (now - last) / 1000;
+            last = now;
+            const t = hoverVideo.currentTime - dt * REVERSE_SPEED;
+            if (t <= 0) {
+              hoverVideo.currentTime = 0;
+              panel.classList.remove('is-hovering');
+              reverseRAF = null;
+              return;
+            }
+            hoverVideo.currentTime = t;
+            reverseRAF = requestAnimationFrame(step);
+          }
+          reverseRAF = requestAnimationFrame(step);
+        }
+
+        // 반응 영상 트리거는 로고 영역에만 반응 (그라디언트 전체가 아니라)
+        // 패널이 확장되며 로고가 재중앙정렬되기 때문에, 커서가 멈춰있어도 로고 쪽이
+        // 커서 밑에서 움직여 벗어날 수 있음 — 그래서 mouseenter/leave 대신
+        // 매 프레임 커서 좌표와 로고 영역을 직접 비교해서 판정
+        let lastMouseX = -9999;
+        let lastMouseY = -9999;
+        let isOverStage = false;
+        document.addEventListener('mousemove', (e) => {
+          lastMouseX = e.clientX;
+          lastMouseY = e.clientY;
+        }, { passive: true });
+
+        function checkStageHover() {
+          const rect = stage.getBoundingClientRect();
+          const inside =
+            lastMouseX >= rect.left && lastMouseX <= rect.right &&
+            lastMouseY >= rect.top && lastMouseY <= rect.bottom;
+          if (inside && !isOverStage) {
+            isOverStage = true;
+            playForward();
+            activateLogo();
+          } else if (!inside && isOverStage) {
+            isOverStage = false;
+            playReverse();
+            deactivateLogo();
+          }
+          requestAnimationFrame(checkStageHover);
+        }
+        requestAnimationFrame(checkStageHover);
+
+        // 클릭하면 반응 영상을 끝까지 재생한 뒤에 이동
+        panel.addEventListener('click', () => {
+          stopReverse();
+          panel.classList.add('is-hovering');
+
+          let navigated = false;
+          function goToPosts() {
+            if (navigated) return;
+            navigated = true;
+            window.location.href = '/posts';
+          }
+
+          const nearEnd = hoverVideo.duration && hoverVideo.currentTime >= hoverVideo.duration - 0.03;
+          if (hoverVideo.ended || nearEnd) {
+            goToPosts();
+            return;
+          }
+          hoverVideo.addEventListener('ended', goToPosts, { once: true });
+          hoverVideo.play().catch(goToPosts);
+          setTimeout(goToPosts, 3000); // 영상이 어떤 이유로든 안 끝날 경우 대비한 안전장치
+        });
       })();
     </script>
 
@@ -246,14 +269,20 @@ import Layout from '../layouts/Layout.astro';
         --title-size: clamp(22px, 3.5vw, 25px); --link-size: clamp(17px, 2.4vw, 18px);
       }
       #home-hero{
-        --bar-h: clamp(200px, 20vw, 600px);
-        --anim-margin-bg: #ebe9e5; --anim-text: #ffffff; --anim-margin: 24px;
+        --anim-margin-bg: #ebe9e5; --anim-margin: 24px;
         --anim-radius: 16px; --anim-inner-pad-x: 40px;
         --anim-inner-gradient: linear-gradient(to bottom, #040404 0%, #040404 18%, #13151e 34%, #2f3756 50%, #747e89 68%, #c3c0ba 82%, #ebe9e5 95%, #f8f7f3 100%);
         --anim-grain-opacity: .10;
+        /* .anim-wrap이 절대배치라 아래 영역을 다 채우지 못하므로, 뒤에 흰 여백이 비치지 않도록
+           페이지/nav바와 같은 색으로 맞춤 */
+        background: var(--anim-margin-bg);
+      }
+      #home-bar{
+        height: calc(var(--vh, 1vh) * 20);
       }
       #home-bar .home-bar{
-        padding: 30px 30px 0 30px; min-height: var(--bar-h); background: var(--bar-bg);
+        height: 100%;
+        padding: 30px 30px 0; background: var(--bar-bg);
         display: flex; align-items: flex-start; justify-content: space-between;
       }
       #home-bar .home-brand{ display:flex; align-items:center; gap: var(--brand-gap); color: var(--bar-fg); text-decoration: none; }
@@ -265,43 +294,113 @@ import Layout from '../layouts/Layout.astro';
       .anim-wrap{
         display:flex; align-items:center; justify-content:center; padding: var(--anim-margin);
         background: var(--anim-margin-bg); box-sizing: border-box; overflow: hidden;
-        min-height: calc(var(--vh, 1vh) * 100 - var(--bar-h-actual, var(--bar-h)));
-        height: calc(var(--vh, 1vh) * 100 - var(--bar-h-actual, var(--bar-h)));
+        /* 아래를 화면 맨 밑에 고정하고, 위쪽만 확장되도록 절대배치 (#home-hero가 position:relative) */
+        position: absolute; left: 0; right: 0; bottom: 0;
+        min-height: calc(var(--vh, 1vh) * 65);
+        height: calc(var(--vh, 1vh) * 65);
+        transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .anim-wrap.is-expanded{
+        min-height: calc(var(--vh, 1vh) * 90);
+        height: calc(var(--vh, 1vh) * 90);
+      }
+      @media (max-width: 640px){
+        .anim-wrap{
+          min-height: calc(var(--vh, 1vh) * 70);
+          height: calc(var(--vh, 1vh) * 70);
+        }
+        .anim-wrap.is-expanded{
+          min-height: calc(var(--vh, 1vh) * 90);
+          height: calc(var(--vh, 1vh) * 90);
+        }
       }
       .anim-panel{
         width: 100%; height: 100%; background: var(--anim-inner-gradient); border-radius: var(--anim-radius);
         display:flex; align-items:center; justify-content:center; padding: 0 var(--anim-inner-pad-x);
         position: relative; overflow: hidden; transform: translateZ(0);
+        transition: transform 0.15s ease;
+      }
+      /* 클릭 시 살짝 눌리는 피드백 (스케일 대신 아래로 눌리는 translateY) */
+      .anim-panel.is-pressed{
+        transform: translateZ(0) translateY(4px);
       }
       .anim-panel::after{
         content:""; position:absolute; inset:0; pointer-events:none;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
         background-size: 200px 200px; mix-blend-mode: multiply; opacity: var(--anim-grain-opacity);
       }
-      .text-block{
-        max-width: 1000px; margin: 0 auto; text-align: center;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-weight: 300; font-size: clamp(16px, 4vw, 40px); line-height: 1.45; color: var(--anim-text);
+      /* 그라디언트 영역과 상호작용할 수 있다는 힌트 — 위로 떠오르며 사라지는 화살표 2개 */
+      .hero-hint{
+        position: absolute;
+        top: 28px; left: 50%;
+        transform: translateX(-50%);
+        display: flex; flex-direction: column; align-items: center; gap: 0px;
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.2s ease;
       }
+      /* 그라디언트 영역이 확장된 상태에서는 힌트를 숨김 */
+      .anim-wrap.is-expanded .hero-hint{
+        opacity: 0;
+      }
+      .hero-hint-chevron{
+        width: 15.6px; height: 7.8px;
+        color: rgba(255, 255, 255, 0.55);
+        animation: heroHintRise 1.7s ease-in-out infinite;
+      }
+      .hero-hint-chevron-2{ animation-delay: 0.28s; margin-top: -3.9px; }
+      @keyframes heroHintRise{
+        0%   { transform: translateY(8px); opacity: 0; }
+        35%  { opacity: 1; }
+        100% { transform: translateY(-12px); opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce){
+        .hero-hint-chevron{ animation: none; opacity: 0.45; }
+      }
+      .hero-logo-stage{
+        position: relative;
+        width: min(30vmin, 320px);
+        height: min(30vmin, 320px);
+        transform: scale(0.7);
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .hero-logo-stage.is-active{
+        transform: scale(1);
+      }
+      /* 패널이 눌려서 translateY(4px)만큼 내려가도, 로고는 그만큼 반대로 보정해서 제자리에 고정 */
+      .anim-panel.is-pressed .hero-logo-stage{
+        transform: translateY(-4px) scale(0.7);
+      }
+      .anim-panel.is-pressed .hero-logo-stage.is-active{
+        transform: translateY(-4px) scale(1);
+      }
+      /* 로고를 직접 클릭했을 때만 추가로 들어가는 스케일 피드백 (그라디언트 영역 클릭 시엔 적용 안 됨) */
+      .anim-panel.is-pressed .hero-logo-stage.is-logo-pressed{
+        transform: translateY(-4px) scale(0.62);
+      }
+      .anim-panel.is-pressed .hero-logo-stage.is-active.is-logo-pressed{
+        transform: translateY(-4px) scale(0.92);
+      }
+      /* 소스 영상 자체는 화면에 보이지 않음 — 알파채널이 있는 <video>를 페이지에 직접 그리면
+         브라우저가 투명도를 무시하는 문제가 있어, 디코딩만 담당하고 실제로는 캔버스에 그림 */
+      .hero-logo-video{
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .hero-logo-canvas{
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+      }
+      .hero-logo-canvas-hover{ opacity: 0; }
+      .anim-panel.is-hovering .hero-logo-canvas-loop{ opacity: 0; }
+      .anim-panel.is-hovering .hero-logo-canvas-hover{ opacity: 1; }
     </style>
 
     <style is:global>
-      /* 문자 컨테이너 */
-      #home-hero .char{ display:inline-block; vertical-align: baseline; }
-      #home-hero .char.ascii{ position: relative; width: 1ch; height: 1em; }
-      #home-hero .char.ascii .g{ position: absolute; inset:0; will-change: opacity; }
-      #home-hero .char.ascii .g.gib{ opacity: 1; }
-      #home-hero .char.ascii .g.orig{ opacity: 0; }
-      #home-hero .char.ws{ display:inline-block; white-space: pre; }
-
-      /* === [수정 핵심] 단어 단위 래핑 설정 === */
-      #home-hero .word {
-        display: inline-block;  /* 단어를 한 덩어리로 취급 */
-        white-space: nowrap;    /* 단어 내부 글자들 줄바꿈 방지 */
-      }
-
-      #home-hero .hard-br{ display: none; }
-      @media (min-width: 640px){ #home-hero .hard-br{ display: initial; } }
       .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
     </style>
   </section>

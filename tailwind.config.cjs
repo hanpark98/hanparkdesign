@@ -7,65 +7,14 @@ module.exports = {
         DEFAULT: {
           css: {
             fontFamily: [
-              'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
+              'Apple SD Gothic Neo', 'Malgun Gothic',
               'Segoe UI Symbol', 'Arial', 'sans-serif'
             ].join(', '),
-            h1: {
-              fontWeight: '600',
-              fontSize: '2.35rem',
-              lineHeight: '1.13',
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-              letterSpacing: '-0.02em',
-            },
-            h2: {
-              fontWeight: '600',
-              fontSize: '1.7rem',
-              lineHeight: '1.13',
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-              letterSpacing: '-0.01em',
-            },
-            h3: {
-              fontWeight: '600',
-              fontSize: '1.18rem',
-              lineHeight: '1.25',
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-              letterSpacing: '-0.01em',
-            },
-            h4: {
-              color: '#888',
-              fontSize: '0.8em',
-              fontWeight: '400',
-              fontStyle: 'italic',
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-            },
-            p: {
-              fontSize: '1.07rem',
-              fontWeight: '400',
-              lineHeight: '1.6',
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-              letterSpacing: '-0.01em',
-            },
-            blockquote: {
-              fontStyle: 'italic',
-              borderLeft: '4px solid #dadada',
-              color: '#555',
-              backgroundColor: '#fafafa',
-              paddingLeft: '1.1em',
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-            },
             img: {
               borderRadius: '0.8em',
               margin: '0.1em',
             },
             ul: {
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
               paddingLeft: '0.1em',
             },
             ol: {
@@ -73,11 +22,6 @@ module.exports = {
               marginBottom: '0.4em',
               marginLeft: '1.2em',
               paddingLeft: '0.15em',
-            },
-            li: {
-              marginTop: '0.4em',
-              marginBottom: '0.4em',
-              lineHeight: '1',
             },
             code: {
               backgroundColor: '#f5f5f5',
@@ -112,21 +56,17 @@ module.exports = {
               margin: '0.4em 0',
               borderCollapse: 'collapse',
             },
-                    blockquote: {
-          fontStyle: 'italic',
-          borderLeft: '0px solid #dadada',
-          color: '#555',
-          backgroundColor: '#fafafa',
-          borderRadius: 'var(--nav-radius)',
-  overflow: 'hidden',
-          // 여백 키우기
-
-
-          // 따옴표 제거
-          quotes: 'none',
-          '& p:first-of-type::before': { content: 'none' },
-          '& p:last-of-type::after': { content: 'none' },
-        },
+            blockquote: {
+              fontStyle: 'italic',
+              borderLeft: '0px solid #dadada',
+              color: '#555',
+              backgroundColor: '#fafafa',
+              borderRadius: 'var(--nav-radius)',
+              overflow: 'hidden',
+              quotes: 'none',
+              '& p:first-of-type::before': { content: 'none' },
+              '& p:last-of-type::after': { content: 'none' },
+            },
             'th, td': {
               border: '1px solid #e3e3e3',
               padding: '0.38em 0.7em',

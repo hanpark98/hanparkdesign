@@ -19,11 +19,11 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
 
 <Layout title={frontmatter.title}>
   <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
-    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4 px-4 sm:px-6 justify-start items-center">
+    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4 px-3 sm:px-6 justify-start items-center">
       <button onclick="window.history.back()" class="back-btn mr-6">Return</button>
     </div>
 
-    <div class="px-4 sm:px-6">
+    <div class="px-3 sm:px-6">
       {isWide ?
       (
         <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
@@ -87,8 +87,9 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
 
 <style is:global>
     .card-shell { border-radius: 16px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02); overflow: hidden; }
-    .back-btn { flex-shrink: 0; padding: .40rem 1.6rem; border-radius: 6px; background: #fff; color: #111; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: none; transition: background 0.2s ease; cursor: pointer; }
-    .back-btn:hover { background: #f4f4f4; }
+    .back-btn { flex-shrink: 0; padding: .55rem 1.6rem .25rem; border-radius: 6px; background: #fff; color: #111; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05); transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease; }
+    .back-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1); }
+    .back-btn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05); }
     html, body { background: #ebe9e5; }
 
     /* --- 캐러셀 & 마키 마우스 드래그 커서 및 충돌 방지 CSS --- */
