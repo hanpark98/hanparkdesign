@@ -448,13 +448,54 @@ const showFooter = Astro.url.pathname !== '/';
           ticking = false;
         }
 
-        window.addEventListener('scroll', () => {
+        // window의 scroll이 아니라 document를 캡처 단계에서 들어야 함 —
+        // 이 사이트는 html/body가 각자 overflow-y:auto를 갖는 중첩 스크롤 구조라
+        // 모바일에서 실제로 스크롤되는 건 body(또는 그 안쪽 컨테이너)이고,
+        // scroll 이벤트는 버블링되지 않아 window 리스너까지 안 올라옴
+        document.addEventListener('scroll', () => {
           if (ticking) return;
           ticking = true;
           requestAnimationFrame(update);
-        }, { passive: true });
+        }, { passive: true, capture: true });
 
         update();
+      }
+
+      // 모바일(터치) 전용: 카드 탭 시 스케일+링 하이라이트로 눌림 피드백을 준 뒤 이동 —
+      // 데스크톱의 setupTiltCards()는 터치에서 아예 동작하지 않아(hover 기반) 탭해도
+      // 아무 반응이 없었던 문제를 보완
+      function setupTouchCardFeedback() {
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (!isTouch) return;
+
+        document.querySelectorAll('.tilt-card').forEach((card) => {
+          if (card.dataset.touchFeedbackInit) return;
+          card.dataset.touchFeedbackInit = 'true';
+
+          card.addEventListener('touchstart', () => {
+            card.classList.add('is-touch-active');
+          }, { passive: true });
+          // touchend에서는 끄지 않음 — 탭을 끝까지 완료했으면 곧 이동할 거라
+          // 여기서 껐다가 click 핸들러가 다시 켜면 깜빡이는 것처럼 보임.
+          // 제스처가 중간에 취소된 경우(손가락을 밀어서 뺌)에만 원상복구
+          card.addEventListener('touchcancel', () => {
+            card.classList.remove('is-touch-active');
+          }, { passive: true });
+
+          // 피드백이 눈에 보일 시간을 확보한 뒤 이동 (탭 즉시 페이지가 넘어가버리면
+          // 스케일/링 효과가 그려질 틈도 없이 사라짐)
+          const href = card.getAttribute('href');
+          if (href) {
+            let navigated = false;
+            card.addEventListener('click', (e) => {
+              e.preventDefault();
+              if (navigated) return; // 일부 모바일 브라우저에서 click이 중복 발생해 두 번 이동하는 것 방지
+              navigated = true;
+              card.classList.add('is-touch-active');
+              setTimeout(() => { window.location.href = href; }, 130);
+            });
+          }
+        });
       }
 
       function setupAll() {
@@ -463,6 +504,7 @@ const showFooter = Astro.url.pathname !== '/';
         setupTiltCards();
         setupParallaxOnlyCards();
         setupScrollParallax();
+        setupTouchCardFeedback();
       }
 
       document.addEventListener('astro:page-load', setupAll);

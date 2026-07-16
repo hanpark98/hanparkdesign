@@ -25,10 +25,8 @@ import Layout from '../layouts/Layout.astro';
           <svg class="hero-hint-chevron hero-hint-chevron-2" viewBox="0 0 20 10"><path d="M2 8L10 2L18 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="hero-logo-stage">
-          <video class="hero-logo-video hero-logo-loop" src="/videos/han-logo-rep.webm" autoplay muted loop playsinline></video>
-          <video class="hero-logo-video hero-logo-hover" src="/videos/han-logo-react.webm" muted playsinline></video>
-          <canvas class="hero-logo-canvas hero-logo-canvas-loop"></canvas>
-          <canvas class="hero-logo-canvas hero-logo-canvas-hover"></canvas>
+          <img class="hero-logo-img hero-logo-loop" src="/images/website/hero-logo-loop.webp" alt="" />
+          <img class="hero-logo-img hero-logo-hover" src="/images/website/hero-logo-hover.webp" alt="" />
         </div>
         <span class="sr-only">Han Park — Graphic Design Portfolio</span>
       </div>
@@ -80,41 +78,18 @@ import Layout from '../layouts/Layout.astro';
           stage.addEventListener('touchcancel', () => stage.classList.remove('is-logo-pressed'), { passive: true });
         }
 
-        const loopVideo = panel.querySelector('.hero-logo-loop');
-        const hoverVideo = panel.querySelector('.hero-logo-hover');
-        const canvasLoop = panel.querySelector('.hero-logo-canvas-loop');
-        const canvasHover = panel.querySelector('.hero-logo-canvas-hover');
+        const loopImg = panel.querySelector('.hero-logo-loop');
+        const hoverImg = panel.querySelector('.hero-logo-hover');
 
-        // 로고 색: 호버 여부와 상관없이 항상 흰색
-        if (loopVideo && hoverVideo && canvasLoop && canvasHover) {
-          const ctxLoop = canvasLoop.getContext('2d');
-          const ctxHover = canvasHover.getContext('2d');
-          const SIZE = 500;
-          canvasLoop.width = canvasLoop.height = SIZE;
-          canvasHover.width = canvasHover.height = SIZE;
+        const REACT_DURATION_MS = 650; // 반응 webp 재생 길이(약 625ms) + 여유
 
-          // 영상의 실루엣(알파 형태)은 그대로 두고 흰색으로 재채색
-          function paintWhite(ctx) {
-            ctx.globalCompositeOperation = 'source-in';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, SIZE, SIZE);
-            ctx.globalCompositeOperation = 'source-over';
-          }
-
-          function draw() {
-            if (loopVideo.readyState >= 2) {
-              ctxLoop.clearRect(0, 0, SIZE, SIZE);
-              ctxLoop.drawImage(loopVideo, 0, 0, SIZE, SIZE);
-              paintWhite(ctxLoop);
-            }
-            if (hoverVideo.readyState >= 2) {
-              ctxHover.clearRect(0, 0, SIZE, SIZE);
-              ctxHover.drawImage(hoverVideo, 0, 0, SIZE, SIZE);
-              paintWhite(ctxHover);
-            }
-            requestAnimationFrame(draw);
-          }
-          requestAnimationFrame(draw);
+        // 애니메이션 webp는 <video>와 달리 재생/역재생을 스크립트로 제어할 수 없어서,
+        // 호버(혹은 터치 트리거)할 때마다 src를 리셋해 처음부터 다시 재생되게 함
+        // (재생 후에는 -loop 1이라 마지막 프레임에 자동으로 멈춤)
+        function forceReplay(img) {
+          const src = img.src;
+          img.src = '';
+          img.src = src;
         }
 
         // 그라디언트 영역 전체에 호버하면 패널이 50% → 80% 높이로 확장
@@ -127,8 +102,12 @@ import Layout from '../layouts/Layout.astro';
         const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-        if (!stage || !loopVideo || !hoverVideo || prefersReduced || isTouch) {
-          if (prefersReduced && loopVideo) loopVideo.pause();
+        // reduced-motion에서는 상시 재생되는 루프 대신 정지 이미지로 대체
+        if (prefersReduced && loopImg) {
+          loopImg.src = '/images/website/hero-logo-static.png';
+        }
+
+        if (!stage || !loopImg || !hoverImg || prefersReduced || isTouch) {
           if (isTouch && wrap) {
             // 터치 기기는 호버가 없으니, 스크롤을 내리거나 위로 스와이프하거나 탭하면
             // 전부 패널이 확장되는 걸 잠깐 보여준 뒤 이동
@@ -137,7 +116,13 @@ import Layout from '../layouts/Layout.astro';
               if (mobileTriggered) return;
               mobileTriggered = true;
               wrap.classList.add('is-expanded');
-              setTimeout(() => { window.location.href = '/posts'; }, 500);
+              // 터치 기기에도 데스크톱과 동일하게 반응 애니메이션 + 로고 확대를 보여준 뒤 이동 —
+              // 기존엔 이 분기에서 is-hovering/is-active를 아예 켜지 않아 react 파일이 안 보이고
+              // 로고도 확대되지 않던 버그
+              panel.classList.add('is-hovering');
+              if (stage) stage.classList.add('is-active');
+              if (hoverImg) forceReplay(hoverImg);
+              setTimeout(() => { window.location.href = '/posts'; }, REACT_DURATION_MS);
             }
 
             panel.addEventListener('click', triggerMobileGo);
@@ -157,7 +142,9 @@ import Layout from '../layouts/Layout.astro';
             window.addEventListener('touchmove', (e) => {
               if (touchStartY == null) return;
               const dy = touchStartY - e.touches[0].clientY;
-              if (dy > 40) triggerMobileGo(); // 위로 40px 이상 스와이프
+              // 위/아래 어느 방향이든 40px 이상 의도적으로 스와이프하면 트리거 —
+              // 이 화면은 스크롤할 콘텐츠가 없으니 방향을 가릴 이유가 없음
+              if (Math.abs(dy) > 40) triggerMobileGo();
             }, { passive: true });
           } else {
             panel.addEventListener('click', () => { window.location.href = '/posts'; });
@@ -165,20 +152,15 @@ import Layout from '../layouts/Layout.astro';
           return;
         }
 
-        const REVERSE_SPEED = 3.2; // 호버 해제 시 되감기 속도 배율 — 빠릿빠릿하게
-
-        let reverseRAF = null;
-        function stopReverse() {
-          if (reverseRAF) { cancelAnimationFrame(reverseRAF); reverseRAF = null; }
-        }
+        let hoverStartTime = 0;
 
         function playForward() {
-          stopReverse();
           panel.classList.add('is-hovering');
-          hoverVideo.play();
+          forceReplay(hoverImg);
+          hoverStartTime = performance.now();
         }
 
-        // 로고 크기 전환은 반응 영상 재생과 별개로 즉시 반응 (빠릿빠릿하게)
+        // 로고 크기 전환은 반응 애니메이션 재생과 별개로 즉시 반응 (빠릿빠릿하게)
         function activateLogo() {
           stage.classList.add('is-active');
         }
@@ -186,29 +168,11 @@ import Layout from '../layouts/Layout.astro';
           stage.classList.remove('is-active');
         }
 
-        // 진짜 역재생은 <video>가 지원하지 않아서(음수 playbackRate 불가),
-        // currentTime을 매 프레임 되감아 수동으로 역재생을 흉내냄 — 재인코딩이 없으니 알파 채널도 그대로 유지됨
         function playReverse() {
-          stopReverse();
-          hoverVideo.pause();
-          let last = performance.now();
-          function step(now) {
-            const dt = (now - last) / 1000;
-            last = now;
-            const t = hoverVideo.currentTime - dt * REVERSE_SPEED;
-            if (t <= 0) {
-              hoverVideo.currentTime = 0;
-              panel.classList.remove('is-hovering');
-              reverseRAF = null;
-              return;
-            }
-            hoverVideo.currentTime = t;
-            reverseRAF = requestAnimationFrame(step);
-          }
-          reverseRAF = requestAnimationFrame(step);
+          panel.classList.remove('is-hovering');
         }
 
-        // 반응 영상 트리거는 로고 영역에만 반응 (그라디언트 전체가 아니라)
+        // 반응 애니메이션 트리거는 로고 영역에만 반응 (그라디언트 전체가 아니라)
         // 패널이 확장되며 로고가 재중앙정렬되기 때문에, 커서가 멈춰있어도 로고 쪽이
         // 커서 밑에서 움직여 벗어날 수 있음 — 그래서 mouseenter/leave 대신
         // 매 프레임 커서 좌표와 로고 영역을 직접 비교해서 판정
@@ -238,26 +202,12 @@ import Layout from '../layouts/Layout.astro';
         }
         requestAnimationFrame(checkStageHover);
 
-        // 클릭하면 반응 영상을 끝까지 재생한 뒤에 이동
+        // 클릭하면 반응 애니메이션이 끝까지 보인 뒤에 이동
         panel.addEventListener('click', () => {
-          stopReverse();
           panel.classList.add('is-hovering');
-
-          let navigated = false;
-          function goToPosts() {
-            if (navigated) return;
-            navigated = true;
-            window.location.href = '/posts';
-          }
-
-          const nearEnd = hoverVideo.duration && hoverVideo.currentTime >= hoverVideo.duration - 0.03;
-          if (hoverVideo.ended || nearEnd) {
-            goToPosts();
-            return;
-          }
-          hoverVideo.addEventListener('ended', goToPosts, { once: true });
-          hoverVideo.play().catch(goToPosts);
-          setTimeout(goToPosts, 3000); // 영상이 어떤 이유로든 안 끝날 경우 대비한 안전장치
+          const elapsed = performance.now() - hoverStartTime;
+          const remaining = Math.max(0, REACT_DURATION_MS - elapsed);
+          setTimeout(() => { window.location.href = '/posts'; }, remaining);
         });
       })();
     </script>
@@ -381,27 +331,32 @@ import Layout from '../layouts/Layout.astro';
       .anim-panel.is-pressed .hero-logo-stage.is-active.is-logo-pressed{
         transform: translateY(-4px) scale(0.92);
       }
-      /* 소스 영상 자체는 화면에 보이지 않음 — 알파채널이 있는 <video>를 페이지에 직접 그리면
-         브라우저가 투명도를 무시하는 문제가 있어, 디코딩만 담당하고 실제로는 캔버스에 그림 */
-      .hero-logo-video{
+      /* 애니메이션 webp로 렌더 — 알파채널이 <video>/<canvas> 없이도 브라우저에서 그대로 살아있어서
+         (데스크톱/모바일, Safari/Chrome 공통) 별도 디코딩 캔버스가 필요 없음 */
+      .hero-logo-img{
         position: absolute; inset: 0;
         width: 100%; height: 100%;
-        opacity: 0;
-        pointer-events: none;
-      }
-      .hero-logo-canvas{
-        position: absolute; inset: 0;
-        width: 100%; height: 100%;
+        object-fit: contain;
         opacity: 1;
+        pointer-events: none;
         transition: opacity 0.2s ease;
       }
-      .hero-logo-canvas-hover{ opacity: 0; }
-      .anim-panel.is-hovering .hero-logo-canvas-loop{ opacity: 0; }
-      .anim-panel.is-hovering .hero-logo-canvas-hover{ opacity: 1; }
+      .hero-logo-hover{ opacity: 0; }
+      .anim-panel.is-hovering .hero-logo-loop{ opacity: 0; }
+      .anim-panel.is-hovering .hero-logo-hover{ opacity: 1; }
     </style>
 
     <style is:global>
       .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+      /* 홈 화면은 스크롤이 없는 고정 뷰포트여야 함 — 스크롤/스와이프 제스처는
+         실제 스크롤이 아니라 애니메이션 트리거용 입력으로만 쓰임.
+         html/body의 overflow-y:auto(전역)를 이 페이지에서만 잠금 */
+      html:has(#home-hero), body:has(#home-hero){
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+        overscroll-behavior: none;
+      }
     </style>
   </section>
 </Layout>

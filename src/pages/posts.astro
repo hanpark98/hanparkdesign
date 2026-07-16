@@ -229,11 +229,22 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
     }
     /* border-width로 두꺼워지던 기존 효과는 콘텐츠 영역을 실제로 줄여 텍스트 줄바꿈을 유발했음 —
        box-shadow 링으로 대체해 레이아웃에 전혀 영향 없이 같은 느낌을 냄.
-       transform(기울임/리프트)은 .tilt-card 전역 스크립트(Layout.astro)가 담당 */
-    .post-card:hover {
-      box-shadow:
-        0 0 0 4px #747e89,
-        0 24px 40px -14px rgba(17, 17, 17, 0.32);
+       transform(기울임/리프트)은 .tilt-card 전역 스크립트(Layout.astro)가 담당.
+       hover:hover 미디어쿼리로 감싸서, 진짜 마우스/트랙패드가 있는 기기에서만 적용 —
+       터치 기기는 스크롤 중 손가락이 스쳐도 :hover가 걸려서 스크롤할 때마다
+       링이 켜지는 문제가 있었음. 터치 기기의 피드백은 is-touch-active(탭 시에만)가 담당 */
+    @media (hover: hover) {
+      .post-card:hover {
+        box-shadow:
+          0 0 0 4px #747e89,
+          0 24px 40px -14px rgba(17, 17, 17, 0.32);
+      }
+    }
+    /* 모바일 탭 피드백 — Layout.astro의 setupTouchCardFeedback()이 붙이는 클래스.
+       테두리(stroke) 두께 애니메이션은 빼고, 살짝 눌리는 스케일만 남김 */
+    .post-card.is-touch-active {
+      transform: scale(0.97);
+      transition: transform 0.15s ease;
     }
 
     .post-card-content { padding: 1.2rem; }
