@@ -27,7 +27,8 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
       {isWide ?
       (
         <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
-          <div class="bg-white p-6 sm:p-8 mb-4 card-shell">
+          <!-- 처음 두 섹션(헤더/본문)은 스크롤을 기다리지 않고, 로딩되듯 페이지 진입 시 바로 fade in -->
+          <div class="bg-white p-6 sm:p-8 mb-4 card-shell load-fade">
             <div class="mb-2 flex flex-wrap items-center text-gray-400 text-[0.96rem] gap-y-1">
               <div class="flex items-center">
                 <span>{frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
@@ -38,13 +39,13 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
             <h1 class="!text-3xl sm:!text-4xl font-bold !mb-1">{frontmatter.title}</h1>
             {frontmatter.description && <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>}
           </div>
-          
-          <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content">
+
+          <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content load-fade load-fade-2">
             <Content />
           </div>
 
           {introHtml && (
-            <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content">
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
               <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
               {frontmatter.tags && (
                 <div class="flex flex-wrap gap-2">
@@ -54,7 +55,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
             </div>
           )}
 
-          <div class="p-6 sm:p-8 mb-4 card-shell" style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;">
+          <div class="p-6 sm:p-8 mb-4 card-shell fade-section" style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;">
             <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]"><span>Got any Questions?</span></div>
             <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
               With 9+ years of experience ranging from marketing to motion graphics, I know the industry out.<br>
@@ -69,7 +70,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
         </article>
       ) : (
         <article class="prose prose-lg max-w-3xl mx-auto mt-4">
-          <div class="bg-white px-5 py-5 mb-7 card-shell">
+          <div class="bg-white px-5 py-5 mb-7 card-shell load-fade">
             <div class="mb-1 flex gap-3 items-center text-gray-400 text-[0.96rem]">
               <span>{frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               <span class="mx-1">&middot;</span>
@@ -87,6 +88,37 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
 
 <style is:global>
     .card-shell { border-radius: 16px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02); overflow: hidden; }
+
+    /* 스크롤로 뷰포트에 들어오는 본문 섹션을 아래→위로 fade in — posts/profile 페이지와 같은 패턴,
+       나갔다 다시 들어올 때마다 매번 재생 */
+    .fade-section {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .fade-section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* 처음 두 섹션(헤더/본문)은 스크롤을 기다리지 않고 페이지 진입 시 곧바로 fade in —
+       로딩되는 느낌을 주기 위해 본문은 헤더보다 살짝 늦게 뜸 */
+    .load-fade {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .load-fade.is-loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .load-fade-2 {
+      transition-delay: 0.12s;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .load-fade { opacity: 1; transform: none; transition: none; }
+    }
     .back-btn { flex-shrink: 0; padding: .55rem 1.6rem .25rem; border-radius: 6px; background: #fff; color: #111; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05); transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease; }
     .back-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1); }
     .back-btn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05); }
@@ -262,6 +294,25 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+      // 스크롤로 뷰포트에 들어오는 본문 섹션(card-shell)을 fade in — 나갔다 다시 들어올 때마다 매번 재생
+      const fadeSections = document.querySelectorAll('.fade-section');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            entry.target.classList.toggle('is-visible', entry.isIntersecting);
+          });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        fadeSections.forEach((section) => io.observe(section));
+      } else {
+        fadeSections.forEach((section) => section.classList.add('is-visible'));
+      }
+
+      // 처음 두 섹션은 스크롤과 상관없이 페이지 진입 시 바로 fade in
+      const loadFadeEls = document.querySelectorAll('.load-fade');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        loadFadeEls.forEach((el) => el.classList.add('is-loaded'));
+      }));
+
       document.querySelectorAll('.my-carousel').forEach(function(carousel) {
         if (carousel.classList.contains('marquee-mode')) return;
         const scrollArea = carousel.querySelector('.my-carousel-scroll');

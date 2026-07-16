@@ -49,6 +49,15 @@ import Layout from '../layouts/Layout.astro';
         } else {
           setVH();
         }
+
+        // 스크롤이 없는 홈 화면은 posts/profile의 스크롤 fade-in을 쓸 수 없어서,
+        // 페이지 로드 시 그라디언트 영역이 한 번 아래→위로 fade in 되도록 함
+        const wrap = document.querySelector('#home-hero .anim-wrap');
+        if (wrap) {
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            wrap.classList.add('is-loaded');
+          }));
+        }
       })();
     </script>
 
@@ -202,11 +211,20 @@ import Layout from '../layouts/Layout.astro';
         }
         requestAnimationFrame(checkStageHover);
 
-        // 클릭하면 반응 애니메이션이 끝까지 보인 뒤에 이동
+        // 클릭 시: 이미 로고를 호버 중이라 react가 재생 중이면(isOverStage) 다시
+        // 트리거하지 않고 남은 시간만 기다림 — 새로 재생시키면 두 번 재생되는 것처럼 보임.
+        // 로고를 거치지 않고 그라디언트 영역만 클릭한 경우(isOverStage=false)에는
+        // 호버와 동일하게 playForward로 새로 재생시킴. 스케일 눌림 피드백은 mousedown의
+        // is-pressed/is-logo-pressed가 이미 담당하므로 여기서 따로 건드리지 않음
+        const MIN_CLICK_PAUSE_MS = 260; // 이미 한참 호버하고 있다가 클릭해도, 클릭 순간부터 최소 이만큼은 보여준 뒤 이동
+
         panel.addEventListener('click', () => {
-          panel.classList.add('is-hovering');
+          if (!isOverStage) {
+            playForward();
+            activateLogo();
+          }
           const elapsed = performance.now() - hoverStartTime;
-          const remaining = Math.max(0, REACT_DURATION_MS - elapsed);
+          const remaining = Math.max(MIN_CLICK_PAUSE_MS, REACT_DURATION_MS - elapsed);
           setTimeout(() => { window.location.href = '/posts'; }, remaining);
         });
       })();
@@ -248,7 +266,19 @@ import Layout from '../layouts/Layout.astro';
         position: absolute; left: 0; right: 0; bottom: 0;
         min-height: calc(var(--vh, 1vh) * 65);
         height: calc(var(--vh, 1vh) * 65);
-        transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        /* 홈 화면은 스크롤이 없어서 posts/profile의 스크롤 fade-in과 같은 트리거를 못 씀 —
+           대신 페이지 로드시 한 번 같은 느낌으로 아래→위 fade in */
+        opacity: 0;
+        transform: translateY(28px);
+        transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .anim-wrap.is-loaded{
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @media (prefers-reduced-motion: reduce){
+        .anim-wrap{ opacity: 1; transform: none; transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), min-height 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
       }
       .anim-wrap.is-expanded{
         min-height: calc(var(--vh, 1vh) * 90);

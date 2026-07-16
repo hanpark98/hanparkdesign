@@ -3,8 +3,9 @@ import Layout from '../layouts/Layout.astro';
 
 const experience = [
   { year: '2026', org: 'Han Design', role: 'Graphic Designer' },
-  { year: '2023–2025', org: 'BAZZAAL', role: 'Graphic Designer' },
-  { year: '2022', org: 'Daeki & Jun', role: 'Assistant Designer' },
+  { year: '2023–2025', org: 'Kijibae', orgSuffix: 'Gel Nail Strips', role: 'Graphic Designer' },
+  { year: '2023–2025', org: 'BAZZAAL', orgSuffix: 'Marketing Agency', role: 'Graphic Designer' },
+  { year: '2022', org: 'Daeki & Jun', orgSuffix: 'Design Studio', role: 'Assistant Designer' },
   { year: '2020–2022', org: 'Content Creator', role: '' },
   { year: '2018–2020', org: 'ROKA 1st Artillery Brigade', role: 'Assistant Publicist' },
   { year: '2018', org: 'YBM', role: 'Videographer' },
@@ -19,7 +20,6 @@ const awards = [
     org: 'Red Dot Design Awards',
     role: 'Winner / Brand & Communication',
     featured: true,
-    description: '설명 문구가 들어갈 자리입니다 — 수상작 소개와 작업 배경을 이곳에 작성하세요.',
   },
   { year: '2023', org: 'The Society of Typographic Arts', role: 'STA 100' },
   { year: '2015', org: 'The Korean Society of Media & Arts', role: 'Honorable Mention' },
@@ -67,12 +67,9 @@ const awardGroups = groupByYear(awards);
     </div>
 
     <!-- 프로필 카드 -->
-    <div class="profile-card parallax-card max-w-xl mx-auto my-8 bg-white rounded-[16px] overflow-hidden">
-      <div class="w-full aspect-square overflow-hidden">
-        <img src="/images/website/profile.jpg" alt="프로필 사진" class="tilt-card-thumb w-full h-full object-cover" />
-      </div>
-
+    <div class="profile-card fade-section max-w-xl mx-auto my-8 bg-white rounded-[16px] overflow-hidden">
       <div class="profile-card-content text-center">
+        <img src="/images/website/logo.svg" alt="Han Park" class="profile-logo-mark" />
         <div class="profile-name">Han Park<br />박한결</div>
         <div class="profile-title">Graphic Designer</div>
 
@@ -85,7 +82,7 @@ const awardGroups = groupByYear(awards);
     </div>
 
     <!-- Experience -->
-    <div class="max-w-xl mx-auto mb-8 cv-section">
+    <div class="max-w-xl mx-auto mb-8 cv-section fade-section">
       <div class="cv-heading">Experience</div>
       <div class="cv-list">
         {experienceGroups.map(group => (
@@ -100,7 +97,10 @@ const awardGroups = groupByYear(awards);
                     {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
                   </div>
                   <div class="cv-text">
-                    <div class="cv-org">{item.org}</div>
+                    <div class="cv-org">
+                      {item.org}
+                      {item.orgSuffix && <span class="cv-org-suffix">{item.orgSuffix}</span>}
+                    </div>
                     {item.role && <div class="cv-role">{item.role}</div>}
                   </div>
                 </div>
@@ -112,7 +112,7 @@ const awardGroups = groupByYear(awards);
     </div>
 
     <!-- Awards -->
-    <div class="max-w-xl mx-auto mb-10 cv-section">
+    <div class="max-w-xl mx-auto mb-10 cv-section fade-section">
       <div class="cv-heading">Awards</div>
       <div class="cv-list">
         {awardGroups.map(group => (
@@ -151,7 +151,7 @@ const awardGroups = groupByYear(awards);
     </div>
 
     <!-- 연락처 -->
-    <div class="max-w-xl mx-auto mb-16 cv-section">
+    <div class="max-w-xl mx-auto mb-16 cv-section fade-section">
       <div class="cv-heading">Contact</div>
       <div class="contact-list">
         <a href="mailto:hanparkdesign@gmail.com" class="contact-row" id="email-contact" data-email="hanparkdesign@gmail.com">
@@ -171,6 +171,19 @@ const awardGroups = groupByYear(awards);
   </div>
 
   <script>
+    // 스크롤로 뷰포트에 들어오는 섹션을 아래→위로 fade in — 나갔다 다시 들어올 때마다 매번 재생
+    const fadeSections = document.querySelectorAll('.fade-section');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      fadeSections.forEach((section) => io.observe(section));
+    } else {
+      fadeSections.forEach((section) => section.classList.add('is-visible'));
+    }
+
     const emailLink = document.getElementById('email-contact');
     const emailText = document.getElementById('email-contact-text');
     if (emailLink && emailText) {
@@ -226,8 +239,33 @@ const awardGroups = groupByYear(awards);
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02);
     }
 
+    /* 스크롤로 뷰포트에 들어오면 아래→위로 fade in — posts 페이지 카드와 같은 패턴,
+       나갔다 다시 들어올 때마다 매번 재생 */
+    .fade-section {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .fade-section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 실제 얼굴 사진 대신 이름 위에 검정 브랜드 마크만 작게 — 위아래 여백 동일하게.
+       global.css의 img{margin-top/bottom:0 !important} 규칙이 margin-bottom을
+       무시시켜서, 아래 여백은 margin 대신 padding-bottom으로 줌 */
+    .profile-logo-mark {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto;
+      padding-bottom: 32px;
+      box-sizing: content-box;
+      display: block;
+    }
+
     .profile-card-content {
-      padding: 1.5rem 2rem 2rem;
+      padding: 2rem 2rem 2rem;
     }
 
     .profile-name {
@@ -266,8 +304,12 @@ const awardGroups = groupByYear(awards);
       .profile-card {
         margin-inline: 12px;
       }
+      /* 위(패딩) = 로고 아래(패딩) 동일하게 유지 */
       .profile-card-content {
-        padding: 1.25rem 1.25rem 1.5rem;
+        padding: 1.5rem 1.25rem 1.5rem;
+      }
+      .profile-logo-mark {
+        padding-bottom: 24px;
       }
     }
 
@@ -288,7 +330,7 @@ const awardGroups = groupByYear(awards);
       color: #111;
       padding-bottom: 20px;
       margin-bottom: 8px;
-      border-bottom: 2px solid #111;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.15);
     }
 
     /* 한 행 안의 연도 칸과 항목 칸 높이가 서로 달라도(연도 여러 줄, 항목 여러 개 등)
@@ -368,6 +410,10 @@ const awardGroups = groupByYear(awards);
       letter-spacing: -0.01em;
       color: #111;
       line-height: 1.35;
+    }
+    .cv-org-suffix {
+      font-weight: 400;
+      margin-left: 6px;
     }
 
     .cv-role {
