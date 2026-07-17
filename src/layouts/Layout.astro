@@ -4,6 +4,13 @@ import Analytics from '@vercel/analytics/astro';
 const { title } = Astro.props;
 const showNav = Astro.url.pathname !== '/';
 const showFooter = Astro.url.pathname !== '/';
+
+// 햄버거 메뉴의 프로젝트 카테고리 목록 — posts.astro와 동일한 정렬 기준
+const postFiles = Object.entries(import.meta.glob('../content/posts/*.md', { eager: true }));
+const menuPosts = postFiles.map(([, f]) => f.frontmatter);
+const menuCategoryOrder = ['Marketing', 'E-commerce', 'Branding', 'Motion & Content', 'Print & Illustration', 'Events'];
+const menuRawCategories = [...new Set(menuPosts.flatMap(p => Array.isArray(p.category) ? p.category : (p.category ? [p.category] : [])))];
+const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.includes(c)), ...menuRawCategories.filter(c => !menuCategoryOrder.includes(c))];
 ---
 
 <html lang="ko">
@@ -11,6 +18,11 @@ const showFooter = Astro.url.pathname !== '/';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>{title ?? '한결'}</title>
+
+    <link rel="icon" type="image/svg+xml" href="/images/website/logo.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <style is:global>
       main { flex: 1 1 auto; min-height: 0; }
@@ -54,72 +66,117 @@ const showFooter = Astro.url.pathname !== '/';
       }
 
       .site-nav-box{
+        position: relative;
         display:flex;
         justify-content:space-between;
-        align-items:flex-start;
+        align-items:center;
         margin: 0 max(var(--nav-side-gap), env(safe-area-inset-left)) 0 max(var(--nav-side-gap), env(safe-area-inset-right));
         background: var(--nav-gradient);
         border-radius: 0 0 var(--nav-radius) var(--nav-radius); 
         padding: var(--nav-pad-t) var(--nav-pad-x) var(--nav-pad-b);
         box-sizing: border-box;
         -webkit-transform: translateZ(0);
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.18);
+        /* 두번째 그림자(0 -4px 0 0)는 press 애니메이션 때 박스가 아래로 밀리며 위쪽에
+           실선처럼 드러나는 배경색 틈을 그라디언트 시작색으로 미리 메꿔주는 백킹 레이어 —
+           박스 자체가 항상 그 위를 덮고 있어서 평소엔 안 보이고 눌렸을 때만 틈을 채움 */
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
         transition: box-shadow 0.25s ease, transform 0.25s ease;
       }
 
       .site-nav-box:hover {
-        box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.18);
+        box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
         transform: translateY(-2px);
       }
 
       /* 클릭 시 살짝 눌리는 상하 피드백 */
       .site-nav-box:active {
-        box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.18);
+        box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
         transform: translateY(2px);
       }
 
       .site-brand{
-        display:flex; align-items:center; gap: 12px; min-width:0;
+        display:flex; align-items:center; gap: 14px; min-width:0;
         text-decoration:none; color:#fff;
       }
       .brand-logo{
-        height: clamp(28px, 3.7vw, 30px); width:auto; object-fit:contain; border-radius:0;
+        height: 34px; width:auto; object-fit:contain; border-radius:0;
         filter: invert(1) brightness(1.05) contrast(1.05);
       }
       .brand-title{
-        font-weight:500; font-size: clamp(22px, 3.5vw, 25px);
-        letter-spacing:0.01em; line-height:1; white-space:nowrap; color:#fff;
+        font-weight:500; font-size: 25px;
+        letter-spacing:0.01em; word-spacing:-2px; line-height:1; white-space:nowrap; color:#fff;
         overflow:hidden; text-overflow:ellipsis;
         position: relative; top: 2px;
       }
 
-      #search-form{
-        position: relative; display:flex; align-items:center; flex:0 0 auto;
-        width: min(11rem, 46vw); margin-top: 0;
+      #menu-wrap{ flex: 0 0 auto; }
+
+      #menu-toggle{
+        display:flex; align-items:center; justify-content:center;
+        width: 2.75rem; height: 2.75rem;
+        border-radius: 9999px; border: 0; cursor:pointer;
+        background: transparent; color:#fff;
+        transition: opacity .2s;
       }
-      #search-input{
-        width:100%;
-        font-size: clamp(14px, 3.6vw, 15px); line-height:1.1;
-        padding: 0.6rem 2.0rem 0.4rem 0.9rem;
-        border-radius: 9999px; border: 0;
-        background: rgba(255,255,255,0.92); color:#111;
-        outline: none; transition: box-shadow .2s, background .2s;
+      #menu-toggle:hover{ opacity: 0.75; }
+      #menu-toggle svg{ width:1.7rem; height:1.7rem; stroke-width: 2.6; }
+
+      /* 옆은 nav-box 오른쪽 끝에 정확히 맞추고, 윗부분만 nav<>카드 사이 여백에 살짝 걸치게 */
+      #menu-panel{
+        position:absolute; top: calc(100% + 8px); right: 0;
+        min-width: 13rem;
+        background: #fff; color:#111;
+        border-radius: 16px;
+        box-shadow: 0 20px 45px -12px rgba(0,0,0,0.35), 0 4px 14px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        opacity:0; visibility:hidden; transform: translateY(-14px);
+        transition: opacity .22s ease,
+                    transform .32s cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility .32s;
+        z-index: 60;
       }
-      #search-input::placeholder{ color: rgba(0,0,0,.5); }
-      #search-form button{
-        position:absolute; right: .6rem; top:50%; transform: translateY(-50%);
-        background:none; border:none; color:#111; cursor:pointer;
+      #menu-wrap.is-open #menu-panel{
+        opacity:1; visibility:visible; transform: translateY(0);
       }
-      #search-form svg{ width:1rem; height:1rem; }
-      #search-input:focus{ box-shadow: 0 0 0 0px rgba(255,255,255,.6), 0 0 0 5px rgba(0,0,0,.2) inset; }
+
+      /* 패널 안 항목들이 순차적으로 떠오르는 캐스케이드 — 닫힐 땐 지연 없이 한번에 */
+      .menu-panel-item{
+        opacity:0; transform: translateY(-5px);
+        transition: opacity .2s ease, transform .2s ease;
+      }
+      #menu-wrap.is-open .menu-panel-item{ opacity:1; transform: translateY(0); }
+      #menu-wrap.is-open .menu-panel-item:nth-child(1){ transition-delay: 0.02s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(2){ transition-delay: 0.05s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(3){ transition-delay: 0.08s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(4){ transition-delay: 0.11s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(5){ transition-delay: 0.14s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(6){ transition-delay: 0.17s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(7){ transition-delay: 0.20s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(8){ transition-delay: 0.23s; }
+      #menu-wrap.is-open .menu-panel-item:nth-child(9){ transition-delay: 0.26s; }
+
+      .menu-link{
+        display:block; padding: 0.55rem 0.8rem; border-radius: 9px;
+        font-weight:600; font-size:0.95rem; color:#111; text-decoration:none;
+        transition: background .15s ease, transform .15s ease;
+      }
+      .menu-link:hover{ background: rgba(0,0,0,0.06); transform: translateX(2px); }
+
+      .menu-section-label{
+        padding: 0.7rem 0.8rem 0.3rem; margin-top: 0.2rem;
+        font-size: 0.72rem; font-weight:700; letter-spacing:0.06em;
+        text-transform:uppercase; color: rgba(0,0,0,0.4);
+        border-top: 1px solid rgba(0,0,0,0.08);
+      }
+      .menu-link.menu-sub{ font-weight:500; font-size:0.9rem; color:#333; }
 
       @media (max-width: 640px){
         .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
-        #search-form{ width: min(10rem, 52vw); }
-      }
-      @media (max-width: 400px){
-        .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
-        #search-form{ width: min(9.2rem, 56vw); }
+
+        #menu-panel{ min-width: 14rem; padding: 0.6rem; }
+        .menu-link{ padding: 0.85rem 1rem; font-size: 1.02rem; }
+        .menu-section-label{ padding: 0.85rem 1rem 0.35rem; }
+        .menu-link.menu-sub{ font-size: 0.98rem; }
       }
     </style>
   </head>
@@ -134,15 +191,23 @@ const showFooter = Astro.url.pathname !== '/';
               <span class="brand-title">Han Park</span>
             </a>
 
-            <form id="search-form">
-              <input type="search" placeholder="Search" id="search-input" />
-              <button type="submit" aria-label="검색">
+            <div id="menu-wrap">
+              <button id="menu-toggle" type="button" aria-label="메뉴" aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <circle cx="11" cy="11" r="7" stroke-width="2" />
-                  <line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="4" y1="5.5" x2="20" y2="5.5" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="4" y1="12" x2="20" y2="12" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="4" y1="18.5" x2="20" y2="18.5" stroke-width="2" stroke-linecap="round"/>
                 </svg>
               </button>
-            </form>
+              <div id="menu-panel">
+                <a href="/profile" class="menu-link menu-panel-item">Profile</a>
+                <div class="menu-section-label menu-panel-item">Sort</div>
+                <a href="/posts?cat=all" class="menu-link menu-sub menu-panel-item">All Projects</a>
+                {menuCategories.map(c => (
+                  <a href={`/posts?cat=${encodeURIComponent(c)}`} class="menu-link menu-sub menu-panel-item">{c}</a>
+                ))}
+              </div>
+            </div>
           </div>
         </nav>
       )}
@@ -498,6 +563,33 @@ const showFooter = Astro.url.pathname !== '/';
         });
       }
 
+      function setupHamburgerMenu() {
+        const wrap = document.getElementById('menu-wrap');
+        const toggle = document.getElementById('menu-toggle');
+        if (!wrap || !toggle || toggle.dataset.menuInit) return;
+        toggle.dataset.menuInit = 'true';
+
+        function close() {
+          wrap.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+        function open() {
+          wrap.classList.add('is-open');
+          toggle.setAttribute('aria-expanded', 'true');
+        }
+
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          wrap.classList.contains('is-open') ? close() : open();
+        });
+        document.addEventListener('click', (e) => {
+          if (wrap.classList.contains('is-open') && !wrap.contains(e.target)) close();
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') close();
+        });
+      }
+
       function setupAll() {
         setupVideoControls();
         setupAntiCopy();
@@ -505,6 +597,7 @@ const showFooter = Astro.url.pathname !== '/';
         setupParallaxOnlyCards();
         setupScrollParallax();
         setupTouchCardFeedback();
+        setupHamburgerMenu();
       }
 
       document.addEventListener('astro:page-load', setupAll);

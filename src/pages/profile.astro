@@ -2,28 +2,47 @@
 import Layout from '../layouts/Layout.astro';
 
 const experience = [
+  { year: '2027', org: 'MUGUHADA', role: 'Head of Design / Co-Founder', url: 'https://www.muguhada.com' },
   { year: '2026', org: 'Han Design', role: 'Graphic Designer' },
-  { year: '2023–2025', org: 'Kijibae', orgSuffix: 'Gel Nail Strips', role: 'Graphic Designer' },
-  { year: '2023–2025', org: 'BAZZAAL', orgSuffix: 'Marketing Agency', role: 'Graphic Designer' },
+  { year: '2023–2025', org: 'Kijibae', orgSuffix: 'DIY Nails', role: 'Graphic Designer', url: 'https://www.shopkijibae.com' },
+  { year: '2023–2025', org: 'BAZZAAL', orgSuffix: 'Marketing Agency', role: 'Graphic Designer', url: 'https://www.bazzaal.com/' },
   { year: '2022', org: 'Daeki & Jun', orgSuffix: 'Design Studio', role: 'Assistant Designer' },
   { year: '2020–2022', org: 'Content Creator', role: '' },
   { year: '2018–2020', org: 'ROKA 1st Artillery Brigade', role: 'Assistant Publicist' },
-  { year: '2018', org: 'YBM', role: 'Videographer' },
-  { year: '2018', org: 'UNIVTOMORROW', role: 'Content Creator' },
+  { year: '2018', org: 'YBM', role: 'Videographer', url: 'https://www.ybmedu.com/e4u' },
+  { year: '2018', org: 'UNIVTOMORROW', role: 'Content Creator', url: 'https://www.univ20.com/' },
   { year: '2017', org: 'RocketView', role: 'Marketing Strategy and Design' },
 ];
 
+const education = [
+  {
+    year: '2014–2022',
+    org: 'Seoul National University of Science and Technology',
+    role: "Bachelor's degree, Design",
+    dateRange: 'Mar 2014 – Feb 2022',
+    grade: '3.54 / 4.5',
+    activities: [
+      '2014–2018 · Founder / Leader of LGBTQ+ Rights Club "큰따옴표"',
+      '2014–2017 · Member of Visual Design Academia "Inacoms"',
+    ],
+    url: 'https://en.seoultech.ac.kr/',
+  },
+  { org: 'Cathays Highschool', role: 'Wales, United Kingdom', url: 'https://www.cathayshigh.co.uk/' },
+  { org: 'Pinawa Elementary School', role: 'Manitoba, Canada' },
+];
+
 const awards = [
-  { year: '2024', org: 'Graphis International Awards', role: 'Gold / Silver' },
+  { year: '2024', org: 'Graphis International Awards', role: 'Gold / Silver', url: 'https://graphis.com/competition/design-awards-2024/winners' },
   {
     year: '2023',
     org: 'Red Dot Design Awards',
-    role: 'Winner / Brand & Communication',
+    role: 'Winner — Brand & Communication',
     featured: true,
+    url: 'https://www.red-dot.org/project/2022-gangwon-design-festa-gdf-66101',
   },
-  { year: '2023', org: 'The Society of Typographic Arts', role: 'STA 100' },
-  { year: '2015', org: 'The Korean Society of Media & Arts', role: 'Honorable Mention' },
-  { year: '2014', org: 'Seoul National Univ. of Sci & Tech', role: '2nd Prize / Character Design' },
+  { year: '2023', org: 'The Society of Typographic Arts', role: 'STA 100', url: 'https://typographicarts.org/' },
+  { year: '2015', org: 'The Korean Society of Media & Arts', role: 'Honorable Mention', url: 'https://kos-ma.org/' },
+  { year: '2014', org: 'Seoul National Univ. of Sci & Tech', role: '2nd Prize — Character Design', url: 'https://www.seoultech.ac.kr/service/board/rec/?do=commonview&searchtext=%EC%BA%90%EB%A6%AD%ED%84%B0&searchtype=1&nowpage=2&bnum=6302&bidx=183625&qidx=6302&cate=10&allboard=false&nowpage=2' },
 ];
 
 // 같은 연도가 연속으로 이어지면 하나의 연도 그룹으로 묶기
@@ -41,6 +60,14 @@ function groupByYear(list) {
 }
 
 // "2023–2025" 형태의 범위를 [2025, 2024, 2023]처럼 연도별 한 줄씩으로 풀어서 표시
+// 긴 기관명이 모바일에서 못생기게 줄바꿈되는 걸 막기 위한 지정 줄바꿈 지점 (PC에서는 한 줄 유지)
+const orgLineBreaks = {
+  'The Society of Typographic Arts': ['The Society of', 'Typographic Arts'],
+  'The Korean Society of Media & Arts': ['The Korean Society of', 'Media & Arts'],
+  'Seoul National Univ. of Sci & Tech': ['Seoul National Univ.', 'of Sci & Tech'],
+  'Seoul National University of Science and Technology': ['Seoul National University', 'of Science and Technology'],
+};
+
 function yearLines(year) {
   const [a, b] = year.split('–').map(s => s.trim());
   if (!b) return [a];
@@ -55,34 +82,93 @@ const experienceGroups = groupByYear(experience);
 const awardGroups = groupByYear(awards);
 ---
 
-<Layout title="Profile">
-  <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
-    <div id="category-nav" class="flex flex-wrap gap-x-4 gap-y-2 mb-8 px-3 sm:px-6 justify-start items-center">
+<Layout title="Han Park | Profile">
+  <div class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen">
+    <!-- lg+: 버튼을 플로우에서 빼서 왼쪽 여백에 절대 위치시키고, 프로필 카드와 같은 높이(lg:top-4 = 위 wrapper의 lg:pt-4와 동일 기준점)에 맞춤 -->
+    <div id="category-nav" class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 lg:mb-0 lg:px-0 lg:absolute lg:top-4 lg:left-6 justify-start items-center">
       <button
         onclick="window.history.back()"
         class="back-btn mr-6"
       >
-        Return
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+        Back
       </button>
     </div>
 
     <!-- 프로필 카드 -->
-    <div class="profile-card fade-section max-w-xl mx-auto my-8 bg-white rounded-[16px] overflow-hidden">
+    <div class="profile-card fade-section max-w-xl mx-auto mb-4 bg-white rounded-[16px] overflow-hidden">
       <div class="profile-card-content text-center">
         <img src="/images/website/logo.svg" alt="Han Park" class="profile-logo-mark" />
         <div class="profile-name">Han Park<br />박한결</div>
         <div class="profile-title">Graphic Designer</div>
+        <div class="profile-location">Based in Seoul, South Korea (GMT+9)</div>
 
         <div class="profile-divider"></div>
 
         <blockquote class="profile-quote">
-          Global-minded strategist with educational backgrounds from Canada, the UK, and South Korea, specialized in marketing and creative direction.
+          I build demand for brands.<br />Creative direction, performance marketing, and DTC e-commerce, with a focus on growing <span class="nowrap">K-beauty</span> in North America.
         </blockquote>
       </div>
     </div>
 
+    <!-- 연락처 -->
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
+      <div class="cv-heading">Contact</div>
+      <div class="contact-list">
+        <a href="https://www.linkedin.com/in/hanparkdesign/" target="_blank" rel="noopener noreferrer" class="contact-row">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="8.3" cy="8.3" r="0.7" fill="currentColor" stroke="none"/><path d="M8.3 10.8V17"/><path d="M12.5 17v-3.8"/><path d="M12.5 13.2c0-1.3 1-2.2 2.2-2.2s2.3.9 2.3 2.2V17"/></svg>
+          </span>
+          <span class="contact-text">hanparkdesign</span>
+          <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
+        <a href="mailto:hanparkdesign@gmail.com" class="contact-row" id="email-contact" data-email="hanparkdesign@gmail.com">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          </span>
+          <span class="contact-text" id="email-contact-text">hanparkdesign@gmail.com</span>
+        </a>
+        {/* 인스타그램은 화면에서 숨김 — 나중에 다시 켤 수 있게 마크업은 남겨둠
+        <a href="https://www.instagram.com/hanparkdesign/" target="_blank" rel="noopener noreferrer" class="contact-row">
+          <span class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <span class="contact-text">@hanparkdesign</span>
+          <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
+        */}
+      </div>
+    </div>
+
+    <!-- Skills & Tools -->
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
+      <div class="cv-heading">Skills & Tools</div>
+      <div class="skills-list">
+        <div class="skills-row">
+          <div class="skills-category">Visual & Print</div>
+          <div class="skills-tools">Adobe Photoshop, Illustrator, InDesign</div>
+        </div>
+        <div class="skills-row">
+          <div class="skills-category">Motion & Video</div>
+          <div class="skills-tools">Adobe After Effects, Premiere Pro</div>
+        </div>
+        <div class="skills-row">
+          <div class="skills-category">Collaboration</div>
+          <div class="skills-tools">Figma, Canva</div>
+        </div>
+        <div class="skills-row">
+          <div class="skills-category">E-commerce & Performance Marketing</div>
+          <div class="skills-tools">Shopify, Amazon, TikTok Shop, Meta Ads, Mailchimp</div>
+        </div>
+        <div class="skills-row">
+          <div class="skills-category">Web</div>
+          <div class="skills-tools">Visual Studio Code, AI Assistants</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Experience -->
-    <div class="max-w-xl mx-auto mb-8 cv-section fade-section">
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
       <div class="cv-heading">Experience</div>
       <div class="cv-list">
         {experienceGroups.map(group => (
@@ -92,18 +178,34 @@ const awardGroups = groupByYear(awards);
             </div>
             <div class="cv-entries">
               {group.items.map(item => (
-                <div class="cv-entry">
-                  <div class="cv-thumb">
-                    {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
-                  </div>
-                  <div class="cv-text">
-                    <div class="cv-org">
-                      {item.org}
-                      {item.orgSuffix && <span class="cv-org-suffix">{item.orgSuffix}</span>}
+                item.url ? (
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" class="cv-entry cv-entry-link">
+                    <div class="cv-thumb">
+                      {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
                     </div>
-                    {item.role && <div class="cv-role">{item.role}</div>}
+                    <div class="cv-text">
+                      <div class="cv-org">
+                        {item.org}
+                        {item.orgSuffix && <span class="cv-org-suffix">{item.orgSuffix}</span>}
+                        <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+                      </div>
+                      {item.role && <div class="cv-role">{item.role}</div>}
+                    </div>
+                  </a>
+                ) : (
+                  <div class="cv-entry">
+                    <div class="cv-thumb">
+                      {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+                    </div>
+                    <div class="cv-text">
+                      <div class="cv-org">
+                        {item.org}
+                        {item.orgSuffix && <span class="cv-org-suffix">{item.orgSuffix}</span>}
+                      </div>
+                      {item.role && <div class="cv-role">{item.role}</div>}
+                    </div>
                   </div>
-                </div>
+                )
               ))}
             </div>
           </div>
@@ -112,7 +214,7 @@ const awardGroups = groupByYear(awards);
     </div>
 
     <!-- Awards -->
-    <div class="max-w-xl mx-auto mb-10 cv-section fade-section">
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
       <div class="cv-heading">Awards</div>
       <div class="cv-list">
         {awardGroups.map(group => (
@@ -123,15 +225,32 @@ const awardGroups = groupByYear(awards);
             <div class="cv-entries">
               {group.items.map(item => (
                 <div class="cv-entry-wrap">
-                  <div class="cv-entry">
-                    <div class="cv-thumb">
-                      {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+                  {item.url ? (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" class="cv-entry cv-entry-link">
+                      <div class="cv-thumb">
+                        {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+                      </div>
+                      <div class="cv-text">
+                        <div class="cv-org">
+                          {orgLineBreaks[item.org] ? (
+                            <>{orgLineBreaks[item.org][0]}<br class="mobile-break" />{orgLineBreaks[item.org][1]}</>
+                          ) : item.org}
+                          <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+                        </div>
+                        {item.role && <div class="cv-role">{item.role}</div>}
+                      </div>
+                    </a>
+                  ) : (
+                    <div class="cv-entry">
+                      <div class="cv-thumb">
+                        {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+                      </div>
+                      <div class="cv-text">
+                        <div class="cv-org">{item.org}</div>
+                        {item.role && <div class="cv-role">{item.role}</div>}
+                      </div>
                     </div>
-                    <div class="cv-text">
-                      <div class="cv-org">{item.org}</div>
-                      {item.role && <div class="cv-role">{item.role}</div>}
-                    </div>
-                  </div>
+                  )}
                   {item.featured && (
                     <div class="cv-feature">
                       {item.description && <p class="cv-feature-desc">{item.description}</p>}
@@ -150,22 +269,79 @@ const awardGroups = groupByYear(awards);
       </div>
     </div>
 
-    <!-- 연락처 -->
-    <div class="max-w-xl mx-auto mb-16 cv-section fade-section">
-      <div class="cv-heading">Contact</div>
-      <div class="contact-list">
-        <a href="mailto:hanparkdesign@gmail.com" class="contact-row" id="email-contact" data-email="hanparkdesign@gmail.com">
-          <span class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-          </span>
-          <span class="contact-text" id="email-contact-text">hanparkdesign@gmail.com</span>
-        </a>
-        <a href="https://www.instagram.com/hanparkdesign/" target="_blank" rel="noopener noreferrer" class="contact-row">
-          <span class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg>
-          </span>
-          <span class="contact-text">@hanparkdesign</span>
-        </a>
+    <!-- Education (연도 칼럼 없이 — 학교명/학위만 나열) -->
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
+      <div class="cv-heading">Education</div>
+      <div class="cv-list">
+        {education.map(item => (
+          <div class="cv-row edu-row-flat">
+            <div class="cv-entry-wrap">
+              {item.url ? (
+                <a href={item.url} target="_blank" rel="noopener noreferrer" class="cv-entry cv-entry-link">
+                  <div class="cv-thumb">
+                    {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+                  </div>
+                  <div class="cv-text">
+                    <div class="cv-org">
+                      {orgLineBreaks[item.org] ? (
+                        <>{orgLineBreaks[item.org][0]}<br class="mobile-break" />{orgLineBreaks[item.org][1]}</>
+                      ) : item.org}
+                      <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+                    </div>
+                    {item.role && <div class="cv-role">{item.role}</div>}
+                  </div>
+                </a>
+              ) : (
+                <div class="cv-entry">
+                  <div class="cv-thumb">
+                    {item.thumb ? <img src={item.thumb} alt="" /> : <svg class="cv-thumb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+                  </div>
+                  <div class="cv-text">
+                    <div class="cv-org">{item.org}</div>
+                    {item.role && <div class="cv-role">{item.role}</div>}
+                  </div>
+                </div>
+              )}
+              {/* 연도·날짜/학점/활동 상세는 요청에 따라 화면에는 숨김 — 데이터는 그대로 두고 나중에 다시 켤 수 있게 함
+              {(item.dateRange || item.grade || item.activities) && (
+                <div class="cv-feature edu-feature">
+                  {item.dateRange && <p class="edu-detail-line">{item.dateRange}</p>}
+                  {item.grade && <p class="edu-detail-line">Grade: {item.grade}</p>}
+                  {item.activities && (
+                    <div class="edu-activities">
+                      <div class="edu-activities-label">Activities and societies</div>
+                      <ul class="edu-activities-list">
+                        {item.activities.map(a => <li>{a}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+              */}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Languages -->
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
+      <div class="cv-heading">Languages</div>
+      <div class="lang-list">
+        <div class="lang-row">
+          <div class="lang-name">English</div>
+          <div class="lang-detail">
+            <div class="lang-level">Professional Working Proficiency</div>
+            {/* 취득일(Jan 2022)은 화면엔 숨김 — 나중에 다시 켤 수 있게 여기 남겨둠 */}
+            <div class="lang-score">TOEIC 955 · OPIc IH</div>
+          </div>
+        </div>
+        <div class="lang-row">
+          <div class="lang-name">Korean</div>
+          <div class="lang-detail">
+            <div class="lang-level">Native</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -184,51 +360,67 @@ const awardGroups = groupByYear(awards);
       fadeSections.forEach((section) => section.classList.add('is-visible'));
     }
 
+    // navigator.clipboard는 HTTPS(보안 컨텍스트)에서만 동작하고 구형 모바일
+    // 브라우저는 아예 없을 수도 있음 — 그런 경우 임시 textarea + execCommand로 폴백
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      return new Promise((resolve, reject) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '0';
+        textarea.style.left = '0';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+          const ok = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          ok ? resolve() : reject(new Error('execCommand copy failed'));
+        } catch (err) {
+          document.body.removeChild(textarea);
+          reject(err);
+        }
+      });
+    }
+
     const emailLink = document.getElementById('email-contact');
     const emailText = document.getElementById('email-contact-text');
     if (emailLink && emailText) {
       const original = emailText.textContent;
-      emailLink.addEventListener('click', async () => {
+      emailLink.addEventListener('click', async (e) => {
+        // 메일 앱으로 튕겨서 홈페이지를 이탈시키지 않도록 — 복사 피드백만 줌
+        e.preventDefault();
         try {
-          await navigator.clipboard.writeText(emailLink.dataset.email);
+          await copyToClipboard(emailLink.dataset.email);
           emailText.textContent = 'Copied!';
           setTimeout(() => { emailText.textContent = original; }, 1600);
         } catch (e) {
-          // 클립보드 API를 쓸 수 없으면 mailto 이동만 진행
+          // 복사조차 실패하면 최소한 이메일 주소가 선택된 채로 남게 됨 (기본 select 동작)
         }
       });
     }
   </script>
 
   <style>
-    /* 뒤로가기 버튼 */
+    /* 뒤로가기 버튼 — 고스트 스타일, 박스 없이 아이콘+텍스트만, 호버 시 화살표가 슬라이드 */
     .back-btn {
       flex-shrink: 0;
-      padding: .55rem 1.6rem .25rem;
-      border-radius: 6px;
-      background: #fff;
-      color: #111;
-      font-weight: 700;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.3rem 0.1rem;
+      background: transparent; border: none;
+      color: #111; font-weight: 600; font-size: 0.95rem;
       white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      border: none;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
-      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      transition: opacity 0.15s ease;
     }
-    /* 호버 시 살짝 뜨는 피드백 */
-    .back-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1);
-    }
-    /* 클릭 시 살짝 눌리는 피드백 */
-    .back-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
-    }
+    .back-btn svg { width: 1.05rem; height: 1.05rem; transition: transform 0.15s ease; }
+    .back-btn:hover { opacity: 0.55; }
+    .back-btn:hover svg { transform: translateX(-3px); }
+    .back-btn:active svg { transform: translateX(-1px); }
 
     body, html {
       background: #ebe9e5 !important;
@@ -259,13 +451,13 @@ const awardGroups = groupByYear(awards);
       width: 78px;
       height: 78px;
       margin: 0 auto;
-      padding-bottom: 32px;
+      padding-bottom: 40px;
       box-sizing: content-box;
       display: block;
     }
 
     .profile-card-content {
-      padding: 2rem 2rem 2rem;
+      padding: 2.5rem 2rem 2.5rem;
     }
 
     .profile-name {
@@ -277,7 +469,7 @@ const awardGroups = groupByYear(awards);
     }
 
     .profile-title {
-      margin-top: 6px;
+      margin-top: 14px;
       font-size: 1rem;
       font-weight: 600;
       letter-spacing: -0.01em;
@@ -293,11 +485,22 @@ const awardGroups = groupByYear(awards);
 
     .profile-quote {
       margin: 20px auto 0;
-      max-width: 26rem;
+      max-width: 22rem;
       font-size: 1.05rem;
       letter-spacing: -0.01em;
       line-height: 1.7;
       color: #555;
+    }
+    .profile-quote .nowrap {
+      white-space: nowrap;
+    }
+
+    .profile-location {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      letter-spacing: -0.01em;
+      color: #9a9a9a;
+      font-variant-numeric: tabular-nums;
     }
 
     @media (max-width: 640px) {
@@ -306,10 +509,10 @@ const awardGroups = groupByYear(awards);
       }
       /* 위(패딩) = 로고 아래(패딩) 동일하게 유지 */
       .profile-card-content {
-        padding: 1.5rem 1.25rem 1.5rem;
+        padding: 1.75rem 1.25rem 1.75rem;
       }
       .profile-logo-mark {
-        padding-bottom: 24px;
+        padding-bottom: 28px;
       }
     }
 
@@ -347,6 +550,10 @@ const awardGroups = groupByYear(awards);
       border-bottom: none;
       padding-bottom: 22px;
     }
+    /* Education처럼 연도 칼럼이 필요 없는 목록은 grid를 풀어서 단일 컬럼으로 */
+    .edu-row-flat {
+      display: block;
+    }
 
     /* 연도 범위를 하나로 압축하지 않고 연도별 한 줄씩(2025 / 2024 / 2023) 나열 */
     .cv-year {
@@ -374,6 +581,36 @@ const awardGroups = groupByYear(awards);
       align-items: center;
       gap: 12px;
       min-width: 0;
+    }
+    /* 웹사이트 링크가 있는 경력은 통째로 클릭 가능 — 새 창으로 열림 */
+    .cv-entry-link {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+    /* 새 창으로 열린다는 걸 클릭 전에 알 수 있도록 — 외부 링크 화살표 */
+    .cv-external-icon {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-left: 4px;
+      vertical-align: 2px;
+      color: #b0b0b0;
+      flex-shrink: 0;
+    }
+    /* 긴 기관명이 모바일에서 못생기게 줄바꿈되는 걸 막기 위한 지정 줄바꿈 지점 —
+       PC에서는 숨겨서 한 줄로 유지 */
+    .mobile-break { display: none; }
+    @media (max-width: 640px) {
+      .mobile-break { display: block; content: ""; }
+      /* 지정 줄바꿈으로 2줄이 될 때 행간을 좀 더 촘촘하게 */
+      .cv-org { line-height: 1.2; }
+    }
+    @media (hover: hover) {
+      .cv-entry-link:hover .cv-org {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
     }
 
     /* 썸네일 높이를 옆 텍스트 2줄(org + role) 높이에 맞춤 */
@@ -422,6 +659,89 @@ const awardGroups = groupByYear(awards);
       color: #8a8a8a;
       line-height: 1.35;
       margin-top: 2px;
+    }
+
+    /* ------------ Languages ------------ */
+    .lang-list { display: flex; flex-direction: column; }
+    .lang-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      column-gap: 20px;
+      align-items: baseline;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    }
+    .lang-row:last-child { border-bottom: none; padding-bottom: 22px; }
+    .lang-name {
+      font-weight: 700;
+      font-size: 1.08rem;
+      letter-spacing: -0.01em;
+      color: #111;
+    }
+    .lang-detail { text-align: left; min-width: 0; }
+    .lang-level {
+      font-size: 1.02rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: #555;
+    }
+    .lang-score {
+      font-size: 0.8rem;
+      color: #b0b0b0;
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ------------ Skills & Tools ------------ */
+    .skills-list { display: flex; flex-direction: column; }
+    .skills-row {
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    }
+    .skills-row:last-child { border-bottom: none; padding-bottom: 22px; }
+    .skills-category {
+      font-weight: 700;
+      font-size: 1.08rem;
+      letter-spacing: -0.01em;
+      color: #111;
+      line-height: 1.35;
+    }
+    .skills-tools {
+      font-size: 0.92rem;
+      letter-spacing: -0.01em;
+      color: #666;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    /* ------------ Education ------------
+       org/role는 Experience와 동일한 cv-org/cv-role을 재사용.
+       날짜/학점/활동 상세는 현재 화면에는 숨겨두었지만(마크업 주석 처리),
+       나중에 다시 켤 때 쓰도록 스타일은 남겨둠 */
+    .edu-detail-line {
+      font-size: 0.85rem;
+      color: #8a8a8a;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .edu-activities { margin-top: 14px; }
+    .edu-activities-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #b0b0b0;
+      margin-bottom: 6px;
+    }
+    .edu-activities-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .edu-activities-list li {
+      font-size: 0.88rem;
+      color: #666;
+      line-height: 1.55;
     }
 
     /* Red Dot Design Awards의 설명 / 작업물 이미지 (별도 카드 없이 리스트 흐름 그대로) */
@@ -494,8 +814,8 @@ const awardGroups = groupByYear(awards);
       color: #6b6b6b;
     }
     .contact-icon svg {
-      width: 16px;
-      height: 16px;
+      width: 21px;
+      height: 21px;
     }
 
     .contact-text {

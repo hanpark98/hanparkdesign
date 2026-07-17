@@ -17,16 +17,20 @@ const isWide = frontmatter.format === 'wide';
 const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : null;
 ---
 
-<Layout title={frontmatter.title}>
-  <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
-    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4 px-3 sm:px-6 justify-start items-center">
-      <button onclick="window.history.back()" class="back-btn mr-6">Return</button>
+<Layout title={`Han Park | ${frontmatter.title}`}>
+  <div class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen">
+    <!-- lg+: 버튼을 플로우에서 빼서 왼쪽 여백에 절대 위치시키고, 타이틀 섹션과 같은 높이(lg:top-4 = 위 wrapper의 lg:pt-4와 동일 기준점)에 맞춤 -->
+    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 lg:mb-0 lg:px-0 lg:absolute lg:top-4 lg:left-6 justify-start items-center">
+      <button onclick="window.history.back()" class="back-btn mr-6">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+        Projects
+      </button>
     </div>
 
     <div class="px-3 sm:px-6">
       {isWide ?
       (
-        <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto mt-4">
+        <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto">
           <!-- 처음 두 섹션(헤더/본문)은 스크롤을 기다리지 않고, 로딩되듯 페이지 진입 시 바로 fade in -->
           <div class="bg-white p-6 sm:p-8 mb-4 card-shell load-fade">
             <div class="mb-2 flex flex-wrap items-center text-gray-400 text-[0.96rem] gap-y-1">
@@ -47,11 +51,6 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
           {introHtml && (
             <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
               <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
-              {frontmatter.tags && (
-                <div class="flex flex-wrap gap-2">
-                  {frontmatter.tags.map((tag) => <span class="text-[0.9rem] text-gray-400 italic leading-[1.0]">#{tag}</span>)}
-                </div>
-              )}
             </div>
           )}
 
@@ -69,7 +68,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
           </div>
         </article>
       ) : (
-        <article class="prose prose-lg max-w-3xl mx-auto mt-4">
+        <article class="prose prose-lg max-w-3xl mx-auto">
           <div class="bg-white px-5 py-5 mb-7 card-shell load-fade">
             <div class="mb-1 flex gap-3 items-center text-gray-400 text-[0.96rem]">
               <span>{frontmatter.date && (new Date(frontmatter.date)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
@@ -119,9 +118,20 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     @media (prefers-reduced-motion: reduce) {
       .load-fade { opacity: 1; transform: none; transition: none; }
     }
-    .back-btn { flex-shrink: 0; padding: .55rem 1.6rem .25rem; border-radius: 6px; background: #fff; color: #111; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05); transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease; }
-    .back-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1); }
-    .back-btn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05); }
+    /* 고스트 스타일 — 박스 없이 아이콘+텍스트만, 호버 시 화살표가 슬라이드 */
+    .back-btn {
+      flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.3rem 0.1rem;
+      background: transparent; border: none;
+      color: #111; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .back-btn svg { width: 1.05rem; height: 1.05rem; transition: transform 0.15s ease; }
+    .back-btn:hover { opacity: 0.55; }
+    .back-btn:hover svg { transform: translateX(-3px); }
+    .back-btn:active svg { transform: translateX(-1px); }
     html, body { background: #ebe9e5; }
 
     /* --- 캐러셀 & 마키 마우스 드래그 커서 및 충돌 방지 CSS --- */

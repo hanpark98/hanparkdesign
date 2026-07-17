@@ -3,8 +3,7 @@ title: "Kijibae"
 format: wide
 description: "Semi-Cured Gel Nail Strips Branding"
 image: "/images/posts/260326 Kijibae/kjb_thumb.webp"
-category: ["Branding", "Motion Graphics", "Product"]
-tags: ["BI", "graphic design", "photography", "Print"]
+category: ["Branding", "Motion & Content", "E-commerce"]
 date: "2024-07-07"
 intro:
   ### Introduction

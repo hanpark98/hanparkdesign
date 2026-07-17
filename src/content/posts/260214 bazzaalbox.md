@@ -3,8 +3,7 @@ title: "Bazzaal Box"
 format: wide
 description: "The First Beauty Box Curated by Creators"
 image: "/images/posts/260214 bazzaalbox/thumb.webp"
-category: ["Package", "Branding", "Print"]
-tags: ["k-beauty", "skincare", "cosmetics", "package design", "product design", "Poster"]
+category: ["Branding", "Print & Illustration", "E-commerce"]
 date: "2023-02-01"
 intro: |
   ### Design Background

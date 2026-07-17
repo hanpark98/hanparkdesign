@@ -21,45 +21,24 @@ const posts = allPosts
     return !isDraft && !isFuture;
   })
   .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0));
-
-// 카테고리 정렬
-const categoryOrder = ['버킷리스트', '에세이', '영화', '(Null)'];
-const raw = [...new Set(posts.flatMap(p => Array.isArray(p.category) ? p.category : (p.category ? [p.category] : ['기타'])))];
-const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.filter(c => !categoryOrder.includes(c))];
 ---
 
-<Layout title="Blog">
-  <div class="pt-[24px] bg-[#ebe9e5] min-h-screen">
-
-    <!-- 카테고리 Navigation -->
-<div id="category-nav" class="flex items-center gap-0 px-3 sm:px-6 mb-0">
-  <a href="/profile" class="profile-btn mr-6" data-category="profile">Profile</a>
-
-  <div class="relative flex-1 sm:hidden">
-    <select id="cat-select" class="w-full bg-white border border-gray-200 rounded-3xl px-4 pt-[10px] pb-[6px] font-bold text-[#111] appearance-none cursor-pointer outline-none">
-      <option value="all">Every Projects</option>
-      {allCategories.map(c => (
-        <option value={c}>{c}</option>
-      ))}
-    </select>
-    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </div>
-
-  <div id="cat-track"
-       class="hidden sm:flex flex-nowrap overflow-x-auto gap-2 min-w-0 flex-1 -mr-6 pr-6 py-3 -my-3">
-    <button class="category-btn active" data-category="all">Every Projects</button>
-    {allCategories.map(c => (
-      <button class="category-btn" data-category={c}>{c}</button>
-    ))}
-  </div>
-</div>
+<Layout title="Han Park | Projects">
+  <div class="bg-[#ebe9e5] min-h-screen">
 
     <!-- 포스트 목록 -->
-    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-3 sm:px-6 py-6">
+    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-3 sm:px-6 pt-3 sm:pt-6 pb-6">
+      <!-- 항상 맨 앞에 고정되는 프로필 카드 — 카테고리 필터와 무관하게 항상 보임 -->
+      <a href="/profile" class="group post-card tilt-card">
+        <div class="w-full aspect-square overflow-hidden profile-grid-thumb">
+          <img src="/images/website/profile-thumb.webp" alt="Han Park"
+               class="tilt-card-thumb w-full h-full object-cover"/>
+        </div>
+        <div class="post-card-content">
+          <h3 class="post-card-title">Profile</h3>
+          <p class="post-card-desc">Han Park — Graphic Designer</p>
+        </div>
+      </a>
       {posts.map(p => (
         <a href={`/posts/${p.slug}`} class="group post-card tilt-card"
            data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}>
@@ -77,50 +56,25 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
     </div>
   </div>
 
-  <!-- JS : 휠→가로 스크롤 & 필터 -->
+  <!-- JS : 필터 (카테고리 선택은 nav의 햄버거 메뉴가 담당 — ?cat= 쿼리로 진입) -->
 <script>
-  const btns   = document.querySelectorAll('.category-btn');
-  const select = document.getElementById('cat-select');
   const cards  = document.querySelectorAll('.post-card');
-  const track  = document.getElementById('cat-track');
 
   // 공통 필터링 함수
   function filterPosts(cat) {
     localStorage.setItem('lastCategory', cat);
-    
-    // 카드 표시/숨김 처리
+
+    // 카드 표시/숨김 처리 (프로필 카드처럼 data-category가 없는 카드는 필터와 무관하게 항상 표시)
     cards.forEach(c => {
+      if (!c.dataset.category) return;
       const isMatch = cat === 'all' || c.dataset.category.split(',').includes(cat);
       c.style.display = isMatch ? 'block' : 'none';
     });
-
-    // 버튼 활성화 상태 동기화
-    btns.forEach(b => {
-      b.classList.toggle('active', b.dataset.category === cat);
-    });
-
-    // 드롭다운 값 동기화
-    if (select) {
-      select.value = cat;
-    }
   }
 
-  // 데스크톱 버튼 클릭 이벤트
-  btns.forEach(b => b.addEventListener('click', () => filterPosts(b.dataset.category)));
-
-  // 모바일 드롭다운 변경 이벤트 추가
-  select?.addEventListener('change', (e) => filterPosts(e.target.value));
-
-  // 기존 가로 스크롤 유지
-  track?.addEventListener('wheel', e => {
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      e.preventDefault();
-      track.scrollLeft += e.deltaY;
-    }
-  }, { passive:false });
-
-  // 페이지 로드 시 상태 복원
-  const last = localStorage.getItem('lastCategory') || 'all';
+  // 페이지 로드 시 상태 복원 — 햄버거 메뉴 등에서 ?cat= 로 들어온 경우 최우선 적용
+  const catParam = new URLSearchParams(location.search).get('cat');
+  const last = catParam || localStorage.getItem('lastCategory') || 'all';
   filterPosts(last);
 
   // 스크롤로 뷰포트에 들어오는 카드를 아래→위로 fade in — 나갔다 다시 들어올 때마다 매번 재생
@@ -138,73 +92,17 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
 </script>
 
   <style>
-    /* 프로필 버튼 */
-    .profile-btn {
-      flex-shrink: 0;
-      padding: .55rem 1.6rem .25rem;
-      border-radius: 6px;
-      background: #fff;
-      color: #111;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    /* 호버 시 살짝 뜨는 피드백 */
-    .profile-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1);
-    }
-    /* 클릭 시 살짝 눌리는 피드백 */
-    .profile-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
-    }
-
-    /* pill */
-    .category-btn {
-      flex-shrink: 0;
-      min-width: 100px;
-      max-width: 160px;
-      padding: .57rem 1.3rem .27rem;
-      border-radius: 9999px;
-      background: #fff;
-      color: #111;
-      font-weight: 700;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
-      transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    /* 클릭 시(active) 색상 변경 */
-.category-btn.active {
-  background: #747e89; /* 기존 #009695에서 수정 */
-  color: #fff;
-}
-
-    /* 호버 시 살짝 뜨는 피드백 */
-    .category-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(17, 17, 17, 0.1);
-    }
-
-    /* 마우스로 눌렀을 때 약간 눌린 듯한 피드백 */
-    .category-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 2px rgba(17, 17, 17, 0.05);
-    }
-
-    /* 마지막 pill이 잘리지 않도록 트랙에 더미 공간 추가 */
-    #cat-track::after {
-      content: '';
-      flex: 0 0 2.5rem;
-    }
 
     /* 카드 */
+    /* 모바일(1열)에서는 정사각 썸네일이 첫 화면을 다 차지해서 아래 작품들이 안 보이던 문제 —
+       세로로 납작하게 줄여서 다른 카드들도 바로 눈에 들어오게 함 */
+    @media (max-width: 640px) {
+      .post-card .profile-grid-thumb {
+        aspect-ratio: auto;
+        height: 84px;
+      }
+    }
+
     .post-card {
       position: relative;
       border-radius: 16px;
@@ -262,28 +160,6 @@ const allCategories = [...categoryOrder.filter(c => raw.includes(c)), ...raw.fil
     }
 
     body, html { background: #F8F8FF; }
-
-    /* 스크롤바 숨김 */
-    #cat-track { scrollbar-width: none; -ms-overflow-style: none; }
-    #cat-track::-webkit-scrollbar { display: none; }
-    #cat-track { scroll-behavior: smooth; }
-
-    /* ▼ 카테고리 바 오른쪽 fade-out */
-    #category-nav { position: relative; }
-    #category-nav::after {
-      content: '';
-      position: absolute; right: 0; top: 0;
-      width: 35px; height: 100%;
-      pointer-events: none;
-      background: linear-gradient(to right, rgba(248,248,255,0) 0%, #ebe9e5 100%);
-    }
-
-  /* 모바일에서는 네비게이션 우측 그라데이션 제거 */
-  @media (max-width: 640px) {
-    #category-nav::after {
-      display: none;
-    }
-  }
 
   </style>
 </Layout>

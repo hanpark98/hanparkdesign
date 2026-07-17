@@ -3,8 +3,7 @@ title: "Olive Young"
 format: wide
 description: "Winter Sale 2025"
 image: "/images/posts/260322 Oliveyoung/oliveyoung_thumb.webp"
-category: ["Marketing", "Print", "Illustration"]
-tags: ["Olive Young", "Graphic Design", "Skincare", "Social Media"]
+category: ["Marketing", "Print & Illustration"]
 date: "2025-11-30"
 intro: |
   ### Introduction

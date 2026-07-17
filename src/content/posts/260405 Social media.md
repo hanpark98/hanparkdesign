@@ -3,8 +3,7 @@ title: "Social Media Marketing"
 format: wide
 description: "Content Creation / Video & Static"
 image: "/images/posts/260405 Social media/social_thumb2.webp"
-category: ["Marketing", "Content Creation"]
-tags: ["Marketing", "Social Media", "Viral", "Instagram", "Youtube"]
+category: ["Marketing", "Motion & Content"]
 date: "2024-12-31"
 intro:
   ### Introduction

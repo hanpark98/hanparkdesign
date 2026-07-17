@@ -3,8 +3,7 @@ title: "Mediheal"
 format: wide
 description: "Email & SMS Marketing"
 image: "/images/posts/260331 Mediheal/thumb2.webp"
-category: ["Marketing", "Generative AI"]
-tags: ["graphic design", "E-mail Marketing", "Shopify"]
+category: ["Marketing", "E-commerce"]
 date: "2025-12-31"
 intro:
   ### Introduction

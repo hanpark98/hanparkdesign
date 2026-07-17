@@ -3,8 +3,7 @@ title: "VT Cosmetics"
 format: wide
 description: "Secret Society - Exclusive Beauty Event"
 image: "/images/posts/260215 VT cosmetics/thumb.webp"
-category: ["Event", "Package", "Illustration"]
-tags: ["k-beauty", "skincare", "cosmetics", "package design", "event identity"]
+category: ["Branding", "Events"]
 date: "2025-04-06"
 intro: |
   ### VT Cosmetics: Secret Society
