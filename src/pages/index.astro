@@ -143,6 +143,19 @@ import Layout from '../layouts/Layout.astro';
 
             panel.addEventListener('click', triggerMobileGo);
 
+            // 모바일 사파리/크롬은 뒤로가기 시 페이지를 bfcache에서 그대로 복원하는데,
+            // 이 경우 스크립트가 재실행되지 않아 mobileTriggered가 true로 굳어있던 채로 남아있음 —
+            // 그래서 첫 클릭은 정상 재생되지만, 뒤로가기 후 두번째 클릭은 아무 반응이 없었음.
+            // pageshow로 bfcache 복원을 감지해 상태를 초기화
+            window.addEventListener('pageshow', (e) => {
+              if (!e.persisted) return;
+              mobileTriggered = false;
+              touchStartY = null;
+              wrap.classList.remove('is-expanded');
+              panel.classList.remove('is-hovering');
+              if (stage) stage.classList.remove('is-active');
+            });
+
             window.addEventListener('wheel', (e) => {
               if (e.deltaY > 5) triggerMobileGo();
             }, { passive: true });
@@ -233,6 +246,19 @@ import Layout from '../layouts/Layout.astro';
           const elapsed = performance.now() - hoverStartTime;
           const remaining = Math.max(MIN_CLICK_PAUSE_MS, REACT_DURATION_MS - elapsed);
           setTimeout(() => { window.location.href = '/posts'; }, remaining);
+        });
+
+        // bfcache로 페이지가 복원되면(뒤로가기) 이전 hover/재생 상태가 그대로 남아있어
+        // 두번째 클릭 시 remaining이 잘못 계산되던 문제 — 복원 시 초기 상태로 리셋
+        window.addEventListener('pageshow', (e) => {
+          if (!e.persisted) return;
+          isOverStage = false;
+          lastMouseX = -9999;
+          lastMouseY = -9999;
+          hoverStartTime = 0;
+          panel.classList.remove('is-hovering', 'is-pressed');
+          stage.classList.remove('is-active', 'is-logo-pressed');
+          if (wrap) wrap.classList.remove('is-expanded');
         });
       })();
     </script>
