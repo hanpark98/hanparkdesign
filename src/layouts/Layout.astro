@@ -551,17 +551,29 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
           // 스케일/링 효과가 그려질 틈도 없이 사라짐)
           const href = card.getAttribute('href');
           if (href) {
-            let navigated = false;
+            // 클로저 변수 대신 dataset에 저장 — bfcache로 페이지가 복원될 때(pageshow) 밖에서 리셋 가능해야 함
+            card.dataset.navigating = 'false';
             card.addEventListener('click', (e) => {
               e.preventDefault();
-              if (navigated) return; // 일부 모바일 브라우저에서 click이 중복 발생해 두 번 이동하는 것 방지
-              navigated = true;
+              if (card.dataset.navigating === 'true') return; // 일부 모바일 브라우저에서 click이 중복 발생해 두 번 이동하는 것 방지
+              card.dataset.navigating = 'true';
               card.classList.add('is-touch-active');
               setTimeout(() => { window.location.href = href; }, 130);
             });
           }
         });
       }
+
+      // 모바일에서 뒤로가기로 돌아오면 브라우저가 페이지를 bfcache에서 그대로 복원하는데,
+      // 이 경우 DOMContentLoaded가 다시 발생하지 않아 위의 navigating 플래그가 true로 남아있는 채였음 —
+      // 그래서 뒤로가기 후 같은 카드를 다시 눌러도 클릭이 씹히는 버그가 있었음. pageshow로 복원 감지 후 리셋.
+      window.addEventListener('pageshow', (e) => {
+        if (!e.persisted) return;
+        document.querySelectorAll('.tilt-card').forEach((card) => {
+          card.dataset.navigating = 'false';
+          card.classList.remove('is-touch-active');
+        });
+      });
 
       function setupHamburgerMenu() {
         const wrap = document.getElementById('menu-wrap');
