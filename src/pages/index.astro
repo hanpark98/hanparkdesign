@@ -102,10 +102,14 @@ import Layout from '../layouts/Layout.astro';
         // 애니메이션 webp는 <video>와 달리 재생/역재생을 스크립트로 제어할 수 없어서,
         // 호버(혹은 터치 트리거)할 때마다 src를 리셋해 처음부터 다시 재생되게 함
         // (재생 후에는 -loop 1이라 마지막 프레임에 자동으로 멈춤)
+        // 캐시 버스팅 쿼리를 매번 새로 붙임 — 동일 URL로만 리셋하면 배포 환경의
+        // 캐시 재검증(304) 응답을 브라우저가 "이미 로드된 리소스"로 취급해 애니메이션이
+        // 처음부터 다시 재생되지 않고 멈춰있던 마지막 프레임 그대로 남는 경우가 있었음
+        // (dev 서버는 캐싱이 느슨해서 이 문제가 안 보였음)
         function forceReplay(img) {
-          const src = img.src;
+          const base = img.src.split('?')[0];
           img.src = '';
-          img.src = src;
+          img.src = base + '?r=' + Date.now();
         }
 
         // 그라디언트 영역 전체에 호버하면 패널이 50% → 80% 높이로 확장
