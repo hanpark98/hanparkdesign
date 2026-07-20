@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { marked } from 'marked'; 
+import { readdir } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
 
 export async function getStaticPaths() {
   const postImportResult = import.meta.glob('../../content/posts/*.md');
@@ -15,12 +17,199 @@ export async function getStaticPaths() {
 const { default: Content, frontmatter } = await import(`../../content/posts/${Astro.params.slug}.md`);
 const isWide = frontmatter.format === 'wide';
 const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : null;
+
+// Featured Email 목업 미디어:
+// 1) images 배열(명시 순서) → 2) imageFolder(파일명 자연 정렬) → 3) 기존 img 한 장 순으로 해석.
+// GIF도 일반 img 요소로 렌더해 자동 재생되며, 여러 파일은 폰 화면 안에서 세로로 이어진다.
+const FEATURED_IMAGE_EXT = /\.(?:avif|gif|jpe?g|png|webp)$/i;
+const publicAssetRoot = resolve(process.cwd(), 'public');
+
+const normalizeFeaturedImage = (item, label, index) => {
+  const fallbackAlt = `${label} — image ${index + 1}`;
+  return typeof item === 'string'
+    ? { src: item, alt: fallbackAlt }
+    : { src: item.src, alt: item.alt || fallbackAlt };
+};
+
+const resolveFeaturedImages = async (email) => {
+  if (Array.isArray(email.images) && email.images.length) {
+    return email.images
+      .filter(item => typeof item === 'string' || item?.src)
+      .map((item, index) => normalizeFeaturedImage(item, email.label, index));
+  }
+
+  if (email.imageFolder) {
+    const folderUrl = `/${String(email.imageFolder).replace(/^\/+|\/+$/g, '')}`;
+    const folderPath = resolve(publicAssetRoot, folderUrl.slice(1));
+    const isInsidePublic = folderPath.startsWith(`${publicAssetRoot}${sep}`);
+
+    if (isInsidePublic) {
+      try {
+        const files = (await readdir(folderPath, { withFileTypes: true }))
+          .filter(entry => entry.isFile() && FEATURED_IMAGE_EXT.test(entry.name))
+          .map(entry => entry.name)
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+        if (files.length) {
+          return files.map((file, index) => ({
+            src: `${folderUrl}/${encodeURIComponent(file)}`,
+            alt: `${email.label} — image ${index + 1}`,
+          }));
+        }
+      } catch {
+        // 폴더가 아직 업로드되지 않았으면 기존 img fallback을 사용한다.
+      }
+    }
+  }
+
+  return email.img ? [normalizeFeaturedImage(email.img, email.label, 0)] : [];
+};
+
+if (frontmatter.featuredEmails?.groups) {
+  await Promise.all(frontmatter.featuredEmails.groups.flatMap(group => (
+    group.emails.map(async email => {
+      email.resolvedImages = await resolveFeaturedImages(email);
+    })
+  )));
+}
+
+// 매출 추이 라인 차트 — frontmatter.revenueTrend.points로부터 SVG 좌표 계산.
+// 참고 디자인(Branding Emotional Graph) 기반: 구간 분할 없이 단일 톤의 연속 곡선 하나 +
+// 라인 전체 아래 통합 면 그라디언트. 스토리텔링(하락→회복)은 색이 아니라 Takeover 마커와
+// 처음 적용한 Catmull-Rom 기반 cubic Bézier 곡률.
+const TREND_TENSION = 0.22;
+
+const smoothSegmentPoint = (pts, segmentIndex, t) => {
+  const p1 = pts[segmentIndex];
+  const p2 = pts[segmentIndex + 1];
+  if (!p1 || !p2) return p1 || p2 || { x: 0, y: 0 };
+  const p0 = pts[segmentIndex - 1] || p1;
+  const p3 = pts[segmentIndex + 2] || p2;
+  const c1 = {
+    x: p1.x + (p2.x - p0.x) * TREND_TENSION,
+    y: p1.y + (p2.y - p0.y) * TREND_TENSION,
+  };
+  const c2 = {
+    x: p2.x - (p3.x - p1.x) * TREND_TENSION,
+    y: p2.y - (p3.y - p1.y) * TREND_TENSION,
+  };
+  const mt = 1 - t;
+  return {
+    x: mt ** 3 * p1.x + 3 * mt ** 2 * t * c1.x + 3 * mt * t ** 2 * c2.x + t ** 3 * p2.x,
+    y: mt ** 3 * p1.y + 3 * mt ** 2 * t * c1.y + 3 * mt * t ** 2 * c2.y + t ** 3 * p2.y,
+  };
+};
+
+const smoothPointAtX = (pts, targetX) => {
+  let segmentIndex = pts.findIndex((p, i) => (
+    i < pts.length - 1 && targetX >= p.x && targetX <= pts[i + 1].x
+  ));
+  if (segmentIndex < 0) segmentIndex = targetX < pts[0].x ? 0 : pts.length - 2;
+
+  let low = 0;
+  let high = 1;
+  for (let i = 0; i < 24; i++) {
+    const mid = (low + high) / 2;
+    const point = smoothSegmentPoint(pts, segmentIndex, mid);
+    if (point.x < targetX) low = mid;
+    else high = mid;
+  }
+  return smoothSegmentPoint(pts, segmentIndex, (low + high) / 2);
+};
+
+const smoothPath = (pts) => {
+  if (pts.length < 2) return '';
+  if (pts.length === 2) return `M ${pts[0].x},${pts[0].y} L ${pts[1].x},${pts[1].y}`;
+  let d = `M ${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const c1x = p1.x + (p2.x - p0.x) * TREND_TENSION;
+    const c1y = p1.y + (p2.y - p0.y) * TREND_TENSION;
+    const c2x = p2.x - (p3.x - p1.x) * TREND_TENSION;
+    const c2y = p2.y - (p3.y - p1.y) * TREND_TENSION;
+    d += ` C ${c1x},${c1y} ${c2x},${c2y} ${p2.x},${p2.y}`;
+  }
+  return d;
+};
+
+// 차트 지오메트리를 계산 — W(뷰박스 너비)를 줄일수록 카드 실제 렌더 너비 대비 스케일이
+// 커져서, 같은 px 폰트 크기(CSS)가 화면에 더 크게 찍힌다. 데스크톱/모바일 각각 카드의
+// 실제 렌더 너비가 크게 다르므로(약 840px vs 320px) 뷰박스 하나로는 둘 다 만족시킬 수
+// 없어 지오메트리 자체를 두 벌 만든다 — 폰트 크기(CSS)는 공유, W/PAD_X/세로 비율만 다름.
+// 세로(PLOT_TOP~BOTTOM/H)를 너비 대비 넉넉히 잡아 "위아래로 늘어난" 종횡비를 만들면
+// 라벨이 뭉치지 않고 여유롭게 읽힌다(모바일 쪽을 더 정사각형에 가깝게).
+function buildTrendChart(trend, geom) {
+  const { W, PAD_X, PLOT_TOP, PLOT_BOTTOM, H } = geom;
+  const points = trend.points;
+  const values = points.map(p => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  // 감성용 padding bias(참고 디자인의 핵심) — 실제 min/max 대신 ±8% 여유를 둔 가상
+  // 범위로 매핑해, 최고점이 천장에 닿거나 저점이 바닥에 붙지 않고 라인이 공중에 떠서 흐름
+  const visualMax = max * 1.08;
+  const visualMin = min * 0.92;
+  const range = (visualMax - visualMin) || 1;
+  const n = points.length;
+  const stepX = (W - PAD_X * 2) / (n - 1);
+  const plotH = PLOT_BOTTOM - PLOT_TOP;
+  const yFor = (v) => +(PLOT_TOP + (1 - (v - visualMin) / range) * plotH).toFixed(1);
+  const coords = points.map((p, i) => ({
+    ...p,
+    // 월말 저점처럼 축 라벨과 실제 이벤트 시점이 다른 경우, 한 달 간격을 1로 본
+    // xOffset으로 데이터 포인트만 미세 조정한다. 월 라벨 위치는 그대로 유지한다.
+    tickX: +(PAD_X + stepX * i).toFixed(1),
+    x: +(PAD_X + stepX * (i + (p.xOffset ?? 0))).toFixed(1),
+    y: yFor(p.value),
+  }));
+
+  const troughIdx = values.indexOf(min);
+  const lastIdx = n - 1;
+  // takeover 같은 전환 시점은 월 데이터 포인트와 별개로 월 사이에도 놓일 수 있다.
+  const joinPosition = Math.max(0, Math.min(trend.joinPosition ?? trend.joinIndex ?? troughIdx, lastIdx));
+  const joinFromIdx = Math.floor(joinPosition);
+  const joinToIdx = Math.min(Math.ceil(joinPosition), lastIdx);
+  const joinT = joinPosition - joinFromIdx;
+  const joinCoord = Number.isFinite(trend.joinTickPosition)
+    ? smoothPointAtX(coords, PAD_X + stepX * Math.max(0, Math.min(trend.joinTickPosition, lastIdx)))
+    : joinFromIdx === joinToIdx
+      ? coords[joinFromIdx]
+      : smoothSegmentPoint(coords, joinFromIdx, joinT);
+
+  // 단일 연속 곡선 + 그 전체를 바닥선까지 닫은 면 — 참고 코드의 linePath/areaPath 그대로
+  const linePath = smoothPath(coords);
+  const areaPath = `${linePath} L ${coords[lastIdx].x},${PLOT_BOTTOM} L ${coords[0].x},${PLOT_BOTTOM} Z`;
+
+  return {
+    W, H, PLOT_TOP, PLOT_BOTTOM,
+    coords,
+    linePath,
+    areaPath,
+    troughIdx,
+    lastIdx,
+    joinCoord,
+  };
+}
+
+let trendChart = null;
+let trendChartMobile = null;
+if (frontmatter.revenueTrend?.points?.length > 1) {
+  const trend = frontmatter.revenueTrend;
+  // 플롯이 카드 콘텐츠 폭에 꽉 차도록 PAD_X를 작게 — 양 끝 값/월 라벨은 마크업에서
+  // start/end 정렬로 처리해 가장자리에서 잘리지 않음. 데스크톱/모바일 모두 완만한
+  // 비율(plot 높이/가로폭 ≈ 0.3)로 곡선 인상 통일
+  trendChart = buildTrendChart(trend, { W: 640, PAD_X: 14, PLOT_TOP: 52, PLOT_BOTTOM: 214, H: 282 });
+  trendChartMobile = buildTrendChart(trend, { W: 340, PAD_X: 12, PLOT_TOP: 52, PLOT_BOTTOM: 152, H: 206 });
+}
 ---
 
 <Layout title={`Han Park | ${frontmatter.title}`}>
   <div class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen">
-    <!-- lg+: 버튼을 플로우에서 빼서 왼쪽 여백에 절대 위치시키고, 타이틀 섹션과 같은 높이(lg:top-4 = 위 wrapper의 lg:pt-4와 동일 기준점)에 맞춤 -->
-    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 lg:mb-0 lg:px-0 lg:absolute lg:top-4 lg:left-6 justify-start items-center">
+    <!-- 충분한 좌측 여백이 생기는 2xl부터만 버튼을 바깥 레일에 배치하고,
+         그보다 좁은 화면에서는 본문 위의 정상 플로우에 두어 콘텐츠와 겹치지 않게 함 -->
+    <div class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 2xl:mb-0 2xl:px-0 2xl:absolute 2xl:top-4 2xl:left-6 justify-start items-center">
       <button onclick="window.history.back()" class="back-btn mr-6">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
         Projects
@@ -30,7 +219,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     <div class="px-3 sm:px-6">
       {isWide ?
       (
-        <article class="prose prose-lg max-w-full lg:max-w-[65%] mx-auto">
+        <article class="prose prose-lg w-full max-w-[1100px] mx-auto">
           <!-- 처음 두 섹션(헤더/본문)은 스크롤을 기다리지 않고, 로딩되듯 페이지 진입 시 바로 fade in -->
           <div class="bg-white p-6 sm:p-8 mb-4 card-shell load-fade">
             <div class="mb-2 flex flex-wrap items-center text-gray-400 text-[0.96rem] gap-y-1">
@@ -44,9 +233,305 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
             {frontmatter.description && <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>}
           </div>
 
-          <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content load-fade load-fade-2">
-            <Content />
-          </div>
+          {frontmatter.role && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell load-fade load-fade-2">
+              <div class="stat-eyebrow">
+                <span class="title">Team & Scope</span>
+              </div>
+              <div class="role-grid">
+                <div class="role-col">
+                  <div class="role-col-heading">Team</div>
+                  <ul class="role-list">
+                    {frontmatter.role.team.map(person => (
+                      <li class:list={{ 'is-me': person.mine }}>
+                        <span class="credit-role">{person.part}</span>
+                        <span class="credit-name">{person.name}</span>
+                        {person.suffix && <span class="credit-suffix">({person.suffix})</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div class="role-col">
+                  <div class="role-col-heading">My Scope</div>
+                  <ul class="role-list role-list-plain">
+                    {frontmatter.role.scope.map(item => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Revenue 차트 + statSections[0](Team Result)를 한 카드로 통합 — 차트가 먼저, 세부 스탯이 그 아래 */}
+          {frontmatter.statSections?.[0] && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section">
+              <div class="chart-eyebrow">
+                <span class="title">{frontmatter.statSections[0].title}</span>
+              </div>
+
+              {trendChart && trendChartMobile && (
+                <>
+                  <div class="trend-unit-label">{frontmatter.revenueTrend.unit}</div>
+                  {[
+                    { chart: trendChart, wrapClass: 'trend-svg-wrap hidden sm:block', idSuffix: 'desktop' },
+                    { chart: trendChartMobile, wrapClass: 'trend-svg-wrap sm:hidden', idSuffix: 'mobile' },
+                  ].map(({ chart, wrapClass, idSuffix }) => (
+                    <div class={`${wrapClass} trend-plot`}>
+                      {/* SVG에는 선·면·도트만 — 텍스트는 아래 HTML 오버레이로 분리해 컨테이너
+                          폭에 따라 스케일되지 않고 항상 고정 크기(rem)를 유지하게 함 */}
+                      <svg viewBox={`0 0 ${chart.W} ${chart.H}`} class="trend-svg" role="img"
+                           aria-label={`Monthly revenue trend — ${frontmatter.revenueTrend.joinLabel}, trough ${frontmatter.revenueTrend.troughLabel}, peak ${frontmatter.revenueTrend.peakLabel}`}>
+                        <defs>
+                          {/* 색상은 좌→우(회색 #5F6E7A → 포인트 컬러 #5b74a3)로 —
+                              하락기의 무채색이 회복기의 브랜드 컬러로 번져가는 스토리.
+                              데스크톱/모바일 두 SVG가 한 문서에 같이 있으므로 id는 반드시
+                              variant별로 달라야 함 — 겹치면 뒤에 있는 SVG의 url() 참조가
+                              깨짐(문서 순서상 첫 id로만 resolve) */}
+                          <linearGradient id={`trendColorGrad-${idSuffix}`} x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#5F6E7A" />
+                            <stop offset="100%" stop-color="#5b74a3" />
+                          </linearGradient>
+                          {/* 상하 페이드(0.55→0.22→0)는 마스크로 유지 — 좌우 색 그라디언트와
+                              상하 투명도 페이드를 한 면에 겹쳐 얹는 구조 */}
+                          <linearGradient id={`trendFadeGrad-${idSuffix}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55" />
+                            <stop offset="50%" stop-color="#ffffff" stop-opacity="0.22" />
+                            <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                          </linearGradient>
+                          <mask id={`trendFadeMask-${idSuffix}`}>
+                            <rect x="0" y="0" width={chart.W} height={chart.H} fill={`url(#trendFadeGrad-${idSuffix})`} />
+                          </mask>
+                        </defs>
+
+                        <path class="trend-area" d={chart.areaPath}
+                              style={`fill: url(#trendColorGrad-${idSuffix}); mask: url(#trendFadeMask-${idSuffix})`} />
+                        <path class="trend-line" d={chart.linePath} pathLength="100"
+                              style={`stroke: url(#trendColorGrad-${idSuffix})`} />
+
+                        {/* 전체 추이의 양 끝과 비교 기준 시작점에만 흰 도트 */}
+                        {chart.coords.map((c, i) => (i === 0 || i === chart.lastIdx || c.showDot) && (
+                          <circle cx={c.x} cy={c.y} r="3" class="trend-dot" vector-effect="non-scaling-stroke"
+                                  class:list={{ 'dot-end': i === chart.lastIdx }} />
+                        ))}
+
+                        {/* takeover 말풍선의 꼬리가 가리키는 전환 시점 */}
+                        <circle cx={chart.joinCoord.x} cy={chart.joinCoord.y} r="3" class="trend-dot dot-takeover"
+                                vector-effect="non-scaling-stroke" />
+
+                        {/* 값 표시용 호버 타깃 */}
+                        {chart.coords.map((c) => (
+                          <circle cx={c.x} cy={c.y} r="12" class="trend-hit">
+                            <title>{c.month}: ${c.value.toLocaleString()}</title>
+                          </circle>
+                        ))}
+                      </svg>
+
+                      {/* ── HTML 오버레이 (SVG 밖, 고정 rem) — % 위치로 데이터 포인트에 정렬 ── */}
+                      {/* 월 라벨 — 플롯 하단에. 양 끝은 start/end 정렬로 가장자리 클리핑 방지 */}
+                      {chart.coords.map((c, i) => (
+                        <span class="trend-ovl trend-ovl-month"
+                              class:list={{ 'ovl-start': i === 0, 'ovl-end': i === chart.lastIdx }}
+                              style={`left:${(c.tickX / chart.W * 100).toFixed(2)}%; top:${(chart.PLOT_BOTTOM / chart.H * 100).toFixed(2)}%`}>
+                          {c.month}
+                        </span>
+                      ))}
+                      {/* 값 라벨 — 전체 추이의 시작·끝과 비교 기준 시작점(showValue)을 표시.
+                          양 끝은 둘 중 더 높은 지점 y에 맞춰 같은 높이로 정렬한다. */}
+                      {chart.coords.map((c, i) => (i === 0 || i === chart.lastIdx || c.showValue) && (
+                        <span class="trend-ovl trend-ovl-value"
+                              class:list={{ 'ovl-start': i === 0, 'ovl-end': i === chart.lastIdx }}
+                              style={`left:${(c.x / chart.W * 100).toFixed(2)}%; top:${(((i === 0 || i === chart.lastIdx) ? Math.min(chart.coords[0].y, chart.coords[chart.lastIdx].y) : c.y) / chart.H * 100).toFixed(2)}%`}>
+                          ${c.value.toLocaleString()}
+                        </span>
+                      ))}
+                      {/* takeover 말풍선 — 월별 데이터 포인트와 독립적으로 월 사이에 배치 */}
+                      <span class="trend-ovl trend-ovl-bubble"
+                            style={`left:${(chart.joinCoord.x / chart.W * 100).toFixed(2)}%; top:${(chart.joinCoord.y / chart.H * 100).toFixed(2)}%`}>
+                        {frontmatter.revenueTrend.joinLabel}
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              <div class="stat-grid stat-grid-chart">
+                {frontmatter.statSections[0].stats.map(s => (
+                  <div class="stat-card">
+                    <div class="stat-label">{s.label}</div>
+                    <div class="stat-number">{s.prefix && <span class="plus">{s.prefix}</span>}{s.value}<span class="unit" class:list={{ 'unit-x': s.unit === 'x' }}>{s.unit}</span></div>
+                    <div class="stat-detail">{s.detail}</div>
+                  </div>
+                ))}
+              </div>
+
+              {frontmatter.statSections[0].subtitle && (
+                <div class="team-result-period">{frontmatter.statSections[0].subtitle}</div>
+              )}
+            </div>
+          )}
+
+          {/* statSections[1] = My Results — Volume & Reach */}
+          {frontmatter.statSections?.[1] && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section">
+              <div class="stat-eyebrow">
+                <span class="title">{frontmatter.statSections[1].title}</span>
+                {frontmatter.statSections[1].subtitle && <span class="subtitle">{frontmatter.statSections[1].subtitle}</span>}
+              </div>
+              <div class="stat-grid">
+                {frontmatter.statSections[1].stats.map(s => (
+                  <div class="stat-card">
+                    <div class="stat-label">{s.label}</div>
+                    <div class="stat-number">{s.prefix && <span class="plus">{s.prefix}</span>}{s.value}<span class="unit" class:list={{ 'unit-x': s.unit === 'x' }}>{s.unit}</span></div>
+                    <div class="stat-detail">{s.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* HOW I WORK — 메인 Featured Emails */}
+          {frontmatter.featuredEmails && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section featured-email-section">
+              <div class="stat-eyebrow">
+                <span class="title">{frontmatter.featuredEmails.title}</span>
+                {frontmatter.featuredEmails.subtitle && <span class="subtitle">{frontmatter.featuredEmails.subtitle}</span>}
+              </div>
+              <div class="fe-groups">
+                {frontmatter.featuredEmails.groups.map(g => (
+                  <div class="fe-group" class:list={{
+                    'is-pair': g.type === 'pair',
+                    'is-gallery': g.type === 'gallery',
+                    'is-sequence': g.type === 'sequence',
+                    'is-revenue-only': g.revenueOnly,
+                  }}>
+                    {/* 텍스트 컬럼 — 기존 How I Work 내러티브 (짝수 타일에선 CSS order로 좌우 반전) */}
+                    <div class="fe-group-text">
+                      <div class="fe-tag">{g.tag}</div>
+                      <div class="fe-kicker">{g.kicker}</div>
+                      {g.body && <p class="fe-body" set:html={g.body} />}
+                    </div>
+                    {/* 목업 컬럼 — 폰 + 히어로 지표 하나(애플식: 기기당 큰 숫자 하나) */}
+                    <div class="fe-phones">
+                      {g.emails.map(em => (
+                        <figure class="fe-phone-fig">
+                          {/* 제목·세그먼트 — 목업 위 */}
+                          <div class="fe-cap-top">
+                            <div class="fe-cap-label">{em.label}</div>
+                            {em.date && <div class="fe-cap-date">{em.date}</div>}
+                            <div class="fe-cap-seg">{em.seg}</div>
+                          </div>
+                          <div class="fe-phone">
+                            <div class="fe-phone-screen">
+                              {em.resolvedImages.map((media) => (
+                                <img src={media.src} alt={media.alt} loading="lazy" />
+                              ))}
+                            </div>
+                            {/* 스크롤 인디케이터 — 화면 밖 오른쪽: 회색 세로선 + 상하로 긴 알약 손잡이
+                                (위아래 화살표 포함, 드래그·레일 클릭으로 화면 스크롤 제어) */}
+                            <div class="fe-rail">
+                              <div class="fe-rail-knob">
+                                <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                  <path d="M2 5 L5 2 L8 5" />
+                                  <path d="M2 13 L5 16 L8 13" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          {/* 주요지표(큰 글씨) + 기타지표 — 목업 아래 */}
+                          {(em.hero || em.sub || em.badge) && (
+                            <figcaption class="fe-cap-bottom">
+                              {em.heroLabel && <div class="fe-hero-label">{em.heroLabel}</div>}
+                              {em.hero && <div class="fe-hero" class:list={{ 'is-muted': em.heroMuted }}>{em.hero}</div>}
+                              {em.sub && <div class="fe-cap-sub">{em.sub}</div>}
+                              {em.badge && (
+                                <div class="fe-badge">
+                                  <span class="fe-badge-copy">
+                                    <span>{em.badge}</span>
+                                    {em.badgeSecondLine && <span class="fe-badge-second-line">{em.badgeSecondLine}</span>}
+                                  </span>
+                                </div>
+                              )}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* statSections[2] = Meta Creative Performance */}
+          {frontmatter.statSections?.[2] && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section">
+              <div class="stat-eyebrow">
+                <span class="title">{frontmatter.statSections[2].title}</span>
+                {frontmatter.statSections[2].subtitle && <span class="subtitle">{frontmatter.statSections[2].subtitle}</span>}
+              </div>
+              <div class="stat-grid">
+                {frontmatter.statSections[2].stats.map(s => (
+                  <div class="stat-card">
+                    <div class="stat-label">{s.label}</div>
+                    <div class="stat-number">{s.prefix && <span class="plus">{s.prefix}</span>}{s.value}<span class="unit" class:list={{ 'unit-x': s.unit === 'x' }}>{s.unit}</span></div>
+                    <div class="stat-detail">{s.detail}</div>
+                  </div>
+                ))}
+              </div>
+              {frontmatter.statSections[2].note && (
+                <div class="team-result-period">{frontmatter.statSections[2].note}</div>
+              )}
+            </div>
+          )}
+
+          {/* 성과지표 섹션 중 마지막 — 이미지 위주의 본문(Content) 바로 위에 위치 */}
+          {frontmatter.clickTable && !frontmatter.clickTable.hidden && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section">
+              <div class="stat-eyebrow">
+                <span class="title">{frontmatter.clickTable.title}</span>
+              </div>
+              <div class="click-table-wrap">
+                <table class="click-table">
+                  <thead>
+                    <tr>
+                      <th class="align-left">My Campaigns</th>
+                      <th>CTR</th>
+                      <th>Clicks</th>
+                      <th>vs. Avg</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {frontmatter.clickTable.rows.map(r => (
+                      <tr>
+                        <td class="align-left">
+                          <div class="click-name">{r.name}</div>
+                          <div class="click-detail">{r.detail}</div>
+                        </td>
+                        <td class="click-ctr">{r.ctr}</td>
+                        <td>{r.clicks}</td>
+                        <td class="click-mult">{r.mult}</td>
+                      </tr>
+                    ))}
+                    {frontmatter.clickTable.avgRow && (
+                      <tr class="is-avg">
+                        <td class="align-left">{frontmatter.clickTable.avgRow.name}</td>
+                        <td class="click-ctr">{frontmatter.clickTable.avgRow.ctr}</td>
+                        <td>{frontmatter.clickTable.avgRow.clicks}</td>
+                        <td class="click-mult">{frontmatter.clickTable.avgRow.mult}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {!frontmatter.hideMarkdownBody && (
+            <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content fade-section">
+              <Content />
+            </div>
+          )}
 
           {introHtml && (
             <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
@@ -66,6 +551,16 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
               <a href="https://www.instagram.com/hanparkdesign/" target="_blank" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Instagram</a>
             </div>
           </div>
+
+          {frontmatter.footnotes && (
+            <div class="case-footnote fade-section">
+              <div class="case-footnote-title">Notes</div>
+              <div class="case-footnote-body">
+                {frontmatter.footnotes.map(f => <p>{f}</p>)}
+              </div>
+            </div>
+          )}
+
         </article>
       ) : (
         <article class="prose prose-lg max-w-3xl mx-auto">
@@ -79,7 +574,7 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
             {frontmatter.description && <p class="text-gray-600 text-lg mt-2 mb-3">{frontmatter.description}</p>}
             {frontmatter.image && <img src={frontmatter.image} alt={frontmatter.title} class="square-img" />}
           </div>
-          <Content />
+          {!frontmatter.hideMarkdownBody && <Content />}
         </article>
       )}
     </div>
@@ -176,8 +671,701 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     .marquee-mode .my-carousel-img {
       display: block !important;
       max-width: none !important;
-      border-radius: 0 !important; 
+      border-radius: 0 !important;
     }
+
+    /* ------------ Role / Scope — 팀 성과와 내 기여를 구분하는 정직성 블록.
+       위계는 색/굵기로만: 검정+볼드(핵심) vs 회색+일반(부가) — profile.astro의
+       skills-category(1.08rem/700/#111) · skills-tools(0.92rem/#666) · profile-quote(#555)와
+       동일한 두 단(black·bold / gray·regular) 체계를 그대로 가져옴. 헤어라인 구분선은
+       click-table의 행 구분선(rgba(17,17,17,0.07))과 동일 */
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    /* 컬럼 헤딩 — stat-label과 동일한 위계(1.08rem/700/#111) + 앞에 포인트 링 도트 */
+    .role-col-heading {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #111;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+    .role-col-heading::before {
+      content: '';
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #e4e9f3;
+      border: 1.5px solid #5b74a3;
+      flex: none;
+    }
+    /* prose(article) 안이라 전역 ul/li 마진·패딩이 스며듦 — 들여쓰기 완전 제거 */
+    .role-list {
+      list-style: none;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .role-list li {
+      margin: 0 !important;
+      padding: 13px 0;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.07);
+    }
+    .role-list li:last-child { border-bottom: none; }
+    /* 이름 크기는 profile.astro의 lang-level(1.02rem/500/#555)과 동일 기준,
+       역할명은 skills-category(1.08rem/700/#111)와 동일 기준 */
+    .credit-role {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.01em;
+    }
+    .credit-role::after { content: '\2014'; margin: 0 7px; color: #c7c5c0; font-weight: 400; }
+    .credit-name { font-size: 1.02rem; font-weight: 500; color: #555; letter-spacing: -0.01em; }
+    .credit-suffix { font-size: 0.88rem; font-weight: 400; color: #8a8a8a; margin-left: 4px; }
+    .role-list li.is-me {
+      margin: 0 -10px !important;
+      padding-left: 10px;
+      padding-right: 10px;
+      background: rgba(91, 116, 163, 0.06);
+      border-bottom-color: transparent;
+      border-radius: 6px;
+    }
+    .role-list li.is-me .credit-role { color: #5b74a3; }
+    .role-list li.is-me .credit-name { color: #5b74a3; font-weight: 600; }
+    /* 스코프 목록 — 불릿·들여쓰기 없이 팀 목록과 같은 헤어라인 행 언어로 통일 */
+    .role-list-plain {
+      color: #555;
+      font-size: 1.02rem;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .role-list-plain li { display: block; }
+    @media (max-width: 640px) {
+      /* 1열로 접히면 Team/Scope 두 블록이 붙어 구분이 안 되므로, 둘째 블록(My Scope)에
+         상단 헤어라인 + 여백을 줘 명확히 나눔 */
+      .role-grid { grid-template-columns: 1fr; gap: 0; }
+      .role-col + .role-col {
+        margin-top: 22px;
+        padding-top: 22px;
+        border-top: 1px solid rgba(17, 17, 17, 0.12);
+      }
+    }
+
+    /* 성과 인포그래픽 — 타이틀/본문과 같은 급의 독립 섹션(card-shell)으로 렌더링됨.
+       이 페이지 자체에 이미 있는 큰 타이포(H1 30~36px, description 20px, date행 0.96rem)를
+       기준으로 삼음 — profile.astro는 촘촘한 리스트라 절대값을 그대로 가져오면 지나치게
+       작아짐. 숫자는 이 섹션의 히어로이므로 H1급으로 크게, 라벨/캡션도 본문 date행 정도의
+       무게감은 유지. 포인트 컬러(#5b74a3)는 posts.astro 카드 호버 링과 항상 통일 —
+       색 바꿀 땐 둘 다 같이 */
+    .stat-eyebrow {
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+    }
+    .stat-eyebrow .title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #111;
+    }
+    .stat-eyebrow .subtitle {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: -0.01em;
+      color: #8a8a8a;
+    }
+    .stat-eyebrow.no-border { border-bottom: none; padding-bottom: 0; margin-bottom: 16px; }
+
+    /* 차트 카드 전용 헤딩 — 제목 → 그레이 헤어라인 → 부가설명 순서(다른 카드의
+       title+subtitle가 함께 라인 위에 있는 stat-eyebrow와 다른, 차트 카드만의 변형) */
+    .chart-eyebrow { margin-bottom: 20px; }
+    .chart-eyebrow .title {
+      display: block;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #111;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+    }
+    .chart-eyebrow .subtitle {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: #8a8a8a;
+    }
+
+    /* ------------ 클릭률 테이블 ------------
+       모노스페이스는 사이트 어디에도 없는 폰트라 걷어냄 — 본문 산세리프 + tabular-nums로
+       숫자 열 정렬만 유지(profile.astro의 숫자 표기 방식과 동일) */
+    .click-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .click-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+    .click-table th {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+      color: #8a8a8a; text-align: right; padding: 10px; border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+    }
+    .click-table th.align-left, .click-table td.align-left { text-align: left; }
+    .click-table td {
+      padding: 14px 10px; border-bottom: 1px solid rgba(17, 17, 17, 0.07);
+      font-size: 0.92rem; text-align: right; color: #111; vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+    }
+    .click-name {
+      font-size: 0.95rem; font-weight: 600; color: #111;
+    }
+    .click-detail {
+      font-size: 0.8rem; color: #8a8a8a; margin-top: 3px;
+    }
+    .click-ctr { font-weight: 700; font-size: 1rem; color: #5b74a3; }
+    .click-mult { font-weight: 700; color: #111; }
+    .click-table tr.is-avg td { background: #f7f6f4; color: #6b6b6b; font-weight: 600; }
+    .click-table tr.is-avg .click-ctr { color: #6b6b6b; }
+
+    /* ------------ How I Work — 에디토리얼 리스트 ------------
+       [키커(포인트 컬러 대문자) + 제목 + 본문] 헤어라인 행 구성.
+       성과 수치는 별도 컬럼 대신 본문 문장 속 형광펜 하이라이트(mark)로 녹여냄 */
+    .tactics-list { display: flex; flex-direction: column; }
+    .tactic-row {
+      padding: 30px 0;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.07);
+    }
+    .tactic-row:first-child { padding-top: 8px; }
+    .tactic-row:last-child { border-bottom: none; padding-bottom: 8px; }
+    /* 키커와 제목을 같은 크기(1.05rem)로 — 키커는 포인트 컬러 대문자, 제목은 진한 볼드 */
+    .tactic-kicker {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #5b74a3;
+      margin-bottom: 6px;
+    }
+    /* 제목 앞에 포인트 링 도트(stat-label과 동일 양식) */
+    .tactic-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #111;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+    .tactic-title::before {
+      content: '';
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #e4e9f3;
+      border: 1.5px solid #5b74a3;
+      flex: none;
+    }
+    /* 본문 — scope 항목(CRM Design…)과 같은 크기(1.02rem). 전역 p 규칙(!important)이
+       이기므로 여기도 !important로 고정 */
+    .tactic-body {
+      font-size: 1.02rem !important;
+      line-height: 1.7 !important;
+      color: #6b7684;
+      max-width: 660px;
+      margin: 0 !important;
+    }
+    /* 형광펜 하이라이트 — 글자 아래쪽 45%에만 포인트 컬러 워시가 깔리는 마커 톤 */
+    .tactic-body mark {
+      background: linear-gradient(transparent 55%, rgba(91, 116, 163, 0.22) 55%);
+      color: inherit;
+      font-weight: inherit;
+      padding: 0 1px;
+    }
+    .tactic-body strong { font-weight: 650; color: #1a2430; }
+    @media (max-width: 640px) {
+      .tactic-row { padding: 24px 0; }
+    }
+
+    /* ------------ How I Work ver2 — Featured Emails (애플 bento 스타일) ------------
+       헤어라인 행 대신 옅은 그레이 라운드 타일을 세로로 쌓고, 타일마다
+       [내러티브 텍스트 | 아이폰 목업 + 히어로 지표]를 좌우 교차 배치.
+       기기당 큰 숫자 하나(heroLabel/hero)가 주인공 — 애플 제품 페이지 문법 */
+    .fe-groups { display: flex; flex-direction: column; gap: 18px; margin-top: 4px; }
+    .fe-group {
+      display: grid;
+      grid-template-columns: minmax(0, 300px) 1fr;
+      gap: 44px;
+      align-items: center;
+      background: #f5f6f8;
+      border-radius: 24px;
+      padding: 36px 38px;
+    }
+    /* 모든 좌우형 타일은 텍스트 왼쪽, 목업 오른쪽으로 통일 */
+    /* 텍스트 컬럼 — How I Work의 kicker/title/body 위계 그대로 재사용 */
+    .fe-tag {
+      font-size: 0.82rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #5b74a3; margin-bottom: 8px;
+    }
+    .fe-kicker {
+      font-size: 1.45rem; font-weight: 800; color: #111; letter-spacing: -0.02em; line-height: 1.25;
+      margin-bottom: 12px;
+    }
+    /* 목업 컬럼 — pair는 폰 2개 나란히, solo는 1개. 폰은 칸에 맞춰 줄어듦.
+       레일(오른쪽 바깥 −20px)이 이웃 폰과 답답하지 않게 폰 사이 간격을 넉넉히 */
+    .fe-phones { display: flex; gap: 42px; align-items: flex-start; justify-content: center; }
+    .fe-phone-fig { margin: 0; flex: 1 1 0; min-width: 0; max-width: 216px; }
+
+    /* ver3의 Calendar·Timing은 텍스트 위, 목업 갤러리 아래의 전체 폭 구성 */
+    .fe-group.is-gallery,
+    .fe-group.is-sequence {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    .fe-group.is-gallery .fe-group-text,
+    .fe-group.is-sequence .fe-group-text,
+    .fe-group.is-gallery .fe-phones,
+    .fe-group.is-sequence .fe-phones {
+      order: 0;
+    }
+    .fe-group.is-gallery .fe-group-text,
+    .fe-group.is-sequence .fe-group-text { max-width: 720px; }
+    .fe-group.is-gallery .fe-phones,
+    .fe-group.is-sequence .fe-phones {
+      display: grid;
+      width: 100%;
+      gap: 34px;
+      align-items: start;
+    }
+    .fe-group.is-gallery .fe-phones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .fe-group.is-sequence .fe-phones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .fe-group.is-gallery .fe-phone-fig,
+    .fe-group.is-sequence .fe-phone-fig {
+      width: 100%;
+      max-width: 190px;
+      justify-self: center;
+    }
+    /* Revenue 중심 시퀀스: 원본 성과 데이터는 유지하되 카드에서는 보조 지표를 감춤 */
+    .fe-group.is-revenue-only .fe-cap-seg,
+    .fe-group.is-revenue-only .fe-cap-sub { display: none; }
+
+    /* 아이폰 목업 — 실제 애플 프레임 비율: 화면 9:19.5, 사방 균일한 슬림 베젤,
+       큰 코너 라운드. 장식(노치/슬릿) 없이 클린 프레임, 부드러운 플로팅 섀도.
+       코너/베젤은 컨테이너 폭 비례(cqw) — 창 크기로 폰이 줄어도 커브 비율이 안 무너짐
+       (px 값은 cqw 미지원 브라우저용 폴백) */
+    .fe-phone-fig { container-type: inline-size; }
+    .fe-phone {
+      position: relative;
+      background: #16181c;
+      border-radius: 42px;
+      border-radius: 19.4cqw;
+      padding: 8px;
+      padding: 3.7cqw;
+      box-shadow: 0 18px 40px rgba(26, 36, 48, 0.18), inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .fe-phone-screen {
+      position: relative;
+      aspect-ratio: 9 / 19.5;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 34px;
+      border-radius: 15.7cqw;
+      background: #fff;
+      /* 스크롤 끝의 탄성 영역에서 흰 배경이 드러나지 않도록 내부 오버스크롤을 차단 */
+      overscroll-behavior-x: none;
+      overscroll-behavior-y: none;
+      -webkit-overflow-scrolling: auto;
+      scrollbar-width: none;
+    }
+    .fe-phone-screen::-webkit-scrollbar { display: none; }
+    /* 여러 이미지·GIF가 업로드 순서대로 틈 없이 세로 스택됨 */
+    .fe-phone-screen img {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 !important;
+      border-radius: 0 !important;
+    }
+    .fe-phone-screen img + img { margin-top: -1px !important; }
+
+    /* 스크롤 인디케이터 — 화면 밖 오른쪽: 얇은 회색 세로선 위를 상하로 긴 알약 손잡이
+       (위아래 화살표 포함, 모든 폰 동일한 고정 크기)가 이동. 드래그·레일 클릭으로 제어,
+       위치는 JS가 px로 계산 */
+    /* 세로선은 시각 가이드일 뿐 — 클릭·커서 반응 없음(조작은 알약 손잡이로만) */
+    .fe-rail {
+      position: absolute; top: 10px; bottom: 10px; right: -20px; width: 2px;
+      background: rgba(17, 17, 17, 0.1); border-radius: 1px;
+    }
+    .fe-rail-knob {
+      position: absolute; left: 50%; top: 0;
+      width: 16px; height: 36px; border-radius: 8px;
+      background: #5b74a3;
+      transform: translateX(-50%);
+      box-shadow: 0 0 0 2px #f5f6f8, 0 2px 6px rgba(26, 36, 48, 0.25);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      cursor: grab;
+      touch-action: none;
+      z-index: 3;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    /* 시각 크기는 그대로 두고 터치 판정 영역만 모바일 권장 크기 이상으로 확장 */
+    .fe-rail-knob::before {
+      content: '';
+      position: absolute;
+      inset: -8px -14px;
+      border-radius: 22px;
+    }
+    .fe-rail-knob:active { cursor: grabbing; }
+    .fe-rail-knob svg { width: 10px; height: 18px; }
+    .fe-phone.no-scroll .fe-rail { display: none; }
+
+    /* 캡션 상단 — 이메일 제목·세그먼트(목업 위). pair에서 제목 줄수가 달라도 폰 상단이
+       정렬되도록 2줄 분량을 예약하고 아래 정렬 */
+    .fe-cap-top {
+      display: flex; flex-direction: column; justify-content: flex-end;
+      min-height: 3.6rem;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .fe-cap-label { font-size: 0.92rem; font-weight: 600; color: #111; letter-spacing: -0.01em; line-height: 1.3; }
+    .fe-cap-date { font-size: 0.78rem; font-weight: 500; color: #8a8a8a; margin-top: 2px; }
+    .fe-cap-seg { font-size: 0.78rem; font-weight: 500; color: #8a8a8a; margin-top: 2px; }
+    /* Calendar 날짜는 데이터에 유지하되 화면에서는 캠페인명만 노출 */
+    .fe-group.is-gallery .fe-cap-seg { display: none; }
+    /* 캡션 하단 — 애플식 스탯: 작은 대문자 라벨 → 큰 히어로 숫자 → 기타지표 한 줄 */
+    .fe-cap-bottom { margin-top: 16px; text-align: center; }
+    .fe-hero-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #8a8a8a; margin-bottom: 2px;
+    }
+    .fe-hero {
+      font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+      color: #111; font-variant-numeric: tabular-nums;
+    }
+    .fe-hero.is-muted { color: #b0b6bd; }
+    .fe-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 5px 9px;
+      border: 1px solid #ead46c;
+      border-radius: 999px;
+      background: #fff4bd;
+      color: #6f5900;
+      font-size: 0.68rem;
+      font-weight: 750;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      box-shadow: 0 3px 8px rgba(111, 89, 0, 0.12);
+    }
+    .fe-badge::before { content: "★"; font-size: 0.65rem; }
+    .fe-badge-second-line::before { content: " "; }
+    .fe-cap-sub { font-size: 0.8rem; font-weight: 500; color: #8a8a8a; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    /* 그룹 본문(기존 How I Work 내러티브) — tactic-body 위계 그대로 재사용 */
+    .fe-body {
+      font-size: 1.02rem !important; line-height: 1.7 !important; color: #6b7684;
+      margin: 0 !important;
+    }
+    .fe-body mark {
+      background: linear-gradient(transparent 55%, rgba(91, 116, 163, 0.22) 55%);
+      color: inherit; font-weight: inherit; padding: 0 1px;
+    }
+    .fe-body strong { font-weight: 650; color: #1a2430; }
+
+    /* 태블릿~좁은 데스크톱: 타일 내부를 세로 스택(텍스트 위 → 목업 아래)으로 전환 */
+    @media (max-width: 900px) {
+      .fe-group { grid-template-columns: 1fr; gap: 26px; padding: 28px 24px; }
+      .fe-group.is-gallery .fe-phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .fe-group.is-sequence .fe-phones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      /* 모바일은 목업을 2열로 압축해 비교성을 높이고 전체 페이지 길이를 줄임 */
+      .fe-group { padding: 26px 20px; border-radius: 20px; }
+      .fe-phones,
+      .fe-group.is-gallery .fe-phones,
+      .fe-group.is-sequence .fe-phones {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 30px 24px;
+        width: 100%;
+        align-items: start;
+      }
+      .fe-phone-fig,
+      .fe-group.is-gallery .fe-phone-fig,
+      .fe-group.is-sequence .fe-phone-fig {
+        max-width: 150px;
+        width: 100%;
+        justify-self: center;
+      }
+      /* Timing처럼 홀수 개면 마지막 목업을 마지막 줄 중앙에 */
+      .fe-phones > .fe-phone-fig:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
+      .fe-rail { right: -14px; }
+      .fe-kicker { font-size: 1.25rem; }
+      .fe-cap-top { min-height: 0; }
+      .fe-cap-label { font-size: 0.8rem; }
+      .fe-cap-date { font-size: 0.7rem; }
+      .fe-cap-seg { font-size: 0.7rem; }
+      .fe-hero { font-size: 1.55rem; }
+      .fe-cap-sub { font-size: 0.72rem; }
+      .fe-badge-second-line { display: block; }
+      .fe-badge-second-line::before { content: none; }
+    }
+    @media (max-width: 350px) {
+      .fe-phones,
+      .fe-group.is-gallery .fe-phones,
+      .fe-group.is-sequence .fe-phones {
+        grid-template-columns: 1fr;
+      }
+      .fe-phone-fig,
+      .fe-group.is-gallery .fe-phone-fig,
+      .fe-group.is-sequence .fe-phone-fig { max-width: 190px; }
+      .fe-phones > .fe-phone-fig:last-child:nth-child(odd) { grid-column: auto; }
+      .fe-rail { right: -20px; }
+    }
+
+    /* PC: 항목이 늘어나도 자연스럽게 3열 이상으로 확장되도록 auto-fit —
+       고정 2열이 아니라 카드 너비(160px) 기준으로 들어가는 만큼 열이 생김 */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      column-gap: 28px;
+      row-gap: 30px;
+    }
+    /* 차트 바로 아래에 오는 스탯 그리드는 차트와 분리되는 여백을 좀 더 확보 */
+    .stat-grid-chart { margin-top: 32px; }
+    .stat-card { padding: 0; }
+    /* 항목 제목 — profile.astro .skills-category와 위계/표기법 통일:
+       Title Case 그대로(uppercase 변환 없음), 진한 색(#111), -0.01em, 700, 1.08rem */
+    /* min-height는 라벨 2줄 분량(line-height 1.35 × 2) — 같은 행의 라벨이 1줄/2줄로
+       길이가 갈려도 아래 stat-number가 카드마다 다른 높이에서 시작하지 않도록 자리 확보 */
+    .stat-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #111;
+      line-height: 1.35;
+      min-height: 2.95rem;
+      margin-bottom: 12px;
+    }
+    .stat-label::before {
+      content: '';
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #e4e9f3;
+      border: 1.5px solid #5b74a3;
+      flex: none;
+      margin-top: 0.45rem;
+    }
+    .stat-number {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: #111;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    /* 단위 기호 — 베이스라인에 그대로 두면 큰 숫자 옆에서 아래로 치우쳐 보이므로
+       살짝 끌어올려 숫자의 광학적 중심에 가깝게 정렬 */
+    .stat-number .unit {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #5b74a3;
+      margin-left: 2px;
+      vertical-align: 0.32em;
+    }
+    /* 소문자 x는 x-height 글리프라 같은 700에서도 %보다 얇고 낮게 보임 — 실제 상승량을
+       %(0.32em×1.4rem≈0.45rem)와 맞추고(0.28em×1.6rem≈0.45rem), 얇아 보이는 건
+       800 굵기로 보정해 %와 두께·높이를 통일 */
+    .stat-number .unit-x { font-size: 1.6rem; font-weight: 800; vertical-align: 0.28em; }
+    .stat-number .plus {
+      color: #5b74a3;
+    }
+    .stat-detail {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #8a8a8a;
+      margin-top: 10px;
+      max-width: 24ch;
+    }
+    @media (max-width: 640px) {
+      /* 모바일 2열 — 라벨이 1줄/2줄로 갈려도 min-height(2줄 분량)가 자리를 잡아
+         같은 행의 수치 시작 높이가 항상 정렬됨. detail 줄바꿈은 행 아래쪽에서만 발생 */
+      .stat-grid { grid-template-columns: repeat(2, 1fr); column-gap: 18px; row-gap: 30px; }
+      .stat-label { font-size: 1rem; min-height: 2.7rem; margin-bottom: 10px; }
+      .stat-label::before { margin-top: 0.4rem; }
+      .stat-number { font-size: 2.35rem; }
+      .stat-number .unit { font-size: 1.2rem; }
+      .stat-number .unit-x { font-size: 1.35rem; }
+      .stat-detail { font-size: 0.88rem; margin-top: 8px; max-width: none; }
+    }
+
+    .team-result-period {
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid #ececec;
+      font-size: 0.95rem;
+      line-height: 1.05;
+      color: #a8a8a8;
+      white-space: pre-line;
+    }
+    @media (max-width: 640px) {
+      .team-result-period { font-size: 0.88rem; }
+    }
+
+    /* ------------ 케이스 스터디 각주 — 카드 없이 옅은 글씨로만 ------------ */
+    .case-footnote {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 12px 16px 32px;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      color: #a8a8a8;
+      font-variant-numeric: tabular-nums;
+    }
+    .case-footnote-title {
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #969696;
+    }
+    .case-footnote-body { text-align: left; }
+    .case-footnote p + p { margin-top: 4px; }
+
+    /* ------------ 매출 추이 차트 (애플 Stocks/Health류 미니멀 곡선 스타일) ------------
+       사이트 폰트(Apple SD Gothic Neo 계열)만 사용 — 텍스트는 body에서 상속, 숫자 정렬은
+       tabular-nums로. 2구간 — decline(하락, 절제된 로즈 #b16c7a — 사이트에서 유일하게
+       쓰는 "경고" 색) → recover(회복, 포인트 컬러 #5b74a3 — posts.astro 카드 링/스탯
+       포인트와 항상 통일). 축/그리드/평균선 없이 곡선과 최소 라벨만 남겨 여백 위주로 구성 */
+    /* 데이터 출처 캡션 — stat-label과 동일한 디자인(1.08rem/700/#111 + 포인트 링 도트),
+       그래프 왼쪽 상단에 배치 */
+    .trend-unit-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 1.08rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #111;
+      line-height: 1.35;
+      margin: 0 0 10px;
+    }
+    .trend-unit-label::before {
+      content: '';
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #e4e9f3;
+      border: 1.5px solid #5b74a3;
+      flex: none;
+    }
+    @media (max-width: 640px) {
+      .trend-unit-label { font-size: 1rem; }
+    }
+    /* 플롯 래퍼 — SVG(선·면·도트)와 HTML 텍스트 오버레이를 겹쳐 얹는 기준 컨테이너.
+       SVG는 width:100%/height:auto라 viewBox 비율대로 박스가 잡히고, 오버레이는 그
+       박스에 대한 % 좌표로 데이터 포인트에 정렬됨 */
+    .trend-plot {
+      position: relative;
+      margin-top: 4px;
+    }
+    .trend-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    /* 라인 전체 아래 통합 면 — 좌우 컬러 그라디언트 + 상하 페이드 마스크는 마크업 style로 지정 */
+    .trend-area { stroke: none; }
+    /* 연속 곡선 — 얇은 실선. (stroke-dasharray 그리기 애니메이션이 pathLength=100 정규화에
+       의존하므로 non-scaling-stroke는 쓰지 않음 — 둘을 겹치면 대시가 화면 px로 재해석돼
+       선이 점선처럼 끊김) */
+    .trend-line {
+      fill: none; stroke-width: 1.8;
+      stroke-linejoin: round; stroke-linecap: round;
+    }
+    .trend-hit { fill: transparent; }
+    /* 시작·저점·끝 흰 도트 — 선 색 링(non-scaling-stroke) */
+    .trend-dot { fill: #ffffff; stroke: #5F6E7A; stroke-width: 1.6; }
+    .trend-dot.dot-end,
+    .trend-dot.dot-takeover { stroke: #5b74a3; }
+
+    /* ── HTML 텍스트 오버레이 — SVG 밖이라 컨테이너 스케일과 무관하게 항상 고정 rem ── */
+    .trend-ovl {
+      position: absolute;
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    /* 월 라벨 — 플롯 하단 라인 바로 아래. 양 끝은 start/end 정렬로 가장자리 클리핑 방지 */
+    .trend-ovl-month {
+      transform: translate(-50%, 8px);
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+      color: #A0A8AF;
+    }
+    .trend-ovl-month.ovl-start { transform: translate(0, 8px); }
+    .trend-ovl-month.ovl-end { transform: translate(-100%, 8px); }
+    /* 값 라벨 — 각 도트 바로 위. 금액은 읽혀야 하므로 살짝 크게·진하게 */
+    .trend-ovl-value {
+      transform: translate(-50%, calc(-100% - 8px));
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #5a6472;
+      font-variant-numeric: tabular-nums;
+    }
+    /* 양 끝 값 라벨은 살짝 더 띄워 곡선(최고점)과 여유를 둠 */
+    .trend-ovl-value.ovl-start { transform: translate(0, calc(-100% - 13px)); }
+    .trend-ovl-value.ovl-end { transform: translate(-100%, calc(-100% - 13px)); }
+    /* 합류 시점 말풍선 — 저점 값 라벨 위에 포인트 컬러 필 + 아래를 가리키는 꼬리 */
+    .trend-ovl-bubble {
+      transform: translate(-50%, calc(-100% - 46px));
+      background: #5b74a3;
+      color: #fff;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 3px 11px;
+      border-radius: 11px;
+    }
+    .trend-ovl-bubble::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 100%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-bottom: 0;
+      border-top-color: #5b74a3;
+    }
+    @media (max-width: 640px) {
+      /* 모바일에서 월 라벨이 상대적으로 커 보여 축소 */
+      .trend-ovl-month { font-size: 0.7rem; transform: translate(-50%, 6px); }
+      .trend-ovl-month.ovl-start { transform: translate(0, 6px); }
+      .trend-ovl-month.ovl-end { transform: translate(-100%, 6px); }
+      .trend-ovl-value { font-size: 0.8rem; }
+      .trend-ovl-bubble { transform: translate(-50%, calc(-100% - 56px)); }
+    }
+    /* 라인 드로잉 애니메이션 — 페이지 진입 시 왼쪽에서 오른쪽으로 한 번 그려짐.
+       곡선(Bezier) 실제 길이를 예측하기 어려우므로 pathLength="100" 정규화 값 기준 */
+    @media (prefers-reduced-motion: no-preference) {
+      .trend-line {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+        animation: trend-draw 1.6s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+    }
+    @keyframes trend-draw { to { stroke-dashoffset: 0; } }
   </style>
 
 <script>
@@ -304,14 +1492,18 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      // 스크롤로 뷰포트에 들어오는 본문 섹션(card-shell)을 fade in — 나갔다 다시 들어올 때마다 매번 재생
+      // 스크롤로 뷰포트에 들어오는 본문 섹션(card-shell)을 fade in — 나갔다 다시 들어올 때마다 매번 재생.
+      // 주의: 고정 threshold 0.15만 쓰면 뷰포트의 6배 넘게 긴 카드(모바일의 ver2 등)는
+      // 교차비가 절대 0.15에 못 미쳐 영영 안 보이게 됨 — 카드 높이에 맞춰 문턱을 낮춰 판정
       const fadeSections = document.querySelectorAll('.fade-section');
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
-            entry.target.classList.toggle('is-visible', entry.isIntersecting);
+            const h = entry.boundingClientRect.height;
+            const needed = Math.min(0.15, h > 0 ? (window.innerHeight * 0.2) / h : 0.15);
+            entry.target.classList.toggle('is-visible', entry.isIntersecting && entry.intersectionRatio >= needed);
           });
-        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        }, { threshold: [0, 0.03, 0.06, 0.1, 0.15], rootMargin: '0px 0px -40px 0px' });
         fadeSections.forEach((section) => io.observe(section));
       } else {
         fadeSections.forEach((section) => section.classList.add('is-visible'));
@@ -322,6 +1514,63 @@ const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : nu
       requestAnimationFrame(() => requestAnimationFrame(() => {
         loadFadeEls.forEach((el) => el.classList.add('is-loaded'));
       }));
+
+      // Featured Emails — 아이폰 목업 세로 스크롤. 회색 세로 레일 위의 고정 크기
+      // 원형 손잡이(knob)가 스크롤 진행도만큼 위→아래로 이동. 이미지 로드 후 재계산
+      document.querySelectorAll('.fe-phone').forEach(function(phone) {
+        const screen = phone.querySelector('.fe-phone-screen');
+        const rail = phone.querySelector('.fe-rail');
+        const knob = phone.querySelector('.fe-rail-knob');
+        if (!screen || !rail || !knob) return;
+        const update = () => {
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          phone.classList.toggle('no-scroll', maxScroll < 6);
+          if (maxScroll < 6) return;
+          const travel = Math.max(0, rail.clientHeight - knob.offsetHeight);
+          const clampedScroll = Math.max(0, Math.min(screen.scrollTop, maxScroll));
+          knob.style.top = (clampedScroll / maxScroll * travel) + 'px';
+        };
+        screen.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        // 여러 이미지/GIF가 순차 로드되며 scrollHeight가 계속 늘어날 수 있으므로
+        // 첫 장뿐 아니라 모든 미디어의 로드·크기 변화를 감지한다.
+        const images = screen.querySelectorAll('img');
+        images.forEach((img) => {
+          if (!img.complete) {
+            img.addEventListener('load', update, { once: true });
+            img.addEventListener('error', update, { once: true });
+          }
+        });
+        if ('ResizeObserver' in window) {
+          const mediaResizeObserver = new ResizeObserver(update);
+          images.forEach(img => mediaResizeObserver.observe(img));
+        }
+        window.addEventListener('load', update, { once: true });
+        requestAnimationFrame(update);
+
+        // 손잡이 드래그 — 포인터 캡처로 알약을 잡고 끌면 화면이 비례해 스크롤
+        let dragging = false, dragStartY = 0, dragStartTop = 0;
+        knob.addEventListener('pointerdown', (e) => {
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          if (maxScroll < 6) return;
+          dragging = true;
+          dragStartY = e.clientY;
+          dragStartTop = screen.scrollTop;
+          knob.setPointerCapture(e.pointerId);
+          e.preventDefault();
+        });
+        knob.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          const travel = Math.max(0, rail.clientHeight - knob.offsetHeight);
+          if (travel <= 0) return;
+          const nextScroll = dragStartTop + (e.clientY - dragStartY) / travel * maxScroll;
+          screen.scrollTop = Math.max(0, Math.min(nextScroll, maxScroll));
+        });
+        const endDrag = () => { dragging = false; };
+        knob.addEventListener('pointerup', endDrag);
+        knob.addEventListener('pointercancel', endDrag);
+      });
 
       document.querySelectorAll('.my-carousel').forEach(function(carousel) {
         if (carousel.classList.contains('marquee-mode')) return;

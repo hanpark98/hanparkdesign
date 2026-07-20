@@ -131,10 +131,12 @@ const posts = allPosts
        hover:hover 미디어쿼리로 감싸서, 진짜 마우스/트랙패드가 있는 기기에서만 적용 —
        터치 기기는 스크롤 중 손가락이 스쳐도 :hover가 걸려서 스크롤할 때마다
        링이 켜지는 문제가 있었음. 터치 기기의 피드백은 is-touch-active(탭 시에만)가 담당 */
+    /* 포인트 컬러(#5b74a3) — 본문 페이지 성과 인포그래픽의 포인트 컬러와 통일.
+       색을 바꿀 땐 [slug].astro의 stat-number/.stat-label::before도 같이 바꿀 것 */
     @media (hover: hover) {
       .post-card:hover {
         box-shadow:
-          0 0 0 4px #747e89,
+          0 0 0 4px #5b74a3,
           0 24px 40px -14px rgba(17, 17, 17, 0.32);
       }
     }

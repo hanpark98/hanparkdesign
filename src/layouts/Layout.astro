@@ -382,6 +382,9 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
         });
       }
 
+      // 임시 복사 방지 토글 — 다시 활성화할 때 true로 변경.
+      const ANTI_COPY_ENABLED = false;
+
       // 카드 자체는 기울지 않고, 안의 이미지만 마우스를 따라 패럴랙스 이동 (.parallax-card)
       function setupParallaxOnlyCards() {
         const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -604,7 +607,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
 
       function setupAll() {
         setupVideoControls();
-        setupAntiCopy();
+        if (ANTI_COPY_ENABLED) setupAntiCopy();
         setupTiltCards();
         setupParallaxOnlyCards();
         setupScrollParallax();

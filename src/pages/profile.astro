@@ -2,7 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 
 const experience = [
-  { year: '2027', org: 'MUGUHADA', role: 'Head of Design / Co-Founder', url: 'https://www.muguhada.com' },
+  // MUGUHADA 관련 정보 일시적으로 숨김 처리 — 나중에 다시 켤 수 있게 남겨둠
+  // { year: '2027', org: 'MUGUHADA', role: 'Head of Design / Co-Founder', url: 'https://www.muguhada.com' },
   { year: '2026', org: 'Han Design', role: 'Graphic Designer' },
   { year: '2023–2025', org: 'Kijibae', orgSuffix: 'DIY Nails', role: 'Graphic Designer', url: 'https://www.shopkijibae.com' },
   { year: '2023–2025', org: 'BAZZAAL', orgSuffix: 'Marketing Agency', role: 'Graphic Designer', url: 'https://www.bazzaal.com/' },
@@ -167,6 +168,39 @@ const awardGroups = groupByYear(awards);
       </div>
     </div>
 
+    <!-- Project Highlights -->
+    <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
+      <div class="cv-heading">Project Highlights</div>
+      <div class="highlights-grid">
+        <a href="/posts/260322 Oliveyoung" class="highlight-item">
+          <div class="skills-category">Olive Young</div>
+          <div class="cv-feature-image client-thumb">
+            <img src="/images/posts/260322 Oliveyoung/oliveyoung_thumb.webp" alt="Olive Young" />
+          </div>
+        </a>
+        <a href="/posts/260331 Mediheal" class="highlight-item">
+          <div class="skills-category">Mediheal</div>
+          <div class="cv-feature-image client-thumb">
+            <img src="/images/posts/260331 Mediheal/thumb2.webp" alt="Mediheal" />
+          </div>
+        </a>
+        {/* VT Cosmetics, Bodhi Light International 일시적으로 숨김 — 나중에 다시 켤 수 있게 여기 남겨둠
+        <a href="/posts/260215 VT cosmetics" class="highlight-item">
+          <div class="skills-category">VT Cosmetics</div>
+          <div class="cv-feature-image client-thumb">
+            <img src="/images/posts/260215 VT cosmetics/thumb.webp" alt="VT Cosmetics" />
+          </div>
+        </a>
+        <a href="/posts/260221 Relics" class="highlight-item">
+          <div class="skills-category">Bodhi Light International</div>
+          <div class="cv-feature-image client-thumb">
+            <img src="/images/posts/260221 Relics/relic_thumb.webp" alt="Bodhi Light International" />
+          </div>
+        </a>
+        */}
+      </div>
+    </div>
+
     <!-- Experience -->
     <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
       <div class="cv-heading">Experience</div>
@@ -233,7 +267,7 @@ const awardGroups = groupByYear(awards);
                       <div class="cv-text">
                         <div class="cv-org">
                           {orgLineBreaks[item.org] ? (
-                            <>{orgLineBreaks[item.org][0]}<br class="mobile-break" />{orgLineBreaks[item.org][1]}</>
+                            <>{orgLineBreaks[item.org][0]}{' '}<br class="mobile-break" />{orgLineBreaks[item.org][1]}</>
                           ) : item.org}
                           <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
                         </div>
@@ -284,7 +318,7 @@ const awardGroups = groupByYear(awards);
                   <div class="cv-text">
                     <div class="cv-org">
                       {orgLineBreaks[item.org] ? (
-                        <>{orgLineBreaks[item.org][0]}<br class="mobile-break" />{orgLineBreaks[item.org][1]}</>
+                        <>{orgLineBreaks[item.org][0]}{' '}<br class="mobile-break" />{orgLineBreaks[item.org][1]}</>
                       ) : item.org}
                       <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
                     </div>
@@ -332,8 +366,9 @@ const awardGroups = groupByYear(awards);
           <div class="lang-name">English</div>
           <div class="lang-detail">
             <div class="lang-level">Professional Working Proficiency</div>
-            {/* 취득일(Jan 2022)은 화면엔 숨김 — 나중에 다시 켤 수 있게 여기 남겨둠 */}
+            {/* 취득일(Jan 2022), 어학 점수 모두 일시적으로 화면엔 숨김 — 나중에 다시 켤 수 있게 여기 남겨둠
             <div class="lang-score">TOEIC 955 · OPIc IH</div>
+            */}
           </div>
         </div>
         <div class="lang-row">
@@ -713,6 +748,24 @@ const awardGroups = groupByYear(awards);
       line-height: 1.5;
       margin-top: 4px;
     }
+
+    /* ------------ Project Highlights (2열 그리드, 내부 게시글로 이동하는 링크) ------------ */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 16px;
+      margin-top: 15px;
+      margin-bottom: 22px;
+    }
+    .highlight-item {
+      display: block;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+    .highlight-item:hover { opacity: 0.85; }
+    .highlight-item .skills-category { font-size: 0.98rem; }
+    .client-thumb { margin-top: 11px; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+    .highlight-item:hover .client-thumb { transform: scale(1.02); }
 
     /* ------------ Education ------------
        org/role는 Experience와 동일한 cv-org/cv-role을 재사용.

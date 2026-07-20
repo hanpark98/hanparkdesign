@@ -140,8 +140,8 @@ img, video {
 }
 
 body {
-  -webkit-user-select: none;
-  user-select: none;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* ----------- 캐러셀 수정본 ----------- */
