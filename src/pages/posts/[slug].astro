@@ -240,7 +240,9 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
               </div>
               <div class="role-grid">
                 <div class="role-col">
-                  <div class="role-col-heading">Team</div>
+                  <div class="role-col-heading">
+                    Team{frontmatter.role.agency && <> · {frontmatter.role.agency}</>}
+                  </div>
                   <ul class="role-list">
                     {frontmatter.role.team.map(person => (
                       <li class:list={{ 'is-me': person.mine }}>
@@ -368,6 +370,9 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
               {frontmatter.statSections[0].subtitle && (
                 <div class="team-result-period">{frontmatter.statSections[0].subtitle}</div>
               )}
+              {frontmatter.statSections[0].source && (
+                <div class="section-source">{frontmatter.statSections[0].source}</div>
+              )}
             </div>
           )}
 
@@ -387,6 +392,9 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
                   </div>
                 ))}
               </div>
+              {frontmatter.statSections[1].source && (
+                <div class="section-source">{frontmatter.statSections[1].source}</div>
+              )}
             </div>
           )}
 
@@ -481,6 +489,9 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
               </div>
               {frontmatter.statSections[2].note && (
                 <div class="team-result-period">{frontmatter.statSections[2].note}</div>
+              )}
+              {frontmatter.statSections[2].source && (
+                <div class="section-source">{frontmatter.statSections[2].source}</div>
               )}
             </div>
           )}
@@ -583,8 +594,8 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
 <style is:global>
     .card-shell { border-radius: 16px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.02); overflow: hidden; }
 
-    /* 스크롤로 뷰포트에 들어오는 본문 섹션을 아래→위로 fade in — posts/profile 페이지와 같은 패턴,
-       나갔다 다시 들어올 때마다 매번 재생 */
+    /* 스크롤로 뷰포트에 들어오는 본문 섹션을 아래→위로 fade in.
+       화면을 벗어났다가 다시 들어오면 재생하되, 판정은 transform과 무관한 레이아웃 좌표로 처리 */
     .fade-section {
       opacity: 0;
       transform: translateY(28px);
@@ -1211,17 +1222,29 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
       .stat-detail { font-size: 0.88rem; margin-top: 8px; max-width: none; }
     }
 
+    .team-result-period,
+    .section-source {
+      font-size: 0.95rem;
+      line-height: 1.05;
+      color: #a8a8a8;
+    }
     .team-result-period {
       margin-top: 28px;
       padding-top: 16px;
       border-top: 1px solid #ececec;
-      font-size: 0.95rem;
-      line-height: 1.05;
-      color: #a8a8a8;
       white-space: pre-line;
     }
+    .section-source {
+      margin-top: 10px;
+    }
+    .stat-grid + .section-source {
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid #ececec;
+    }
     @media (max-width: 640px) {
-      .team-result-period { font-size: 0.88rem; }
+      .team-result-period,
+      .section-source { font-size: 0.88rem; }
     }
 
     /* ------------ 케이스 스터디 각주 — 카드 없이 옅은 글씨로만 ------------ */
@@ -1492,21 +1515,66 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      // 스크롤로 뷰포트에 들어오는 본문 섹션(card-shell)을 fade in — 나갔다 다시 들어올 때마다 매번 재생.
-      // 주의: 고정 threshold 0.15만 쓰면 뷰포트의 6배 넘게 긴 카드(모바일의 ver2 등)는
-      // 교차비가 절대 0.15에 못 미쳐 영영 안 보이게 됨 — 카드 높이에 맞춰 문턱을 낮춰 판정
-      const fadeSections = document.querySelectorAll('.fade-section');
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            const h = entry.boundingClientRect.height;
-            const needed = Math.min(0.15, h > 0 ? (window.innerHeight * 0.2) / h : 0.15);
-            entry.target.classList.toggle('is-visible', entry.isIntersecting && entry.intersectionRatio >= needed);
-          });
-        }, { threshold: [0, 0.03, 0.06, 0.1, 0.15], rootMargin: '0px 0px -40px 0px' });
-        fadeSections.forEach((section) => io.observe(section));
-      } else {
+      // 스크롤로 뷰포트에 들어오는 본문 섹션(card-shell)을 fade in하고,
+      // 벗어났다가 다시 들어오면 재생한다. getBoundingClientRect/IntersectionObserver는
+      // translateY의 영향을 받아 경계에서 판정이 반복될 수 있으므로, transform과 무관한
+      // offsetTop/offsetHeight를 기준으로 실제 레이아웃의 교차 영역을 계산한다.
+      const fadeSections = document.querySelectorAll<HTMLElement>('.fade-section');
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         fadeSections.forEach((section) => section.classList.add('is-visible'));
+      } else {
+        const getLayoutTop = (element: HTMLElement) => {
+          let top = 0;
+          let node: HTMLElement | null = element;
+          while (node) {
+            top += node.offsetTop;
+            node = node.offsetParent as HTMLElement | null;
+          }
+          return top;
+        };
+
+        let fadeTicking = false;
+        const updateFadeSections = () => {
+          const viewportTop = Math.max(
+            window.scrollY,
+            document.documentElement.scrollTop,
+            document.body.scrollTop
+          );
+          const viewportBottom = viewportTop + window.innerHeight - 40;
+
+          fadeSections.forEach((section) => {
+            const height = section.offsetHeight;
+            const sectionTop = getLayoutTop(section);
+            const sectionBottom = sectionTop + height;
+            const visiblePixels = Math.max(
+              0,
+              Math.min(sectionBottom, viewportBottom) - Math.max(sectionTop, viewportTop)
+            );
+            const neededPixels = Math.min(height * 0.15, window.innerHeight * 0.2);
+            const isVisible = section.classList.contains('is-visible');
+
+            if (!isVisible && visiblePixels >= neededPixels) {
+              section.classList.add('is-visible');
+            } else if (isVisible && visiblePixels <= 0) {
+              section.classList.remove('is-visible');
+            }
+          });
+
+          fadeTicking = false;
+        };
+
+        const requestFadeUpdate = () => {
+          if (fadeTicking) return;
+          fadeTicking = true;
+          requestAnimationFrame(updateFadeSections);
+        };
+
+        // 모바일에서는 body/document가 실제 스크롤 컨테이너가 될 수 있고 scroll 이벤트는
+        // 버블링되지 않으므로 document의 캡처 단계에서 모든 문서 스크롤을 받는다.
+        document.addEventListener('scroll', requestFadeUpdate, { passive: true, capture: true });
+        window.addEventListener('resize', requestFadeUpdate);
+        window.addEventListener('load', requestFadeUpdate);
+        requestFadeUpdate();
       }
 
       // 처음 두 섹션은 스크롤과 상관없이 페이지 진입 시 바로 fade in

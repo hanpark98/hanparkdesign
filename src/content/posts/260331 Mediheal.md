@@ -1,12 +1,13 @@
 ---
 title: "Mediheal"
 format: wide
-description: "Email & SMS Marketing"
+description: "CRM & Performance Creative"
 image: "/images/posts/260331 Mediheal/thumb2.webp"
 category: ["Marketing", "E-commerce"]
 date: "2025-12-31"
 hideMarkdownBody: true
 role:
+  agency: "BAZZAAL"
   team:
     - name: "Rocky"
       part: "Lead"
@@ -53,7 +54,7 @@ revenueTrend:
 statSections:
   - title: "Team Results"
     subtitle: |-
-      Comparison: Aug 1–31, 2025 vs Dec 1–29, 2025.
+      Source: Shopify / Comparison: Aug 1–31 vs Dec 1–29, 2025.
       August represents the previous agency’s last full operating month. September was excluded as a transition and setup period.
     stats:
       - label: "Total Sales"
@@ -76,6 +77,7 @@ statSections:
         unit: "% Lower"
         detail: "From 16.9% to 7.1%, less discounting, more revenue"
   - title: "My Results — CRM Design"
+    source: "Klaviyo · Sep–Dec 2025"
     stats:
       - label: "Best Click Rate"
         value: "9.70"
@@ -95,7 +97,8 @@ statSections:
         unit: "/mo"
         detail: "80 sends from Sep to Dec 2025"
   - title: "My Results — Performance Ad Creative (Meta)"
-    note: "Creative-level metrics only. Media buying, budget, and targeting were owned separately."
+    source: "Meta Ads Manager · Oct 13–Nov 30, 2025"
+    note: "Creative-level metrics only; media buying, budget, and targeting were owned separately."
     stats:
       - label: "Best Thumb-Stop Rate"
         value: "47.53"
@@ -232,11 +235,6 @@ featuredEmails:
           exactRevenue: "$934.91"
           heroLabel: "Revenue"
           sub: "Open 10.23% · Click 0.20% · 131 clicked recipients · 12 purchasers"
-footnotes:
-  - "Client: Mediheal US (K-beauty D2C) · Agency: BAZZAAL · My role: Graphic Designer — Email Creative."
-  - "\"Team Result\" reflects BAZZAAL's overall outcome; my scope was email creative. Strategy, segmentation, SMS, and Meta operations are handled by other team members."
-  - "Revenue / orders / discounts: Shopify. Click / open rates: Klaviyo sends. Account average CTR (0.45%): Klaviyo 30-day benchmark."
-  - "December figures are partial (Dec 1–29). Campaign count (80) covers Sep–Dec 2025 sends. Meta metrics are from weekly reporting (Oct 13–Nov 30); media buying and targeting are handled separately."
 intro: |
   ### Key Takeaways
 
