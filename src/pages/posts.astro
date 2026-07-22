@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { personId, siteData } from '../data/site';
 
 // .md 파일 수집
 const postFiles = Object.entries(import.meta.glob('../content/posts/*.md', { eager: true }));
@@ -23,7 +24,17 @@ const posts = allPosts
   .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0));
 ---
 
-<Layout title="Han Park | Projects">
+<Layout
+  title={`${siteData.name} | Projects`}
+  description="Selected graphic design, branding, performance marketing, and DTC e-commerce projects by Han Park."
+  schema={{
+    '@type': 'CollectionPage',
+    '@id': `${siteData.url}/posts/#collection`,
+    name: 'Selected Projects by Han Park',
+    url: `${siteData.url}/posts/`,
+    author: { '@id': personId },
+  }}
+>
   <div class="bg-[#ebe9e5] min-h-screen">
 
     <!-- 포스트 목록 -->
@@ -31,12 +42,12 @@ const posts = allPosts
       <!-- 항상 맨 앞에 고정되는 프로필 카드 — 카테고리 필터와 무관하게 항상 보임 -->
       <a href="/profile" class="group post-card tilt-card">
         <div class="w-full aspect-square overflow-hidden profile-grid-thumb">
-          <img src="/images/website/profile-thumb.webp" alt="Han Park"
+          <img src={siteData.image} alt={siteData.name}
                class="tilt-card-thumb w-full h-full object-cover"/>
         </div>
         <div class="post-card-content">
           <h3 class="post-card-title">Profile</h3>
-          <p class="post-card-desc">Han Park — Graphic Designer</p>
+          <p class="post-card-desc">{siteData.name} — {siteData.jobTitle}</p>
         </div>
       </a>
       {posts.map(p => (

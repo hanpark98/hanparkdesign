@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(GPTBot|ClaudeBot|anthropic-ai|CCBot|Bytespider|cohere-ai|Meta-ExternalAgent).*"
+        }
+      ],
+      "mitigate": {
+        "action": "deny"
+      }
+    }
+  ]
+}

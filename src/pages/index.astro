@@ -1,15 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { siteData } from '../data/site';
 ---
 
-<Layout title="Han Park | Graphic Design">
+<Layout title={`${siteData.name} | ${siteData.jobTitle}`}>
   <section id="home-hero" class="w-full flex flex-col full-viewport section-clip" style="position:relative;">
 
     <div id="home-bar" class="w-full">
       <div class="home-bar">
         <a href="/" class="home-brand" aria-label="홈">
           <img src="/images/website/logo.svg" alt="" class="home-logo" />
-          <span class="home-brand-title">Han Park</span>
+          <span class="home-brand-title">{siteData.name}</span>
         </a>
         <nav class="home-nav">
           <a class="home-link" href="/profile">Profile</a>
@@ -28,7 +29,7 @@ import Layout from '../layouts/Layout.astro';
           <img class="hero-logo-img hero-logo-loop" src="/images/website/hero-logo-loop.webp" alt="" />
           <img class="hero-logo-img hero-logo-hover" src="/images/website/hero-logo-hover.webp" alt="" />
         </div>
-        <span class="sr-only">Han Park — Graphic Design Portfolio</span>
+        <span class="sr-only">{siteData.name} — {siteData.jobTitle} Portfolio</span>
       </div>
     </div>
 

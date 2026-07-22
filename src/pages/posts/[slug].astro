@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { personId, siteData } from '../../data/site';
 import { marked } from 'marked'; 
 import { readdir } from 'node:fs/promises';
 import { resolve, sep } from 'node:path';
@@ -203,9 +204,28 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
   trendChart = buildTrendChart(trend, { W: 640, PAD_X: 14, PLOT_TOP: 52, PLOT_BOTTOM: 214, H: 282 });
   trendChartMobile = buildTrendChart(trend, { W: 340, PAD_X: 12, PLOT_TOP: 52, PLOT_BOTTOM: 152, H: 206 });
 }
+
+const projectURL = `${siteData.url}${Astro.url.pathname}`;
+const projectSchema = {
+  '@type': 'CreativeWork',
+  '@id': `${projectURL}#project`,
+  name: frontmatter.title,
+  description: frontmatter.description,
+  url: projectURL,
+  image: frontmatter.image ? new URL(frontmatter.image, siteData.url).href : undefined,
+  dateCreated: frontmatter.date,
+  genre: Array.isArray(frontmatter.category) ? frontmatter.category : [frontmatter.category].filter(Boolean),
+  creator: { '@id': personId },
+};
 ---
 
-<Layout title={`Han Park | ${frontmatter.title}`}>
+<Layout
+  title={`${siteData.name} | ${frontmatter.title}`}
+  description={frontmatter.description || siteData.description}
+  image={frontmatter.image || siteData.image}
+  type="article"
+  schema={projectSchema}
+>
   <div class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen">
     <!-- 충분한 좌측 여백이 생기는 2xl부터만 버튼을 바깥 레일에 배치하고,
          그보다 좁은 화면에서는 본문 위의 정상 플로우에 두어 콘텐츠와 겹치지 않게 함 -->
@@ -553,13 +573,12 @@ if (frontmatter.revenueTrend?.points?.length > 1) {
           <div class="p-6 sm:p-8 mb-4 card-shell fade-section" style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;">
             <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]"><span>Got any Questions?</span></div>
             <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
-              With 9+ years of experience ranging from marketing to motion graphics, I know the industry out.<br>
+              {siteData.jobTitle} with {siteData.experience}.<br>
               Whether you have a project in mind or a question you’re burning to ask, fire away!
             </p>
             <div class="text-[1rem] mt-3 flex gap-4">
               <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Profile</a>
-              <a href="mailto:hanparkdesign@gmail.com" class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
-              <a href="https://www.instagram.com/hanparkdesign/" target="_blank" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Instagram</a>
+              <a href={`mailto:${siteData.email}`} class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
             </div>
           </div>
 

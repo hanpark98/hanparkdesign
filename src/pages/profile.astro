@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { personId, siteData } from '../data/site';
 
 const experience = [
   // MUGUHADA 관련 정보 일시적으로 숨김 처리 — 나중에 다시 켤 수 있게 남겨둠
@@ -83,7 +84,17 @@ const experienceGroups = groupByYear(experience);
 const awardGroups = groupByYear(awards);
 ---
 
-<Layout title="Han Park | Profile">
+<Layout
+  title={`${siteData.name} | Profile`}
+  description={siteData.description}
+  schema={{
+    '@type': 'ProfilePage',
+    '@id': `${siteData.url}/profile/#profile`,
+    name: `${siteData.name} — ${siteData.jobTitle}`,
+    url: `${siteData.url}/profile/`,
+    mainEntity: { '@id': personId },
+  }}
+>
   <div class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen">
     <!-- lg+: 버튼을 플로우에서 빼서 왼쪽 여백에 절대 위치시키고, 프로필 카드와 같은 높이(lg:top-4 = 위 wrapper의 lg:pt-4와 동일 기준점)에 맞춤 -->
     <div id="category-nav" class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 lg:mb-0 lg:px-0 lg:absolute lg:top-4 lg:left-6 justify-start items-center">
@@ -99,15 +110,15 @@ const awardGroups = groupByYear(awards);
     <!-- 프로필 카드 -->
     <div class="profile-card fade-section max-w-xl mx-auto mb-4 bg-white rounded-[16px] overflow-hidden">
       <div class="profile-card-content text-center">
-        <img src="/images/website/logo.svg" alt="Han Park" class="profile-logo-mark" />
-        <div class="profile-name">Han Park<br />박한결</div>
-        <div class="profile-title">Graphic Designer</div>
-        <div class="profile-location">Based in Seoul, South Korea (GMT+9)</div>
+        <img src="/images/website/logo.svg" alt={siteData.name} class="profile-logo-mark" />
+        <div class="profile-name">{siteData.name}<br />{siteData.alternateName}</div>
+        <div class="profile-title">{siteData.jobTitle}</div>
+        <div class="profile-location">Based in {siteData.location.city}, {siteData.location.country} (GMT+9)</div>
 
         <div class="profile-divider"></div>
 
         <blockquote class="profile-quote">
-          I build demand for brands.<br />Creative direction, performance marketing, and DTC e-commerce, with a focus on growing <span class="nowrap">K-beauty</span> in North America.
+          {siteData.taglineLead}<br />{siteData.taglineDetail}
         </blockquote>
       </div>
     </div>
@@ -116,28 +127,19 @@ const awardGroups = groupByYear(awards);
     <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
       <div class="cv-heading">Contact</div>
       <div class="contact-list">
-        <a href="https://www.linkedin.com/in/hanparkdesign/" target="_blank" rel="noopener noreferrer" class="contact-row">
+        <a href={siteData.linkedin} target="_blank" rel="noopener noreferrer" class="contact-row">
           <span class="contact-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="8.3" cy="8.3" r="0.7" fill="currentColor" stroke="none"/><path d="M8.3 10.8V17"/><path d="M12.5 17v-3.8"/><path d="M12.5 13.2c0-1.3 1-2.2 2.2-2.2s2.3.9 2.3 2.2V17"/></svg>
           </span>
           <span class="contact-text">hanparkdesign</span>
           <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
         </a>
-        <a href="mailto:hanparkdesign@gmail.com" class="contact-row" id="email-contact" data-email="hanparkdesign@gmail.com">
+        <a href={`mailto:${siteData.email}`} class="contact-row" id="email-contact" data-email={siteData.email}>
           <span class="contact-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
           </span>
-          <span class="contact-text" id="email-contact-text">hanparkdesign@gmail.com</span>
+          <span class="contact-text" id="email-contact-text">{siteData.email}</span>
         </a>
-        {/* 인스타그램은 화면에서 숨김 — 나중에 다시 켤 수 있게 마크업은 남겨둠
-        <a href="https://www.instagram.com/hanparkdesign/" target="_blank" rel="noopener noreferrer" class="contact-row">
-          <span class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg>
-          </span>
-          <span class="contact-text">@hanparkdesign</span>
-          <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
-        </a>
-        */}
       </div>
     </div>
 

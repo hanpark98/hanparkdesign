@@ -1,7 +1,29 @@
 ---
 import '../styles/global.css';
 import Analytics from '@vercel/analytics/astro';
-const { title } = Astro.props;
+import {
+  personStructuredData,
+  siteData,
+  websiteStructuredData,
+} from '../data/site';
+
+const {
+  title = `${siteData.name} | ${siteData.jobTitle}`,
+  description = siteData.description,
+  image = siteData.image,
+  type = 'website',
+  schema = null,
+} = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, siteData.url).href;
+const socialImageURL = new URL(image, siteData.url).href;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    personStructuredData,
+    websiteStructuredData,
+    ...(schema ? (Array.isArray(schema) ? schema : [schema]) : []),
+  ],
+};
 const showNav = Astro.url.pathname !== '/';
 const showFooter = Astro.url.pathname !== '/';
 
@@ -13,11 +35,31 @@ const menuRawCategories = [...new Set(menuPosts.flatMap(p => Array.isArray(p.cat
 const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.includes(c)), ...menuRawCategories.filter(c => !menuCategoryOrder.includes(c))];
 ---
 
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>{title ?? '한결'}</title>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={`${siteData.name} (${siteData.alternateName})`} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={siteData.siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={socialImageURL} />
+    <meta property="og:image:alt" content={`${siteData.name} — ${siteData.jobTitle}`} />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
 
     <link rel="icon" type="image/svg+xml" href="/images/website/logo.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -227,7 +269,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
           margin-top: 0;
           flex-shrink: 0;
         ">
-          © {new Date().getFullYear()} Han Park | All rights reserved. | hanparkdesign@gmail.com
+          © {new Date().getFullYear()} {siteData.name} | All rights reserved. | {siteData.email}
         </footer>
       )}
     </div>
@@ -382,8 +424,8 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
         });
       }
 
-      // 임시 복사 방지 토글 — 다시 활성화할 때 true로 변경.
-      const ANTI_COPY_ENABLED = false;
+      // 복사 방지 활성화 상태.
+      const ANTI_COPY_ENABLED = true;
 
       // 카드 자체는 기울지 않고, 안의 이미지만 마우스를 따라 패럴랙스 이동 (.parallax-card)
       function setupParallaxOnlyCards() {

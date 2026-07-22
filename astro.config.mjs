@@ -5,7 +5,7 @@ import rehypeRaw from 'rehype-raw'
 import rehypeVideoPoster from './plugins/rehype-video-poster.mjs'
 
 export default defineConfig({
-  site: 'https://www.hanpark.kr',
+  site: 'https://hanparkdesign.com',
   integrations: [tailwind(), sitemap()],
   markdown: {
     rehypePlugins: [
