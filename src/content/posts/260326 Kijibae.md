@@ -2,7 +2,7 @@
 title: "Kijibae"
 format: wide
 description: "Semi-Cured Gel Nail Strips Branding"
-image: "/images/posts/260326 Kijibae/logo-thumb3.webp"
+image: "/images/posts/260326 Kijibae/thumb3.webp"
 category: ["Branding", "Motion & Content", "E-commerce"]
 date: "2024-07-07"
 intro:
@@ -43,13 +43,23 @@ intro:
   </div>
 </div>
 
-<div class="img-row keep-row">
+<div class="img-row">
   <div class="img-col ar-square">
-    <img src="/images/posts/260326 Kijibae/front-1-2.webp" />
+    <img src="/images/posts/260326 Kijibae/front-1-2darker.webp" />
   </div>
-  <div class="img-col ar-square">
-    <img src="/images/posts/260326 Kijibae/inside.webp" />
+  <div class="img-col ar-square kijibae-flat-alternate">
+    <img
+      src="/images/posts/260326 Kijibae/flat-1-1.webp"
+      alt="Kijibae nail strip package laid flat" />
+    <img
+      src="/images/posts/260326 Kijibae/flat-2-2.webp"
+      alt=""
+      aria-hidden="true" />
   </div>
+</div>
+
+<div class="img-col">
+  <img src="/images/posts/260326 Kijibae/life-2-2.webp" />
 </div>
 
 <div class="img-col">
