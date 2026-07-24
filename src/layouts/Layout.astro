@@ -343,8 +343,11 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
         const videos = document.querySelectorAll('video');
 
         videos.forEach((video) => {
-          // 홈 히어로 로고 영상은 자체 호버/역재생 로직을 쓰므로 캐러셀용 wrapper 처리에서 제외
-          if (video.classList.contains('hero-logo-video')) return;
+          // 자체 재생 로직 또는 장식 용도의 영상은 일반 콘텐츠용 컨트롤 처리에서 제외
+          if (
+            video.classList.contains('hero-logo-video') ||
+            video.classList.contains('decorative-video')
+          ) return;
 
           const isCarousel = video.classList.contains('my-carousel-img');
 

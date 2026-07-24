@@ -455,6 +455,33 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   border-radius: 10px;
 }
 
+.img-col .logo-animation-overlay {
+  position: absolute !important;
+  inset: 0;
+  z-index: 11;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 10px;
+  background-color: transparent;
+  filter: drop-shadow(0 2px 3px rgba(57, 13, 28, 0.15));
+  pointer-events: none;
+}
+
+.logo-animation-mobile {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .logo-animation-desktop {
+    display: none !important;
+  }
+
+  .logo-animation-mobile {
+    display: block !important;
+  }
+}
+
 /* 유튜브 전용 컨테이너 */
 .youtube-wrapper {
     position: relative;

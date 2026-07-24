@@ -2,7 +2,7 @@
 title: "Kijibae"
 format: wide
 description: "Semi-Cured Gel Nail Strips Branding"
-image: "/images/posts/260326 Kijibae/kjb_thumb.webp"
+image: "/images/posts/260326 Kijibae/logo-thumb3.webp"
 category: ["Branding", "Motion & Content", "E-commerce"]
 date: "2024-07-07"
 intro:
@@ -18,6 +18,38 @@ intro:
 
 <div class="img-col">
   <img src="/images/posts/260326 Kijibae/kjb_title.webp" />
+</div>
+
+<div class="img-row keep-row">
+  <div class="img-col ar-square">
+    <img src="/images/posts/260326 Kijibae/logo-rose2.webp" />
+    <video
+      class="my-carousel-img logo-animation-overlay logo-animation-desktop decorative-video"
+      src="/images/posts/260326 Kijibae/logo-ani.webm"
+      autoplay
+      loop
+      playsinline
+      muted
+      aria-hidden="true"
+      tabindex="-1"></video>
+    <img
+      class="logo-animation-overlay logo-animation-mobile"
+      src="/images/posts/260326 Kijibae/logo-ani-mobile.webp"
+      alt=""
+      aria-hidden="true" />
+  </div>
+  <div class="img-col ar-square">
+    <img src="/images/posts/260326 Kijibae/logo-thumb3.webp" />
+  </div>
+</div>
+
+<div class="img-row keep-row">
+  <div class="img-col ar-square">
+    <img src="/images/posts/260326 Kijibae/front-1-2.webp" />
+  </div>
+  <div class="img-col ar-square">
+    <img src="/images/posts/260326 Kijibae/inside.webp" />
+  </div>
 </div>
 
 <div class="img-col">
