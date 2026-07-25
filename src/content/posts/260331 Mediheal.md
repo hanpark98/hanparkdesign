@@ -235,6 +235,16 @@ featuredEmails:
           exactRevenue: "$934.91"
           heroLabel: "Revenue"
           sub: "Open 10.23% · Click 0.20% · 131 clicked recipients · 12 purchasers"
+storefrontVisuals:
+  title: "Storefront Visuals"
+  tag: "Touchpoints"
+  label: "Connecting Inbox to Storefront"
+  description: "Key-date campaign visuals carried from email into the storefront, creating a consistent journey from inbox to site and a more cohesive shopping experience."
+  frame: "/images/posts/260331 Mediheal/macmock.webp"
+  image: "/images/posts/260331 Mediheal/winterpc.webp"
+  alt: "MEDIHEAL winter campaign storefront"
+  mobileImage: "/images/posts/260331 Mediheal/wintermobile.webp"
+  mobileAlt: "MEDIHEAL winter campaign mobile storefront"
 intro: |
   ### Key Takeaways
 

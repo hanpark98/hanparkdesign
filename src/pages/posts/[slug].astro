@@ -426,7 +426,8 @@ const projectSchema = {
                 {frontmatter.featuredEmails.subtitle && <span class="subtitle">{frontmatter.featuredEmails.subtitle}</span>}
               </div>
               <div class="fe-groups">
-                {frontmatter.featuredEmails.groups.map(g => (
+                {frontmatter.featuredEmails.groups.map((g, groupIndex) => (
+                  <>
                   <div class="fe-group" class:list={{
                     'is-pair': g.type === 'pair',
                     'is-gallery': g.type === 'gallery',
@@ -486,6 +487,97 @@ const projectSchema = {
                       ))}
                     </div>
                   </div>
+                  {groupIndex === 0 && frontmatter.storefrontVisuals && (
+                    <div class="storefront-viewer" class:list={{ 'has-mobile': frontmatter.storefrontVisuals.mobileImage }}>
+                      <div class="storefront-copy">
+                        {frontmatter.storefrontVisuals.tag && (
+                          <div class="fe-tag">{frontmatter.storefrontVisuals.tag}</div>
+                        )}
+                        {frontmatter.storefrontVisuals.label && (
+                          <div class="storefront-label">{frontmatter.storefrontVisuals.label}</div>
+                        )}
+                        {frontmatter.storefrontVisuals.description && (
+                          <p class="storefront-description">{frontmatter.storefrontVisuals.description}</p>
+                        )}
+                      </div>
+
+                      <div class="storefront-scroll-unit storefront-mac">
+                        <div class="storefront-device">
+                          <div
+                            class="storefront-screen storefront-scroll-screen"
+                            tabindex="0"
+                            aria-label={`${frontmatter.storefrontVisuals.label || frontmatter.storefrontVisuals.title} — scrollable desktop storefront`}
+                          >
+                            <img
+                              src={frontmatter.storefrontVisuals.image}
+                              alt={frontmatter.storefrontVisuals.alt || `${frontmatter.title} storefront`}
+                              loading="lazy"
+                              draggable="false"
+                            />
+                          </div>
+                          <img
+                            class="storefront-frame"
+                            src={frontmatter.storefrontVisuals.frame}
+                            alt=""
+                            loading="lazy"
+                            draggable="false"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div class="storefront-rail">
+                          <button
+                            class="storefront-rail-knob"
+                            type="button"
+                            role="scrollbar"
+                            aria-label="Scroll desktop storefront preview"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                          >
+                            <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M2 5 5 2l3 3M2 13l3 3 3-3" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      {frontmatter.storefrontVisuals.mobileImage && (
+                        <div class="storefront-scroll-unit storefront-phone-wrap">
+                          <div class="storefront-phone">
+                            <div
+                              class="storefront-phone-screen storefront-scroll-screen"
+                              tabindex="0"
+                              aria-label={`${frontmatter.storefrontVisuals.label || frontmatter.storefrontVisuals.title} — scrollable mobile storefront`}
+                            >
+                              <img
+                                src={frontmatter.storefrontVisuals.mobileImage}
+                                alt={frontmatter.storefrontVisuals.mobileAlt || `${frontmatter.title} mobile storefront`}
+                                loading="lazy"
+                                draggable="false"
+                              />
+                            </div>
+                            <span class="storefront-dynamic-island" aria-hidden="true"></span>
+                          </div>
+                          <div class="storefront-rail">
+                            <button
+                              class="storefront-rail-knob"
+                              type="button"
+                              role="scrollbar"
+                              aria-label="Scroll mobile storefront preview"
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                              aria-valuenow="0"
+                            >
+                              <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 5 5 2l3 3M2 13l3 3 3-3" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  </>
                 ))}
               </div>
             </div>
@@ -1063,6 +1155,283 @@ const projectSchema = {
     .fe-rail-knob:active { cursor: grabbing; }
     .fe-rail-knob svg { width: 10px; height: 18px; }
     .fe-phone.no-scroll .fe-rail { display: none; }
+
+    /* ------------ Storefront Visuals — 투명 MacBook 목업 + 전체 페이지 탐색 ------------ */
+    .storefront-copy {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: 1fr;
+      align-items: end;
+      gap: 0;
+      /* 목업용 퍼센트 패딩과 무관하게 How I Work 타일의 텍스트 inset을 공유한다. */
+      width: calc(100% - var(--storefront-copy-inset) + var(--storefront-pad-x));
+      margin-left: calc(var(--storefront-copy-inset) - var(--storefront-pad-x));
+      margin-bottom: 0;
+    }
+    .storefront-label {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      color: #111;
+      margin-bottom: 12px;
+    }
+    .storefront-description {
+      grid-column: 1;
+      max-width: 620px;
+      margin: 0 !important;
+      font-size: 1.02rem !important;
+      line-height: 1.65 !important;
+      color: #6b7684;
+    }
+    .storefront-viewer {
+      --storefront-pad-x: 5.5%;
+      --storefront-copy-inset: 38px;
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 4.3fr) minmax(140px, 1.25fr);
+      align-items: center;
+      column-gap: 3.5%;
+      row-gap: 28px;
+      padding: 36px 5.5% 3.5%;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,0.9), rgba(255,255,255,0) 42%),
+        #f3f4f6;
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .storefront-viewer:not(.has-mobile) { grid-template-columns: 1fr; }
+    .storefront-scroll-unit {
+      position: relative;
+      min-width: 0;
+      padding-right: 18px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .storefront-device {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4237 / 2825;
+    }
+    /* 원본 MacBook 프레임에서 투명하게 뚫린 디스플레이의 실측 비율.
+       캡처는 이 영역 아래에 놓고 프레임 이미지를 위에 포개 베젤/노치가 자연스럽게 가린다. */
+    .storefront-screen {
+      position: absolute;
+      z-index: 1;
+      left: 9.42%;
+      top: 6.2%;
+      width: 81.08%;
+      height: 78.5%;
+      border-radius: 1.1% 1.1% 0.3% 0.3%;
+    }
+    .storefront-scroll-screen {
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #fff;
+      scrollbar-width: none;
+      overscroll-behavior: contain;
+      cursor: grab;
+      touch-action: pan-y;
+    }
+    .storefront-scroll-screen::-webkit-scrollbar { display: none; }
+    .storefront-scroll-screen.is-dragging {
+      cursor: grabbing;
+      scroll-behavior: auto;
+    }
+    .storefront-scroll-screen img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: none;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    /* CSS로 만든 iPhone 프레임. 캡처 위에는 Dynamic Island만 별도 레이어로 얹는다. */
+    .storefront-phone-wrap {
+      width: 100%;
+      max-width: 220px;
+      justify-self: center;
+      transform: translate(-14px, -10px);
+      container-type: inline-size;
+    }
+    .storefront-phone {
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+      /* 기존 이메일 iPhone과 같은 기하:
+         바깥 곡률(19.4cqw) - 안쪽 곡률(15.7cqw) = 균일한 베젤(3.7cqw). */
+      padding: 8px;
+      padding: 3.7cqw;
+      border-radius: 42px;
+      border-radius: 19.4cqw;
+      background: #16181c;
+      isolation: isolate;
+      box-shadow:
+        0 22px 44px rgba(26, 36, 48, 0.2),
+        inset 0 0 0 1px rgba(255,255,255,0.1);
+    }
+    .storefront-phone-screen {
+      position: relative;
+      z-index: 1;
+      aspect-ratio: 9 / 19.5;
+      box-sizing: border-box;
+      border-radius: 34px;
+      border-radius: 15.7cqw;
+      background-clip: padding-box;
+    }
+    .storefront-dynamic-island {
+      position: absolute;
+      z-index: 2;
+      top: 3.25%;
+      left: 50%;
+      width: 29%;
+      height: 2.25%;
+      min-height: 5px;
+      border-radius: 999px;
+      background: #08090b;
+      transform: translateX(-50%);
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .storefront-frame {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      margin: 0 !important;
+      object-fit: contain;
+      filter: drop-shadow(0 18px 22px rgba(26, 36, 48, 0.18));
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .storefront-rail {
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      bottom: auto;
+      right: 7px;
+      width: 2px;
+      height: clamp(88px, 30vw, 340px);
+      border-radius: 1px;
+      background: rgba(17, 17, 17, 0.12);
+      transform: translateY(-50%);
+    }
+    /* 투명 캔버스가 아닌 실제 기기 외곽(약 92.2%)을 기준으로 배치.
+       직전 PC 위치에서 레일을 5px 안쪽으로 보정한 값이다. */
+    .storefront-mac .storefront-rail {
+      right: calc(7.8% - 1px);
+      transform: translateY(-50%) translateY(-10px);
+    }
+    .storefront-phone-wrap .storefront-rail {
+      right: -2px;
+    }
+    .storefront-phone-wrap .storefront-rail-knob {
+      width: 16px;
+      height: 36px;
+      border-radius: 8px;
+      background: #5b74a3;
+      box-shadow: 0 0 0 2px #f5f6f8, 0 2px 6px rgba(26, 36, 48, 0.25);
+    }
+    .storefront-rail-knob {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 36px;
+      border-radius: 8px;
+      color: #fff;
+      background: #5b74a3;
+      padding: 0;
+      border: 0;
+      font: inherit;
+      box-shadow: 0 0 0 2px #f3f4f6, 0 2px 6px rgba(26, 36, 48, 0.25);
+      transform: translateX(-50%);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .storefront-rail-knob::before {
+      content: '';
+      position: absolute;
+      inset: -8px -14px;
+      border-radius: 24px;
+    }
+    .storefront-rail-knob:active { cursor: grabbing; }
+    .storefront-rail-knob svg { width: 10px; height: 18px; }
+    .storefront-scroll-unit.no-scroll .storefront-rail { display: none; }
+    @media (max-width: 900px) {
+      .storefront-viewer {
+        --storefront-copy-inset: 24px;
+        padding-top: 28px;
+      }
+    }
+    @media (max-width: 640px) {
+      .storefront-viewer {
+        --storefront-copy-inset: 20px;
+      }
+      .storefront-copy {
+        display: block;
+        margin-bottom: 0;
+      }
+      .storefront-label { font-size: 1.25rem; }
+      .storefront-description { margin-top: 7px !important; font-size: 0.94rem !important; }
+      .storefront-viewer {
+        margin: 0;
+        padding: 26px 4.5% 5%;
+        border-radius: 18px;
+      }
+      .storefront-rail-knob {
+        width: 16px;
+        height: 36px;
+      }
+      /* 모바일의 작은 MacBook에서는 레일을 PC 위치보다 5px 안쪽으로 보정한다. */
+      .storefront-mac .storefront-rail {
+        right: calc(7.8% + 4px);
+      }
+      /* 모바일에서는 iPhone의 상향 보정을 제거해 MacBook 높이 중앙에 맞춘다. */
+      .storefront-phone-wrap {
+        transform: translate(-14px, 0);
+      }
+      /* iPhone은 기준 목업과 동일하게 모바일에서 외곽→레일 중심 14px. */
+      .storefront-phone-wrap .storefront-rail {
+        right: 4px;
+      }
+      /* 화면 위 세로 스와이프는 문서 이동에 양보하고, 목업은 별도 손잡이로 탐색한다. */
+      @media (hover: none) and (pointer: coarse) {
+        .storefront-scroll-screen {
+          overflow-y: hidden;
+          pointer-events: none;
+        }
+      }
+    }
+    /* 모바일에서도 두 목업은 좌우 배치를 유지한다. 좁아질수록 iPhone 컬럼만
+       140px→64px로 줄고, 나머지 폭은 MacBook이 모두 가져가 기기 높이가 역전되지 않는다. */
+    @media (max-width: 800px) {
+      .storefront-viewer.has-mobile {
+        --storefront-pad-x: 2%;
+        grid-template-columns: minmax(0, 1fr) clamp(64px, 20vw, 140px);
+        column-gap: clamp(12px, 3vw, 24px);
+        row-gap: 24px;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 2%;
+        padding-right: 2%;
+      }
+      .storefront-phone-wrap {
+        width: 100%;
+      }
+    }
 
     /* 캡션 상단 — 이메일 제목·세그먼트(목업 위). pair에서 제목 줄수가 달라도 폰 상단이
        정렬되도록 2줄 분량을 예약하고 아래 정렬 */
@@ -1765,6 +2134,118 @@ const projectSchema = {
         const endDrag = () => { dragging = false; };
         knob.addEventListener('pointerup', endDrag);
         knob.addEventListener('pointercancel', endDrag);
+      });
+
+      // Storefront Visuals — MacBook/iPhone 각각의 화면과 손잡이를 독립적인 scrollTop에 연결.
+      document.querySelectorAll('.storefront-scroll-unit').forEach(function(unit) {
+        const screen = unit.querySelector('.storefront-scroll-screen');
+        const rail = unit.querySelector('.storefront-rail');
+        const knob = unit.querySelector('.storefront-rail-knob');
+        if (!screen || !rail || !knob) return;
+
+        const update = () => {
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          unit.classList.toggle('no-scroll', maxScroll < 6);
+          if (maxScroll < 6) return;
+          const travel = Math.max(0, rail.clientHeight - knob.offsetHeight);
+          const progress = Math.max(0, Math.min(screen.scrollTop, maxScroll)) / maxScroll;
+          knob.style.top = (progress * travel) + 'px';
+          knob.setAttribute('aria-valuenow', String(Math.round(progress * 100)));
+        };
+
+        screen.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        const image = screen.querySelector('img');
+        if (image && !image.complete) {
+          image.addEventListener('load', update, { once: true });
+          image.addEventListener('error', update, { once: true });
+        }
+        if (image && 'ResizeObserver' in window) {
+          const imageResizeObserver = new ResizeObserver(update);
+          imageResizeObserver.observe(image);
+        }
+        requestAnimationFrame(update);
+
+        // 데스크톱: 화면 자체를 위아래로 끌어 캡처를 이동.
+        let screenDragging = false;
+        let screenStartY = 0;
+        let screenStartScroll = 0;
+        screen.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'touch') return;
+          screenDragging = true;
+          screenStartY = e.clientY;
+          screenStartScroll = screen.scrollTop;
+          screen.setPointerCapture(e.pointerId);
+          screen.classList.add('is-dragging');
+          e.preventDefault();
+        });
+        screen.addEventListener('pointermove', (e) => {
+          if (!screenDragging) return;
+          screen.scrollTop = screenStartScroll - (e.clientY - screenStartY) * 2;
+        });
+        const endScreenDrag = () => {
+          screenDragging = false;
+          screen.classList.remove('is-dragging');
+        };
+        screen.addEventListener('pointerup', endScreenDrag);
+        screen.addEventListener('pointercancel', endScreenDrag);
+
+        // 스크린의 위·아래 끝에서는 휠 입력을 문서로 넘겨 섹션 안에 갇히지 않게 한다.
+        screen.addEventListener('wheel', (e) => {
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          const atTop = screen.scrollTop <= 1;
+          const atBottom = screen.scrollTop >= maxScroll - 1;
+          const leaving = (e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom);
+          if (!leaving) return;
+          e.preventDefault();
+          const pageDelta = e.deltaMode === WheelEvent.DOM_DELTA_LINE
+            ? e.deltaY * 16
+            : e.deltaMode === WheelEvent.DOM_DELTA_PAGE
+              ? e.deltaY * window.innerHeight
+              : e.deltaY;
+          document.scrollingElement?.scrollBy({ top: pageDelta, behavior: 'auto' });
+        }, { passive: false });
+
+        // 모든 환경: 오른쪽 알약 손잡이를 움직이면 긴 캡처를 비례 이동.
+        let knobDragging = false;
+        let knobStartY = 0;
+        let knobStartScroll = 0;
+        knob.addEventListener('pointerdown', (e) => {
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          if (maxScroll < 6) return;
+          knobDragging = true;
+          knobStartY = e.clientY;
+          knobStartScroll = screen.scrollTop;
+          knob.setPointerCapture(e.pointerId);
+          e.preventDefault();
+        });
+        knob.addEventListener('pointermove', (e) => {
+          if (!knobDragging) return;
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          const travel = Math.max(0, rail.clientHeight - knob.offsetHeight);
+          if (travel <= 0) return;
+          const nextScroll = knobStartScroll + (e.clientY - knobStartY) / travel * maxScroll;
+          screen.scrollTop = Math.max(0, Math.min(nextScroll, maxScroll));
+        });
+        const endKnobDrag = () => { knobDragging = false; };
+        knob.addEventListener('pointerup', endKnobDrag);
+        knob.addEventListener('pointercancel', endKnobDrag);
+        knob.addEventListener('keydown', (e) => {
+          const maxScroll = screen.scrollHeight - screen.clientHeight;
+          if (maxScroll < 6) return;
+          const smallStep = Math.max(40, screen.clientHeight * 0.12);
+          const pageStep = screen.clientHeight * 0.82;
+          let nextScroll = screen.scrollTop;
+          if (e.key === 'ArrowUp') nextScroll -= smallStep;
+          else if (e.key === 'ArrowDown') nextScroll += smallStep;
+          else if (e.key === 'PageUp') nextScroll -= pageStep;
+          else if (e.key === 'PageDown') nextScroll += pageStep;
+          else if (e.key === 'Home') nextScroll = 0;
+          else if (e.key === 'End') nextScroll = maxScroll;
+          else return;
+          e.preventDefault();
+          screen.scrollTop = Math.max(0, Math.min(nextScroll, maxScroll));
+        });
       });
 
       document.querySelectorAll('.my-carousel').forEach(function(carousel) {
