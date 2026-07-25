@@ -121,18 +121,18 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
         /* 두번째 그림자(0 -4px 0 0)는 press 애니메이션 때 박스가 아래로 밀리며 위쪽에
            실선처럼 드러나는 배경색 틈을 그라디언트 시작색으로 미리 메꿔주는 백킹 레이어 —
            박스 자체가 항상 그 위를 덮고 있어서 평소엔 안 보이고 눌렸을 때만 틈을 채움 */
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
         transition: box-shadow 0.25s ease, transform 0.25s ease;
       }
 
       .site-nav-box:hover {
-        box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
+        box-shadow: 6px 6px 5px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
         transform: translateY(-2px);
       }
 
       /* 클릭 시 살짝 눌리는 상하 피드백 */
       .site-nav-box:active {
-        box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.18), 0 -4px 0 0 #040404;
         transform: translateY(2px);
       }
 

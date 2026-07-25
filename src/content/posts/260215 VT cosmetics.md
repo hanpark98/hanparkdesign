@@ -2,7 +2,7 @@
 title: "VT Cosmetics"
 format: wide
 description: "Secret Society - Exclusive Beauty Event"
-image: "/images/posts/260215 VT cosmetics/thumb.webp"
+image: "/images/posts/260215 VT cosmetics/thumb2.webp"
 category: ["Branding", "Events"]
 date: "2025-04-06"
 intro: |
@@ -17,12 +17,8 @@ intro: |
   <img src="/images/posts/260215 VT cosmetics/main-title.webp" />
 </div>
 
-</br>
-
-#### Invitaion Box Design
-
-<div class="img-col">
-  <img src="/images/posts/260215 VT cosmetics/vt-package3.webp" />
+<div class="img-col ar-2-1">
+  <img src="/images/posts/260215 VT cosmetics/vt-packaging6.webp" />
 </div>
 
 <div class="img-row">
@@ -39,20 +35,14 @@ intro: |
   </div>
 </div>
 
-<div class="my-carousel">
-  <div class="my-carousel-scroll">
-    <div class="my-carousel-item">
-      <img src="/images/posts/260215 VT cosmetics/vt-package2b.webp" class="my-carousel-img" />
-    </div>
-        <div class="my-carousel-item">
-      <img src="/images/posts/260215 VT cosmetics/vt-package4.webp" class="my-carousel-img" />
-    </div>
+<div class="img-row">
+  <div class="img-col">
+    <img src="/images/posts/260215 VT cosmetics/vt-packaging5.webp" />
+  </div>
+  <div class="img-col">
+    <img src="/images/posts/260215 VT cosmetics/vt-package2b.webp" />
   </div>
 </div>
-
-</br>
-
-#### Product Display / Illustration
 
 <div class="img-col">
   <img src="/images/posts/260215 VT cosmetics/vt-vibe6.webp" />
@@ -105,10 +95,6 @@ intro: |
 </div>
 -->
 
-</br>
-
-#### Venue Design
-
 <div class="img-col">
   <img src="/images/posts/260215 VT cosmetics/vt-vibe5.webp" />
 </div>
@@ -142,10 +128,6 @@ intro: |
 <div class="img-col">
   <img src="/images/posts/260215 VT cosmetics/vt-vibe4.webp" />
 </div>
-
-</br>
-
-#### The Making Of
 
 <div class="my-carousel">
   <div class="my-carousel-scroll">

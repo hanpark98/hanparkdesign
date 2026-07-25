@@ -55,6 +55,7 @@ const posts = allPosts
            data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}>
           <div class="w-full aspect-square overflow-hidden">
             <img src={p.image} alt={p.title}
+                 style={p.thumbnailPosition ? `object-position: ${p.thumbnailPosition}` : undefined}
                  class="tilt-card-thumb w-full h-full object-cover"/>
           </div>
           <div class="post-card-content">
@@ -124,7 +125,7 @@ const posts = allPosts
          (링 spread가 0 → 4px로, 그림자가 옅게 → 진하게 자연스럽게 애니메이션) */
       box-shadow:
         0 0 0 0 rgba(116, 126, 137, 0),
-        0 1px 3px rgba(17, 17, 17, 0.05);
+        0 1px 5px rgba(17, 17, 17, 0.05);
       opacity: 0;
       transform: translateY(28px);
       transition: box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
