@@ -556,3 +556,538 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   margin-right: 0 !important;
   width: 100% !important;
 }
+
+/* Muguhada brand identity case study */
+.post-content:has(> .muguhada-project-card) {
+  overflow: visible;
+  padding: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.muguhada-project-card {
+  overflow: hidden;
+  padding: 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.02);
+}
+
+.post-content > .muguhada-project-card {
+  margin: 0 0 16px !important;
+}
+
+.post-content > .muguhada-project-card:last-child {
+  margin-bottom: 0 !important;
+}
+
+.muguhada-project-card > .muguhada-project-divider {
+  margin-bottom: 22px !important;
+}
+
+.muguhada-package-section > * {
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+}
+
+.muguhada-package-section > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+.muguhada-brand-hero {
+  overflow: hidden;
+  margin: 0 0 18px !important;
+  border-radius: 10px;
+}
+
+.muguhada-identity {
+  overflow: hidden;
+  padding: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #222;
+  font-family: inherit;
+}
+
+.muguhada-identity figure,
+.muguhada-identity article {
+  margin: 0 !important;
+}
+
+.muguhada-identity-chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'chapter-heading'
+    'chapter-body';
+  gap: 12px;
+  padding: 36px 38px;
+  border: 0;
+  border-radius: 24px;
+  background: #f5f6f8;
+}
+
+.muguhada-identity-chapter + .muguhada-identity-chapter {
+  margin-top: 18px !important;
+}
+
+.muguhada-identity-chapter:last-child {
+  padding-bottom: 36px;
+}
+
+.muguhada-chapter-heading {
+  grid-area: chapter-heading;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.muguhada-chapter-body {
+  grid-area: chapter-body;
+  width: 100%;
+  min-width: 0;
+}
+
+.muguhada-chapter-heading > span {
+  display: block;
+  margin-bottom: 0;
+  color: #5b74a3;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.muguhada-chapter-heading h3 {
+  margin: 0 !important;
+  color: #111 !important;
+  font-family: inherit !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.muguhada-logo-grid,
+.muguhada-typeface-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.muguhada-logo-card {
+  display: grid;
+  aspect-ratio: 1;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.muguhada-logo-card img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.muguhada-logo-card--mark {
+  background: #fff;
+}
+
+.muguhada-logo-card--mark img {
+  width: 52% !important;
+  height: 52% !important;
+  object-fit: contain;
+  mix-blend-mode: normal;
+}
+
+.muguhada-identity-copy {
+  max-width: 720px;
+  margin: 0 0 30px !important;
+  color: #6b7684;
+  font-family: inherit;
+  font-size: 1.02rem !important;
+  line-height: 1.7 !important;
+}
+
+.muguhada-spec-heading {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.muguhada-spec-heading--spaced {
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
+.muguhada-spec-heading h4 {
+  margin: 0 !important;
+  color: #111 !important;
+  font-family: inherit !important;
+  font-size: 1.08rem !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.muguhada-spec-heading p {
+  margin: 0 !important;
+  color: #8a8a8a;
+  font-family: inherit;
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+}
+
+.muguhada-identity-visual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.muguhada-wordmark-stack {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  aspect-ratio: 1;
+}
+
+.muguhada-wordmark-card {
+  position: relative;
+  display: grid;
+  min-height: clamp(140px, 19vw, 210px);
+  padding: 34px 28px 20px;
+  place-items: center;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.muguhada-wordmark-stack .muguhada-wordmark-card {
+  min-height: 0;
+}
+
+.muguhada-pattern-card,
+.muguhada-application-card {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.muguhada-pattern-card img,
+.muguhada-application-card img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 0;
+  transform: scale(1.002);
+}
+
+.muguhada-wordmark-card figcaption {
+  position: absolute;
+  inset: 16px auto auto 16px;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #8a8a8a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.muguhada-wordmark-card img {
+  width: min(78%, 560px) !important;
+  height: 90px !important;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+.muguhada-typeface-card {
+  min-height: 230px;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 28px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.muguhada-typeface-card > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+.muguhada-typeface-card strong {
+  color: #111;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.muguhada-typeface-card span,
+.muguhada-typeface-card small {
+  margin: 0;
+  padding: 0;
+  color: #8a8a8a;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.muguhada-typeface-card > p {
+  align-self: center;
+  margin: 0 !important;
+  color: #111;
+  font-size: clamp(1.45rem, 3vw, 2.2rem) !important;
+  line-height: 1.14 !important;
+}
+
+.muguhada-typeface-card--serif > p {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+}
+
+.muguhada-typeface-card:not(.muguhada-typeface-card--serif) > p {
+  margin: 0 !important;
+  font-size: clamp(1.25rem, 2vw, 1.4rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.muguhada-color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.muguhada-color-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 0.72fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.muguhada-color-swatches {
+  position: relative;
+  min-height: 0;
+}
+
+.muguhada-color-swatches > .muguhada-color-grid {
+  position: absolute;
+  inset: 3.43% 0 4.28%;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+.muguhada-color-layout .muguhada-color-card {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.8fr) minmax(92px, 1fr);
+}
+
+.muguhada-color-layout .muguhada-color-chip {
+  aspect-ratio: auto;
+}
+
+.muguhada-color-layout .muguhada-color-card figcaption {
+  align-content: center;
+  justify-content: stretch;
+  min-height: 0;
+}
+
+.muguhada-website-mockup {
+  align-self: center;
+}
+
+.muguhada-color-card {
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.muguhada-color-chip {
+  aspect-ratio: 1.25;
+  background: var(--muguhada-color);
+}
+
+.muguhada-color-chip--silver {
+  background:
+    linear-gradient(
+      112deg,
+      #9fa3a6 0%,
+      #d6d9db 30%,
+      #f4f5f5 50%,
+      #b2b6b9 72%,
+      #dadcde 100%
+    );
+}
+
+.muguhada-color-card figcaption {
+  display: grid;
+  height: 100%;
+  box-sizing: border-box;
+  align-content: center;
+  gap: 3px;
+  margin: 0;
+  padding: 14px;
+}
+
+.muguhada-color-card strong {
+  color: #111;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.muguhada-color-card span {
+  color: #8a8a8a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.muguhada-project-divider {
+  padding: 0 0 18px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+  border-radius: 0;
+  background: transparent;
+}
+
+.muguhada-project-divider h2 {
+  margin: 0 !important;
+  color: #111 !important;
+  font-family: inherit !important;
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
+  text-transform: uppercase;
+}
+
+.muguhada-project-divider > span {
+  display: block;
+  margin: 6px 0 0;
+  color: #8a8a8a;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.post-content > .muguhada-project-divider {
+  margin-bottom: 16px !important;
+}
+
+@media (min-width: 641px) {
+  .muguhada-project-card {
+    padding: 32px;
+  }
+
+  .muguhada-package-section > * {
+    margin-bottom: 16px !important;
+  }
+
+}
+
+@media (max-width: 640px) {
+  .muguhada-identity-chapter,
+  .muguhada-spec-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .muguhada-identity-chapter {
+    gap: 12px;
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .muguhada-identity-chapter:last-child {
+    padding-bottom: 26px;
+  }
+
+  .muguhada-typeface-grid,
+  .muguhada-identity-visual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .muguhada-logo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .muguhada-color-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .muguhada-color-swatches {
+    width: calc(95.73% - 17.23px);
+    margin-left: calc(2.077% - 0.37px);
+  }
+
+  .muguhada-color-swatches > .muguhada-color-grid {
+    position: static;
+    inset: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+  }
+
+  .muguhada-color-layout .muguhada-color-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(64px, auto);
+  }
+
+  .muguhada-color-layout .muguhada-color-chip {
+    aspect-ratio: 1.25;
+  }
+
+  .muguhada-color-layout .muguhada-color-card figcaption {
+    height: auto;
+    min-height: 64px;
+    align-content: center;
+  }
+
+  .muguhada-wordmark-card img {
+    width: 88% !important;
+  }
+
+  .muguhada-chapter-heading h3 {
+    font-size: 1.25rem !important;
+  }
+
+  .muguhada-spec-heading h4 {
+    font-size: 1rem !important;
+  }
+
+  .muguhada-spec-heading p {
+    font-size: 0.88rem !important;
+  }
+
+  .muguhada-color-card figcaption {
+    padding: 10px;
+  }
+
+  .muguhada-color-card strong {
+    font-size: 0.8rem;
+  }
+
+  .muguhada-color-card span {
+    font-size: 0.7rem;
+  }
+}
