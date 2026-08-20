@@ -274,8 +274,6 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       )}
     </div>
 
-    <Analytics/>
-
     <script>
       function enhanceVideo(video) {
         const isCarousel = video.classList.contains('my-carousel-img');
@@ -663,5 +661,6 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       document.addEventListener('astro:page-load', setupAll);
       document.addEventListener('DOMContentLoaded', setupAll);
     </script>
+    <Analytics />
   </body>
 </html>
