@@ -72,7 +72,7 @@ export default function ReviewList({
                 key={c}
                 onClick={() => setCategory(c)}
                 className={[
-                  "px-3 py-1.5 rounded-full text-sm border",
+                  "px-3 py-1.5 rounded-full text-sm border cursor-pointer",
                   category === c
                     ? "bg-black text-white border-black"
                     : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50",
@@ -88,7 +88,7 @@ export default function ReviewList({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="검색: 제목·감독/저자·태그"
-              className="w-48 sm:w-64 px-3 py-1.5 rounded-md border border-gray-200 text-sm"
+              className="w-48 sm:w-64 px-3 py-1.5 rounded-md border border-gray-200 text-sm placeholder:text-gray-400"
             />
             <select
               value={sort}
@@ -116,7 +116,7 @@ export default function ReviewList({
             return (
               <li
                 key={r.id}
-                className="border border-gray-200 rounded-2xl p-4 hover:shadow-sm transition"
+                className="border border-gray-200 rounded-2xl p-4 hover:shadow-xs transition"
               >
                 <div className="flex items-start gap-4">
                   {r.cover ? (
