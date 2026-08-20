@@ -58,7 +58,6 @@ main {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@tailwind typography;
 
 /* ------------ 타이포그래피 스타일 ------------ */
 /* 아래 태그 규칙은 !important로 사이트 전체(.prose 포함)에 적용됨 —
