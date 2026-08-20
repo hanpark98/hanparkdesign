@@ -1,6 +1,4 @@
 module.exports = {
-  content: ['./src/**/*.{astro,js,jsx,ts,tsx,md,mdx,html,css}',
-    './content/**/*.{md,mdx}'],
   theme: {
     extend: {
       typography: {
@@ -76,5 +74,4 @@ module.exports = {
       },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
 };

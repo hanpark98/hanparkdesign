@@ -1,3 +1,7 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@config "../../tailwind.config.cjs";
+
 /* === 뷰포트/스크롤 기본값 보수 === */
 html, body{
   height: 100%;
@@ -54,10 +58,6 @@ main {
   -webkit-user-select: auto;
   user-select: auto;
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 /* ------------ 타이포그래피 스타일 ------------ */
 /* 아래 태그 규칙은 !important로 사이트 전체(.prose 포함)에 적용됨 —

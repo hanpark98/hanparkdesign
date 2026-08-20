@@ -249,8 +249,8 @@ const projectSchema = {
               </div>
               <span class="whitespace-normal">{Array.isArray(frontmatter.category) ? frontmatter.category.join(' · ') : frontmatter.category}</span>
             </div>
-            <h1 class="!text-3xl sm:!text-4xl font-bold !mb-1">{frontmatter.title}</h1>
-            {frontmatter.description && <p class="text-gray-600 text-xl !mt-1 !mb-0">{frontmatter.description}</p>}
+            <h1 class="text-3xl! sm:text-4xl! font-bold mb-1!">{frontmatter.title}</h1>
+            {frontmatter.description && <p class="text-gray-600 text-xl mt-1! mb-0!">{frontmatter.description}</p>}
           </div>
 
           {frontmatter.role && (
@@ -664,7 +664,7 @@ const projectSchema = {
 
           <div class="p-6 sm:p-8 mb-4 card-shell fade-section" style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;">
             <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]"><span>Got any Questions?</span></div>
-            <p class="text-white/90 text-xl !mt-0 !mb-4 leading-tight">
+            <p class="text-white/90 text-xl mt-0! mb-4! leading-tight">
               {siteData.jobTitle} with {siteData.experience}.<br>
               Whether you have a project in mind or a question you’re burning to ask, fire away!
             </p>
