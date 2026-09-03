@@ -11,10 +11,25 @@ const allPosts = postFiles.map(([p, f]) => ({
   ...f.frontmatter
 }));
 
+// Highlights 고정 순서. 새 포스트는 lead와 tail 사이에 날짜순으로 자동 배치된다.
+const highlightLeadSlugs = [
+  '260901 valley',
+  '260331 Mediheal',
+  '260326 Kijibae',
+  '260221 Relics',
+];
+const highlightTailSlugs = [
+  '260322 Oliveyoung',
+  '260215 VT cosmetics',
+  '260816 muguhada',
+  '260214 bazzaalbox',
+  '260405 Social media',
+];
+
 // 배포 환경에서는 draft:true 또는 미래 날짜(post.date > today) 숨김
 const isProd = import.meta.env.PROD;
 const today = new Date();
-const posts = allPosts
+const chronologicalPosts = allPosts
   .filter(p => {
     if (!isProd) return true; // dev에서는 전부 보이도록
     const isDraft = p.draft === true;
@@ -22,6 +37,19 @@ const posts = allPosts
     return !isDraft && !isFuture;
   })
   .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0));
+
+const fixedHighlightSlugs = new Set([...highlightLeadSlugs, ...highlightTailSlugs]);
+const newHighlightSlugs = chronologicalPosts
+  .map(p => p.slug)
+  .filter(slug => !fixedHighlightSlugs.has(slug));
+const highlightSlugs = [...highlightLeadSlugs, ...newHighlightSlugs, ...highlightTailSlugs];
+const highlightOrder = new Map(highlightSlugs.map((slug, index) => [slug, index]));
+
+// 기본 HTML도 Highlights 순서로 렌더링하고, 브라우저에서 view/category에 맞춰 재정렬한다.
+const posts = [...chronologicalPosts].sort((a, b) =>
+  (highlightOrder.get(a.slug) ?? Number.MAX_SAFE_INTEGER)
+  - (highlightOrder.get(b.slug) ?? Number.MAX_SAFE_INTEGER)
+);
 ---
 
 <Layout
@@ -52,7 +80,10 @@ const posts = allPosts
       </a>
       {posts.map(p => (
         <a href={`/posts/${p.slug}`} class="group post-card tilt-card"
-           data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}>
+           data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}
+           data-date={p.date ?? ''}
+           data-highlight-order={highlightOrder.get(p.slug)}
+           style={!highlightOrder.has(p.slug) ? 'display: none' : undefined}>
           <div class="w-full aspect-square overflow-hidden">
             <img src={p.image} alt={p.title}
                  style={p.thumbnailPosition ? `object-position: ${p.thumbnailPosition}` : undefined}
@@ -68,26 +99,49 @@ const posts = allPosts
     </div>
   </div>
 
-  <!-- JS : 필터 (카테고리 선택은 nav의 햄버거 메뉴가 담당 — ?cat= 쿼리로 진입) -->
+  <!-- JS : 기본 Highlights / 전체 날짜순 / 카테고리 날짜순 전환 -->
 <script>
-  const cards  = document.querySelectorAll('.post-card');
+  const cards = document.querySelectorAll('.post-card');
+  const projectCards = Array.from(document.querySelectorAll('.post-card[data-category]'));
+  const postsWrapper = document.getElementById('posts-wrapper');
 
-  // 공통 필터링 함수
-  function filterPosts(cat) {
-    localStorage.setItem('lastCategory', cat);
+  const dateValue = (card) => Date.parse(card.dataset.date || '') || 0;
+  const highlightValue = (card) => Number(card.dataset.highlightOrder);
 
-    // 카드 표시/숨김 처리 (프로필 카드처럼 data-category가 없는 카드는 필터와 무관하게 항상 표시)
-    cards.forEach(c => {
-      if (!c.dataset.category) return;
-      const isMatch = cat === 'all' || c.dataset.category.split(',').includes(cat);
-      c.style.display = isMatch ? 'block' : 'none';
-    });
+  function reorderProjects(compare) {
+    if (!postsWrapper) return;
+    [...projectCards].sort(compare).forEach(card => postsWrapper.appendChild(card));
   }
 
-  // 페이지 로드 시 상태 복원 — 햄버거 메뉴 등에서 ?cat= 로 들어온 경우 최우선 적용
-  const catParam = new URLSearchParams(location.search).get('cat');
-  const last = catParam || localStorage.getItem('lastCategory') || 'all';
-  filterPosts(last);
+  function showHighlights() {
+    projectCards.forEach(card => {
+      const isHighlight = card.dataset.highlightOrder !== undefined;
+      card.style.display = isHighlight ? 'block' : 'none';
+    });
+    reorderProjects((a, b) => highlightValue(a) - highlightValue(b));
+  }
+
+  function showChronological(category) {
+    projectCards.forEach(card => {
+      const isMatch = !category || card.dataset.category.split(',').includes(category);
+      card.style.display = isMatch ? 'block' : 'none';
+    });
+    reorderProjects((a, b) => dateValue(b) - dateValue(a));
+  }
+
+  const params = new URLSearchParams(location.search);
+  const category = params.get('cat');
+  const view = params.get('view');
+
+  if (category === 'all') {
+    showChronological();
+  } else if (category) {
+    showChronological(category);
+  } else if (view === 'all') {
+    showChronological();
+  } else {
+    showHighlights();
+  }
 
   // 스크롤로 뷰포트에 들어오는 카드를 아래→위로 fade in — 나갔다 다시 들어올 때마다 매번 재생
   if ('IntersectionObserver' in window) {
