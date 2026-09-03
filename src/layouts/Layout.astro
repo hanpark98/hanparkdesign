@@ -244,7 +244,8 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
               <div id="menu-panel">
                 <a href="/profile" class="menu-link menu-panel-item">Profile</a>
                 <div class="menu-section-label menu-panel-item">Sort</div>
-                <a href="/posts?cat=all" class="menu-link menu-sub menu-panel-item">All Projects</a>
+                <a href="/posts" class="menu-link menu-sub menu-panel-item">Featured</a>
+                <a href="/posts?view=all" class="menu-link menu-sub menu-panel-item">By Date</a>
                 {menuCategories.map(c => (
                   <a href={`/posts?cat=${encodeURIComponent(c)}`} class="menu-link menu-sub menu-panel-item">{c}</a>
                 ))}
