@@ -127,14 +127,14 @@ const awardGroups = groupByYear(awards);
     <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
       <div class="cv-heading">Contact</div>
       <div class="contact-list">
-        <a href={siteData.linkedin} target="_blank" rel="noopener noreferrer" class="contact-row">
+        <a href={siteData.linkedin} target="_blank" rel="noopener noreferrer" class="contact-row" data-analytics-contact="linkedin">
           <span class="contact-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="8.3" cy="8.3" r="0.7" fill="currentColor" stroke="none"/><path d="M8.3 10.8V17"/><path d="M12.5 17v-3.8"/><path d="M12.5 13.2c0-1.3 1-2.2 2.2-2.2s2.3.9 2.3 2.2V17"/></svg>
           </span>
           <span class="contact-text">hanparkdesign</span>
           <svg class="cv-external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
         </a>
-        <a href={`mailto:${siteData.email}`} class="contact-row" id="email-contact" data-email={siteData.email}>
+        <a href={`mailto:${siteData.email}`} class="contact-row ph-no-capture" id="email-contact" data-email={siteData.email} data-analytics-contact="email">
           <span class="contact-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
           </span>
@@ -174,13 +174,13 @@ const awardGroups = groupByYear(awards);
     <div class="max-w-xl mx-auto mb-4 cv-section fade-section">
       <div class="cv-heading">Project Highlights</div>
       <div class="highlights-grid">
-        <a href="/posts/260322 Oliveyoung" class="highlight-item">
+        <a href="/posts/260322 Oliveyoung" class="highlight-item" data-analytics-project-highlight data-project="Olive Young" data-slug="260322 Oliveyoung">
           <div class="skills-category">Olive Young</div>
           <div class="cv-feature-image client-thumb">
             <img src="/images/posts/260322 Oliveyoung/oliveyoung_thumb.webp" alt="Olive Young" />
           </div>
         </a>
-        <a href="/posts/260331 Mediheal" class="highlight-item">
+        <a href="/posts/260331 Mediheal" class="highlight-item" data-analytics-project-highlight data-project="Mediheal" data-slug="260331 Mediheal">
           <div class="skills-category">Mediheal</div>
           <div class="cv-feature-image client-thumb">
             <img src="/images/posts/260331 Mediheal/thumb2.webp" alt="Mediheal" />

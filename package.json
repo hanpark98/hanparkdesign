@@ -15,6 +15,7 @@
     "@astrojs/sitemap": "^3.7.3",
     "@vercel/analytics": "^1.5.0",
     "marked": "^18.0.9",
+    "posthog-js": "^1.428.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "rehype-raw": "^7.0.0"

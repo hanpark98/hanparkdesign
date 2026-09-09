@@ -68,7 +68,7 @@ const posts = [...chronologicalPosts].sort((a, b) =>
     <!-- 포스트 목록 -->
     <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-3 sm:px-6 pt-3 sm:pt-6 pb-6">
       <!-- 항상 맨 앞에 고정되는 프로필 카드 — 카테고리 필터와 무관하게 항상 보임 -->
-      <a href="/profile" class="group post-card tilt-card">
+      <a href="/profile" class="group post-card tilt-card" data-analytics-profile-source="projects_grid">
         <div class="w-full aspect-square overflow-hidden profile-grid-thumb">
           <img src={siteData.image} alt={siteData.name}
                class="tilt-card-thumb w-full h-full object-cover"/>
@@ -80,6 +80,9 @@ const posts = [...chronologicalPosts].sort((a, b) =>
       </a>
       {posts.map(p => (
         <a href={`/posts/${p.slug}`} class="group post-card tilt-card"
+           data-analytics-project-card
+           data-project={p.title}
+           data-slug={p.slug}
            data-category={Array.isArray(p.category) ? p.category.join(',') : (p.category ?? '기타')}
            data-date={p.date ?? ''}
            data-highlight-order={highlightOrder.get(p.slug)}

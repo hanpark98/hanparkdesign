@@ -242,7 +242,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
                 </svg>
               </button>
               <div id="menu-panel">
-                <a href="/profile" class="menu-link menu-panel-item">Profile</a>
+                <a href="/profile" class="menu-link menu-panel-item" data-analytics-profile-source="nav">Profile</a>
                 <div class="menu-section-label menu-panel-item">Sort</div>
                 <a href="/posts" class="menu-link menu-sub menu-panel-item">Featured</a>
                 <a href="/posts?view=all" class="menu-link menu-sub menu-panel-item">By Date</a>
@@ -270,7 +270,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
           margin-top: 0;
           flex-shrink: 0;
         ">
-          © {new Date().getFullYear()} {siteData.name} | All rights reserved. | {siteData.email}
+          © {new Date().getFullYear()} {siteData.name} | All rights reserved. | <span class="ph-mask">{siteData.email}</span>
         </footer>
       )}
     </div>
@@ -661,6 +661,9 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
 
       document.addEventListener('astro:page-load', setupAll);
       document.addEventListener('DOMContentLoaded', setupAll);
+    </script>
+    <script>
+      import '../scripts/analytics';
     </script>
     <Analytics />
   </body>

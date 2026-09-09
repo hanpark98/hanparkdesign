@@ -226,7 +226,13 @@ const projectSchema = {
   type="article"
   schema={projectSchema}
 >
-  <div class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen">
+  <div
+    class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen"
+    data-analytics-project-page
+    data-project={frontmatter.title}
+    data-slug={Astro.params.slug}
+    data-category={Array.isArray(frontmatter.category) ? frontmatter.category.join(',') : (frontmatter.category ?? 'unknown')}
+  >
     <!-- 충분한 좌측 여백이 생기는 2xl부터만 버튼을 바깥 레일에 배치하고,
          그보다 좁은 화면에서는 본문 위의 정상 플로우에 두어 콘텐츠와 겹치지 않게 함 -->
     <div class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 2xl:mb-0 2xl:px-0 2xl:absolute 2xl:top-4 2xl:left-6 justify-start items-center">
@@ -669,8 +675,8 @@ const projectSchema = {
               Whether you have a project in mind or a question you’re burning to ask, fire away!
             </p>
             <div class="text-[1rem] mt-3 flex gap-4">
-              <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors">Profile</a>
-              <a href={`mailto:${siteData.email}`} class="text-white/70 underline text-m hover:text-white/30 transition-colors">E-mail</a>
+              <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors" data-analytics-profile-source="project_page">Profile</a>
+              <a href={`mailto:${siteData.email}`} class="text-white/70 underline text-m hover:text-white/30 transition-colors ph-no-capture">E-mail</a>
             </div>
           </div>
 
