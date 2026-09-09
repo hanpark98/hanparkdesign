@@ -1,4 +1,5 @@
 import type posthog from 'posthog-js';
+import type { BeforeSend } from '@vercel/analytics';
 
 const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY?.trim();
 const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST?.trim().replace(/\/$/, '');
@@ -7,6 +8,7 @@ const analyticsDisabledStorageKey = 'hanparkdesign:posthog-disabled';
 declare global {
   interface Window {
     __hanPostHogInitialized?: boolean;
+    webAnalyticsBeforeSend?: BeforeSend;
   }
 }
 
@@ -212,7 +214,11 @@ function setupProjectEngagement() {
   window.addEventListener('pageshow', updateScrollDepth, { passive: true });
 }
 
-if (!isAnalyticsDisabled() && posthogKey && posthogHost && !window.__hanPostHogInitialized) {
+const analyticsDisabled = isAnalyticsDisabled();
+
+window.webAnalyticsBeforeSend = (event) => (analyticsDisabled ? null : event);
+
+if (!analyticsDisabled && posthogKey && posthogHost && !window.__hanPostHogInitialized) {
   window.__hanPostHogInitialized = true;
   setupClickEvents();
   captureProjectsEntry();
