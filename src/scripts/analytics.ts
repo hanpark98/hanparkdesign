@@ -4,6 +4,7 @@ import type { BeforeSend } from '@vercel/analytics';
 const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY?.trim();
 const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST?.trim().replace(/\/$/, '');
 const analyticsDisabledStorageKey = 'hanparkdesign:posthog-disabled';
+const sessionAttributionStorageKey = 'hanparkdesign:session-attribution';
 
 declare global {
   interface Window {
@@ -16,6 +17,21 @@ type PostHogClient = typeof posthog;
 type QueuedEvent = {
   event: string;
   properties: Record<string, string | number>;
+};
+type EntrySource = 'internal' | 'external' | 'direct';
+type ProjectContext = {
+  project: string;
+  slug: string;
+};
+type SessionAttribution = {
+  entry_source: EntrySource;
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  original_referrer_host: string;
+  original_entry_project: string;
+  original_entry_project_slug: string;
 };
 
 let posthogClient: PostHogClient | null = null;
@@ -39,6 +55,141 @@ function isAnalyticsDisabled() {
   }
 
   return disabled;
+}
+
+function sanitizeCampaignValue(value: string | null) {
+  const normalized = value?.trim() || '';
+  return /^[a-zA-Z0-9][a-zA-Z0-9._~-]{0,99}$/.test(normalized) ? normalized : '';
+}
+
+function getCurrentCampaign() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    utm_source: sanitizeCampaignValue(params.get('utm_source')),
+    utm_medium: sanitizeCampaignValue(params.get('utm_medium')),
+    utm_campaign: sanitizeCampaignValue(params.get('utm_campaign')),
+    utm_content: sanitizeCampaignValue(params.get('utm_content')),
+  };
+}
+
+function hasCampaign(attribution: Pick<SessionAttribution, 'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_content'>) {
+  return Boolean(
+    attribution.utm_source
+    || attribution.utm_medium
+    || attribution.utm_campaign
+    || attribution.utm_content,
+  );
+}
+
+function getReferrerInfo() {
+  try {
+    const referrer = new URL(document.referrer);
+    const host = referrer.hostname.toLowerCase().replace(/^www\./, '');
+    const currentHost = window.location.hostname.toLowerCase().replace(/^www\./, '');
+    return {
+      host,
+      isInternal: referrer.origin === window.location.origin
+        || (host === 'hanparkdesign.com' && currentHost === 'hanparkdesign.com'),
+    };
+  } catch {
+    return { host: '', isInternal: false };
+  }
+}
+
+function getProjectContext() {
+  const projectPage = document.querySelector<HTMLElement>('[data-analytics-project-page]');
+  if (!projectPage) return { projectPage: null, project: '', slug: '' };
+
+  return {
+    projectPage,
+    project: projectPage.dataset.project || 'unknown',
+    slug: projectPage.dataset.slug || 'unknown',
+  };
+}
+
+function readSessionAttribution() {
+  try {
+    const stored = JSON.parse(window.sessionStorage.getItem(sessionAttributionStorageKey) || 'null');
+    if (!stored || !['internal', 'external', 'direct'].includes(stored.entry_source)) return null;
+
+    return {
+      entry_source: stored.entry_source as EntrySource,
+      utm_source: sanitizeCampaignValue(stored.utm_source),
+      utm_medium: sanitizeCampaignValue(stored.utm_medium),
+      utm_campaign: sanitizeCampaignValue(stored.utm_campaign),
+      utm_content: sanitizeCampaignValue(stored.utm_content),
+      original_referrer_host: typeof stored.original_referrer_host === 'string'
+        ? stored.original_referrer_host.slice(0, 160)
+        : '',
+      original_entry_project: typeof stored.original_entry_project === 'string'
+        ? stored.original_entry_project.slice(0, 160)
+        : '',
+      original_entry_project_slug: typeof stored.original_entry_project_slug === 'string'
+        ? stored.original_entry_project_slug.slice(0, 160)
+        : '',
+    } satisfies SessionAttribution;
+  } catch {
+    return null;
+  }
+}
+
+function getSessionAttribution(project: ProjectContext) {
+  const campaign = getCurrentCampaign();
+  const referrer = getReferrerInfo();
+  let attribution = readSessionAttribution();
+
+  if (!attribution) {
+    const entrySource: EntrySource = hasCampaign({ ...campaign })
+      ? 'external'
+      : referrer.isInternal
+        ? 'internal'
+        : referrer.host
+          ? 'external'
+          : 'direct';
+
+    attribution = {
+      entry_source: entrySource,
+      ...campaign,
+      original_referrer_host: referrer.host,
+      original_entry_project: project.project,
+      original_entry_project_slug: project.slug,
+    };
+  } else if (hasCampaign({ ...campaign }) && !hasCampaign(attribution)) {
+    attribution = {
+      ...attribution,
+      ...campaign,
+      entry_source: 'external',
+      original_referrer_host: attribution.original_referrer_host || referrer.host,
+      original_entry_project: attribution.original_entry_project || project.project,
+      original_entry_project_slug: attribution.original_entry_project_slug || project.slug,
+    };
+  }
+
+  try {
+    window.sessionStorage.setItem(sessionAttributionStorageKey, JSON.stringify(attribution));
+  } catch {
+    // Session attribution is optional when storage is unavailable.
+  }
+
+  return attribution;
+}
+
+function getProjectEntrySource(attribution: SessionAttribution): EntrySource {
+  const campaign = getCurrentCampaign();
+  const referrer = getReferrerInfo();
+  if (hasCampaign({ ...campaign })) return 'external';
+  if (referrer.isInternal) return 'internal';
+  if (referrer.host) return 'external';
+  if (hasCampaign(attribution)) return 'external';
+  return 'direct';
+}
+
+function getSourcePage() {
+  const pathname = window.location.pathname.replace(/\/$/, '') || '/';
+  if (pathname === '/') return 'home';
+  if (pathname === '/posts') return 'projects';
+  if (pathname.startsWith('/posts/')) return 'project';
+  return 'profile';
 }
 
 function capture(event: string, properties: Record<string, string | number>) {
@@ -102,7 +253,7 @@ function getVisibleProjectPosition(clickedCard: HTMLElement) {
   return index >= 0 ? index + 1 : 0;
 }
 
-function setupClickEvents() {
+function setupClickEvents(attribution: SessionAttribution) {
   document.addEventListener('click', (event) => {
     if (!event.isTrusted || !(event.target instanceof Element)) return;
 
@@ -130,9 +281,19 @@ function setupClickEvents() {
 
     const contactLink = event.target.closest<HTMLElement>('[data-analytics-contact]');
     if (contactLink) {
+      const contactType = contactLink.dataset.analyticsContact || 'unknown';
+      const project = getProjectContext();
       capture('contact_click', {
-        contact_type: contactLink.dataset.analyticsContact || 'unknown',
-        source: 'profile',
+        contact_type: contactType,
+        type: contactType,
+        source: getSourcePage(),
+        source_page: getSourcePage(),
+        project: project.project || attribution.original_entry_project,
+        slug: project.slug || attribution.original_entry_project_slug,
+        utm_source: attribution.utm_source,
+        utm_medium: attribution.utm_medium,
+        utm_campaign: attribution.utm_campaign,
+        entry_source: attribution.entry_source,
       });
       return;
     }
@@ -144,6 +305,27 @@ function setupClickEvents() {
       });
     }
   }, { capture: true });
+}
+
+function captureProjectView(
+  project: ReturnType<typeof getProjectContext>,
+  attribution: SessionAttribution,
+  entrySource: EntrySource,
+) {
+  if (!project.projectPage || project.projectPage.dataset.analyticsProjectViewCaptured === 'true') return;
+  project.projectPage.dataset.analyticsProjectViewCaptured = 'true';
+
+  const referrer = getReferrerInfo();
+  capture('project_view', {
+    project: project.project,
+    slug: project.slug,
+    entry_source: entrySource,
+    referrer_host: referrer.host || attribution.original_referrer_host,
+    utm_source: attribution.utm_source,
+    utm_medium: attribution.utm_medium,
+    utm_campaign: attribution.utm_campaign,
+    utm_content: attribution.utm_content,
+  });
 }
 
 function captureProjectsEntry() {
@@ -178,7 +360,7 @@ function getScrollDepth() {
   return Math.min(100, Math.round(((scrollTop + window.innerHeight) / scrollHeight) * 100));
 }
 
-function setupProjectEngagement() {
+function setupProjectEngagement(attribution: SessionAttribution, entrySource: EntrySource) {
   const projectPage = document.querySelector<HTMLElement>('[data-analytics-project-page]');
   if (!projectPage) return;
 
@@ -196,6 +378,10 @@ function setupProjectEngagement() {
       category: projectPage.dataset.category || 'unknown',
       engaged_seconds: engagedSeconds,
       scroll_depth: maxScrollDepth,
+      entry_source: entrySource,
+      utm_source: attribution.utm_source,
+      utm_medium: attribution.utm_medium,
+      utm_campaign: attribution.utm_campaign,
     });
   };
 
@@ -220,9 +406,13 @@ window.webAnalyticsBeforeSend = (event) => (analyticsDisabled ? null : event);
 
 if (!analyticsDisabled && posthogKey && posthogHost && !window.__hanPostHogInitialized) {
   window.__hanPostHogInitialized = true;
-  setupClickEvents();
+  const project = getProjectContext();
+  const attribution = getSessionAttribution(project);
+  const projectEntrySource = getProjectEntrySource(attribution);
+  setupClickEvents(attribution);
   captureProjectsEntry();
-  setupProjectEngagement();
+  captureProjectView(project, attribution, projectEntrySource);
+  setupProjectEngagement(attribution, projectEntrySource);
   void initializePostHog(posthogKey, posthogHost);
 }
 
