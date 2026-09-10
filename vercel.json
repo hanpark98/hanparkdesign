@@ -15,5 +15,97 @@
         "action": "deny"
       }
     }
+  ],
+  "redirects": [
+    {
+      "source": "/posts/260214%20bazzaalbox",
+      "destination": "/posts/bazzaalbox",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260214%20bazzaalbox/",
+      "destination": "/posts/bazzaalbox",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260215%20VT%20cosmetics",
+      "destination": "/posts/vt-cosmetics",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260215%20VT%20cosmetics/",
+      "destination": "/posts/vt-cosmetics",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260221%20Relics",
+      "destination": "/posts/relics",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260221%20Relics/",
+      "destination": "/posts/relics",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260322%20Oliveyoung",
+      "destination": "/posts/oliveyoung",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260322%20Oliveyoung/",
+      "destination": "/posts/oliveyoung",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260326%20Kijibae",
+      "destination": "/posts/kijibae",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260326%20Kijibae/",
+      "destination": "/posts/kijibae",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260331%20Mediheal",
+      "destination": "/posts/mediheal",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260331%20Mediheal/",
+      "destination": "/posts/mediheal",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260405%20Social%20media",
+      "destination": "/posts/social-media",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260405%20Social%20media/",
+      "destination": "/posts/social-media",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260816%20muguhada",
+      "destination": "/posts/muguhada",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260816%20muguhada/",
+      "destination": "/posts/muguhada",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260901%20valley",
+      "destination": "/posts/valley",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/260901%20valley/",
+      "destination": "/posts/valley",
+      "statusCode": 301
+    }
   ]
 }

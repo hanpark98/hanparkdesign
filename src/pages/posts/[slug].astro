@@ -4,18 +4,18 @@ import { personId, siteData } from '../../data/site';
 import { marked } from 'marked'; 
 import { readdir } from 'node:fs/promises';
 import { resolve, sep } from 'node:path';
+import { getValidatedProjects } from '../../utils/projectSlugs';
 
 export async function getStaticPaths() {
-  const postImportResult = import.meta.glob('../../content/posts/*.md');
-  const paths = [];
-  for (const path in postImportResult) {
-    const slug = path.split('/').pop().replace('.md', '');
-    paths.push({ params: { slug } });
-  }
-  return paths;
+  const postImportResult = import.meta.glob('../../content/posts/*.md', { eager: true });
+  return getValidatedProjects(postImportResult).map(({ slug, sourceSlug }) => ({
+    params: { slug },
+    props: { sourceSlug },
+  }));
 }
 
-const { default: Content, frontmatter } = await import(`../../content/posts/${Astro.params.slug}.md`);
+const { sourceSlug } = Astro.props;
+const { default: Content, frontmatter } = await import(`../../content/posts/${sourceSlug}.md`);
 const isWide = frontmatter.format === 'wide';
 const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : null;
 
@@ -230,7 +230,7 @@ const projectSchema = {
     class="pt-3 sm:pt-0 lg:pt-4 lg:relative bg-[#ebe9e5] min-h-screen"
     data-analytics-project-page
     data-project={frontmatter.title}
-    data-slug={Astro.params.slug}
+    data-slug={frontmatter.slug}
     data-category={Array.isArray(frontmatter.category) ? frontmatter.category.join(',') : (frontmatter.category ?? 'unknown')}
   >
     <!-- 충분한 좌측 여백이 생기는 2xl부터만 버튼을 바깥 레일에 배치하고,

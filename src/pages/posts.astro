@@ -1,29 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { personId, siteData } from '../data/site';
+import { getValidatedProjects } from '../utils/projectSlugs';
 
 // .md 파일 수집
 const postFiles = Object.entries(import.meta.glob('../content/posts/*.md', { eager: true }));
 
-// frontmatter + slug 파싱
-const allPosts = postFiles.map(([p, f]) => ({
-  slug: p.split('/').pop().replace('.md', ''),
-  ...f.frontmatter
+// frontmatter의 공개 slug와 내부 파일명을 분리하고, slug를 빌드 시 검증한다.
+const allPosts = getValidatedProjects(Object.fromEntries(postFiles)).map(({ slug, frontmatter }) => ({
+  ...frontmatter,
+  slug,
 }));
 
 // Highlights 고정 순서. 새 포스트는 lead와 tail 사이에 날짜순으로 자동 배치된다.
 const highlightLeadSlugs = [
-  '260901 valley',
-  '260331 Mediheal',
-  '260326 Kijibae',
-  '260221 Relics',
+  'valley',
+  'mediheal',
+  'kijibae',
+  'relics',
 ];
 const highlightTailSlugs = [
-  '260322 Oliveyoung',
-  '260215 VT cosmetics',
-  '260816 muguhada',
-  '260214 bazzaalbox',
-  '260405 Social media',
+  'oliveyoung',
+  'vt-cosmetics',
+  'muguhada',
+  'bazzaalbox',
+  'social-media',
 ];
 
 // 배포 환경에서는 draft:true 또는 미래 날짜(post.date > today) 숨김

@@ -1,5 +1,6 @@
 ---
 title: "Kijibae"
+slug: kijibae
 format: wide
 description: "Semi-Cured Gel Nail Strips Branding"
 image: "/images/posts/260326 Kijibae/thumb3.webp"

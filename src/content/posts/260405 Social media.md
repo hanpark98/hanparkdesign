@@ -1,5 +1,6 @@
 ---
 title: "Social Media Marketing"
+slug: social-media
 format: wide
 description: "Content Creation / Video & Static"
 image: "/images/posts/260405 Social media/social_thumb2.webp"

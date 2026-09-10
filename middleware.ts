@@ -2,28 +2,62 @@ const campaigns = {
   upwork: { source: 'upwork', medium: 'proposal' },
   linkedin: { source: 'linkedin', medium: 'dm' },
   email: { source: 'email', medium: 'application' },
+  behance: { source: 'behance', medium: 'portfolio' },
 } as const;
 
-const projectSlugs: Record<string, string> = {
-  valley: '260901 valley',
-  mediheal: '260331 Mediheal',
-  kijibae: '260326 Kijibae',
-  relics: '260221 Relics',
-  'olive-young': '260322 Oliveyoung',
-  oliveyoung: '260322 Oliveyoung',
-  'vt-cosmetics': '260215 VT cosmetics',
-  muguhada: '260816 muguhada',
-  bazzaalbox: '260214 bazzaalbox',
-  'social-media': '260405 Social media',
+const projectSlugs = new Set([
+  'bazzaalbox',
+  'vt-cosmetics',
+  'relics',
+  'oliveyoung',
+  'kijibae',
+  'mediheal',
+  'social-media',
+  'muguhada',
+  'valley',
+]);
+
+const legacyProjectSlugs: Record<string, string> = {
+  '260214 bazzaalbox': 'bazzaalbox',
+  '260215 vt cosmetics': 'vt-cosmetics',
+  '260221 relics': 'relics',
+  '260322 oliveyoung': 'oliveyoung',
+  '260326 kijibae': 'kijibae',
+  '260331 mediheal': 'mediheal',
+  '260405 social media': 'social-media',
+  '260816 muguhada': 'muguhada',
+  '260901 valley': 'valley',
+  'olive-young': 'oliveyoung',
 };
+
+function decodeSegment(segment: string | undefined) {
+  if (!segment) return '';
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return '';
+  }
+}
 
 export default function middleware(request: Request) {
   const url = new URL(request.url);
   const segments = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
-  const campaign = campaigns[segments[1] as keyof typeof campaigns];
-  const projectSlug = projectSlugs[(segments[2] || '').toLowerCase()];
+  const source = decodeSegment(segments[1]).toLowerCase() as keyof typeof campaigns;
+  const campaign = campaigns[source];
 
-  if (segments.length !== 3 || segments[0] !== 'go' || !campaign || !projectSlug) {
+  if ((segments.length !== 2 && segments.length !== 3) || segments[0] !== 'go' || !campaign) {
+    return new Response('Not Found', {
+      status: 404,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+
+  const requestedProjectSlug = decodeSegment(segments[2]).toLowerCase();
+  const projectSlug = projectSlugs.has(requestedProjectSlug)
+    ? requestedProjectSlug
+    : legacyProjectSlugs[requestedProjectSlug];
+
+  if (segments.length === 3 && !projectSlug) {
     return new Response('Not Found', {
       status: 404,
       headers: { 'content-type': 'text/plain; charset=utf-8' },
@@ -31,7 +65,7 @@ export default function middleware(request: Request) {
   }
 
   const analyticsControl = url.searchParams.get('analytics');
-  url.pathname = `/posts/${projectSlug}`;
+  url.pathname = projectSlug ? `/posts/${projectSlug}` : '/';
   url.search = '';
   url.hash = '';
   url.searchParams.set('utm_source', campaign.source);

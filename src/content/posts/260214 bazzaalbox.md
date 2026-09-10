@@ -1,5 +1,6 @@
 ---
 title: "Bazzaal Box"
+slug: bazzaalbox
 format: wide
 description: "The First Beauty Box Curated by Creators"
 image: "/images/posts/260214 bazzaalbox/thumb.webp"

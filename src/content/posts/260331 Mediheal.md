@@ -1,5 +1,6 @@
 ---
 title: "Mediheal"
+slug: mediheal
 format: wide
 description: "CRM & Performance Creative"
 image: "/images/posts/260331 Mediheal/thumb2.webp"

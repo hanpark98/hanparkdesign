@@ -1,5 +1,6 @@
 ---
 title: "Olive Young"
+slug: oliveyoung
 format: wide
 description: "Winter Sale 2025"
 image: "/images/posts/260322 Oliveyoung/oliveyoung_thumb.webp"

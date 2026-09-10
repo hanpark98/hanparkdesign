@@ -1,5 +1,6 @@
 ---
 title: "VT Cosmetics"
+slug: vt-cosmetics
 format: wide
 description: "Secret Society - Exclusive Beauty Event"
 image: "/images/posts/260215 VT cosmetics/thumb2.webp"
