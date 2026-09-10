@@ -5,6 +5,7 @@ const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY?.trim();
 const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST?.trim().replace(/\/$/, '');
 const analyticsDisabledStorageKey = 'hanparkdesign:posthog-disabled';
 const sessionAttributionStorageKey = 'hanparkdesign:session-attribution';
+const projectExplorationStorageKey = 'hanparkdesign:project-exploration';
 
 declare global {
   interface Window {
@@ -32,6 +33,11 @@ type SessionAttribution = {
   original_referrer_host: string;
   original_entry_project: string;
   original_entry_project_slug: string;
+};
+type ProjectExploration = {
+  entry_project: string;
+  entry_project_name: string;
+  explored_projects: string[];
 };
 
 let posthogClient: PostHogClient | null = null;
@@ -184,6 +190,69 @@ function getProjectEntrySource(attribution: SessionAttribution): EntrySource {
   return 'direct';
 }
 
+function readProjectExploration() {
+  try {
+    const stored = JSON.parse(window.sessionStorage.getItem(projectExplorationStorageKey) || 'null');
+    if (!stored || typeof stored.entry_project !== 'string' || !stored.entry_project) return null;
+
+    return {
+      entry_project: stored.entry_project.slice(0, 160),
+      entry_project_name: typeof stored.entry_project_name === 'string'
+        ? stored.entry_project_name.slice(0, 160)
+        : '',
+      explored_projects: Array.isArray(stored.explored_projects)
+        ? stored.explored_projects.filter((slug: unknown) => typeof slug === 'string').slice(0, 100)
+        : [],
+    } satisfies ProjectExploration;
+  } catch {
+    return null;
+  }
+}
+
+function writeProjectExploration(exploration: ProjectExploration) {
+  try {
+    window.sessionStorage.setItem(projectExplorationStorageKey, JSON.stringify(exploration));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function captureProjectExploration(project: ProjectContext, attribution: SessionAttribution) {
+  if (!project.slug || project.slug === 'unknown') return;
+
+  const exploration = readProjectExploration();
+  if (!exploration) {
+    writeProjectExploration({
+      entry_project: project.slug,
+      entry_project_name: project.project,
+      explored_projects: [],
+    });
+    return;
+  }
+
+  if (
+    project.slug === exploration.entry_project
+    || exploration.explored_projects.includes(project.slug)
+  ) return;
+
+  if (!writeProjectExploration({
+    ...exploration,
+    explored_projects: [...exploration.explored_projects, project.slug],
+  })) return;
+
+  capture('explore_another_project', {
+    entry_project: exploration.entry_project,
+    entry_project_name: exploration.entry_project_name,
+    project: project.project,
+    slug: project.slug,
+    utm_source: attribution.utm_source,
+    utm_medium: attribution.utm_medium,
+    utm_campaign: attribution.utm_campaign,
+    entry_source: attribution.entry_source,
+  });
+}
+
 function getSourcePage() {
   const pathname = window.location.pathname.replace(/\/$/, '') || '/';
   if (pathname === '/') return 'home';
@@ -326,6 +395,7 @@ function captureProjectView(
     utm_campaign: attribution.utm_campaign,
     utm_content: attribution.utm_content,
   });
+  captureProjectExploration(project, attribution);
 }
 
 function captureProjectsEntry() {
