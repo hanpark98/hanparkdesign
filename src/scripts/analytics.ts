@@ -332,7 +332,8 @@ function setupClickEvents(attribution: SessionAttribution) {
         project: projectCard.dataset.project || 'unknown',
         slug: projectCard.dataset.slug || 'unknown',
         category: projectCard.dataset.category || 'unknown',
-        source: 'projects_grid',
+        source: projectCard.dataset.analyticsSource || 'projects_grid',
+        recommendation_type: projectCard.dataset.recommendationType || '',
         position: getVisibleProjectPosition(projectCard),
       });
       return;

@@ -204,11 +204,15 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       }
       .menu-link:hover{ background: rgba(0,0,0,0.06); transform: translateX(2px); }
 
+      .menu-divider{
+        height: 1px; margin: 0.2rem 0.8rem;
+        background: rgba(0,0,0,0.08);
+      }
+
       .menu-section-label{
         padding: 0.7rem 0.8rem 0.3rem; margin-top: 0.2rem;
         font-size: 0.72rem; font-weight:700; letter-spacing:0.06em;
         text-transform:uppercase; color: rgba(0,0,0,0.4);
-        border-top: 1px solid rgba(0,0,0,0.08);
       }
       .menu-link.menu-sub{ font-weight:500; font-size:0.9rem; color:#333; }
 
@@ -228,7 +232,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       {showNav && (
         <nav class="site-nav">
           <div class="site-nav-box">
-            <a href="/" class="site-brand" aria-label="홈">
+            <a href="/" class="site-brand" aria-label="홈으로 이동">
               <img src="/images/website/logo.svg" alt="로고" class="brand-logo" />
               <span class="brand-title">Han Park</span>
             </a>
@@ -243,7 +247,9 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
               </button>
               <div id="menu-panel">
                 <a href="/profile" class="menu-link menu-panel-item" data-analytics-profile-source="nav">Profile</a>
-                <div class="menu-section-label menu-panel-item">Sort</div>
+                <div class="menu-divider menu-panel-item" aria-hidden="true"></div>
+                <a href="/posts" class="menu-link menu-panel-item">All Projects</a>
+                <div class="menu-section-label menu-panel-item">Filter</div>
                 <a href="/posts" class="menu-link menu-sub menu-panel-item">Featured</a>
                 <a href="/posts?view=all" class="menu-link menu-sub menu-panel-item">By Date</a>
                 {menuCategories.map(c => (

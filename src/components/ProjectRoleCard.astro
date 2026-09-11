@@ -1,0 +1,31 @@
+---
+const { role, revealClass = 'fade-section' } = Astro.props;
+---
+
+<div class={`muguhada-project-card mb-4 ${revealClass}`}>
+  <div class="muguhada-project-divider">
+    <h2>Team & Scope</h2>
+  </div>
+  <div class="role-grid">
+    <div class="role-col">
+      <div class="role-col-heading">
+        Team{role.agency && <> · {role.agency}</>}
+      </div>
+      <ul class="role-list">
+        {role.team.map(person => (
+          <li class:list={{ 'is-me': person.mine }}>
+            <span class="credit-role">{person.part}</span>
+            <span class="credit-name">{person.name}</span>
+            {person.suffix && <span class="credit-suffix">({person.suffix})</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="role-col">
+      <div class="role-col-heading">My Scope</div>
+      <ul class="role-list role-list-plain">
+        {role.scope.map(item => <li>{item}</li>)}
+      </ul>
+    </div>
+  </div>
+</div>

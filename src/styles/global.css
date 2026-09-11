@@ -972,9 +972,10 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   font-family: inherit !important;
   font-size: 1.35rem !important;
   font-weight: 800 !important;
-  line-height: 1.25 !important;
+  line-height: 1 !important;
   letter-spacing: -0.02em !important;
   text-transform: uppercase;
+  transform: translateY(-1px);
 }
 
 .muguhada-project-divider > span {

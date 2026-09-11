@@ -1,9 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ProjectRecommendations from '../../components/ProjectRecommendations.astro';
+import ProjectRoleCard from '../../components/ProjectRoleCard.astro';
 import { personId, siteData } from '../../data/site';
 import { marked } from 'marked'; 
 import { readdir } from 'node:fs/promises';
 import { resolve, sep } from 'node:path';
+import { getBalancedProjectRecommendations } from '../../utils/projectRecommendations';
 import { getValidatedProjects } from '../../utils/projectSlugs';
 
 export async function getStaticPaths() {
@@ -14,10 +17,16 @@ export async function getStaticPaths() {
   }));
 }
 
+const postImportResult = import.meta.glob('../../content/posts/*.md', { eager: true });
+const projects = getValidatedProjects(postImportResult);
 const { sourceSlug } = Astro.props;
 const { default: Content, frontmatter } = await import(`../../content/posts/${sourceSlug}.md`);
 const isWide = frontmatter.format === 'wide';
 const introHtml = frontmatter.intro ? await marked.parse(frontmatter.intro) : null;
+const projectRecommendations = getBalancedProjectRecommendations(projects).get(frontmatter.slug) || {
+  related: null,
+  discovery: null,
+};
 
 // Featured Email 목업 미디어:
 // 1) images 배열(명시 순서) → 2) imageFolder(파일명 자연 정렬) → 3) 기존 img 한 장 순으로 해석.
@@ -236,10 +245,10 @@ const projectSchema = {
     <!-- 충분한 좌측 여백이 생기는 2xl부터만 버튼을 바깥 레일에 배치하고,
          그보다 좁은 화면에서는 본문 위의 정상 플로우에 두어 콘텐츠와 겹치지 않게 함 -->
     <div class="flex flex-wrap gap-x-4 gap-y-2 mb-3 px-3 sm:px-6 2xl:mb-0 2xl:px-0 2xl:absolute 2xl:top-4 2xl:left-6 justify-start items-center">
-      <button onclick="window.history.back()" class="back-btn mr-6">
+      <a href="/posts" class="back-btn mr-6" aria-label="Back to All Projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
-        Projects
-      </button>
+        All Projects
+      </a>
     </div>
 
     <div class="px-3 sm:px-6">
@@ -258,38 +267,6 @@ const projectSchema = {
             <h1 class="text-3xl! sm:text-4xl! font-bold mb-1!">{frontmatter.title}</h1>
             {frontmatter.description && <p class="text-gray-600 text-xl mt-1! mb-0!">{frontmatter.description}</p>}
           </div>
-
-          {frontmatter.role && (
-            <div class="bg-white p-6 sm:p-8 mb-4 card-shell load-fade load-fade-2">
-              <div class="stat-eyebrow">
-                <span class="title">Team & Scope</span>
-              </div>
-              <div class="role-grid">
-                <div class="role-col">
-                  <div class="role-col-heading">
-                    Team{frontmatter.role.agency && <> · {frontmatter.role.agency}</>}
-                  </div>
-                  <ul class="role-list">
-                    {frontmatter.role.team.map(person => (
-                      <li class:list={{ 'is-me': person.mine }}>
-                        <span class="credit-role">{person.part}</span>
-                        <span class="credit-name">{person.name}</span>
-                        {person.suffix && <span class="credit-suffix">({person.suffix})</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div class="role-col">
-                  <div class="role-col-heading">My Scope</div>
-                  <ul class="role-list role-list-plain">
-                    {frontmatter.role.scope.map(item => (
-                      <li>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Revenue 차트 + statSections[0](Team Result)를 한 카드로 통합 — 차트가 먼저, 세부 스탯이 그 아래 */}
           {frontmatter.statSections?.[0] && (
@@ -662,23 +639,28 @@ const projectSchema = {
             </div>
           )}
 
+          {frontmatter.role && (
+            <ProjectRoleCard role={frontmatter.role} />
+          )}
+
           {introHtml && (
             <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
               <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
             </div>
           )}
 
-          <div class="p-6 sm:p-8 mb-4 card-shell fade-section" style="background: linear-gradient(to bottom, #4e5459, #2c3e50); color: black;">
-            <div class="mb-0 flex gap-3 items-center text-white/70 text-[1.2rem]"><span>Got any Questions?</span></div>
-            <p class="text-white/90 text-xl mt-0! mb-4! leading-tight">
-              {siteData.jobTitle} with {siteData.experience}.<br>
-              Whether you have a project in mind or a question you’re burning to ask, fire away!
-            </p>
-            <div class="text-[1rem] mt-3 flex gap-4">
-              <a href="/profile" class="text-white/70 underline text-m hover:text-white/30 transition-colors" data-analytics-profile-source="project_page">Profile</a>
-              <a href={`mailto:${siteData.email}`} class="text-white/70 underline text-m hover:text-white/30 transition-colors ph-no-capture ph-mask" data-analytics-contact="email">E-mail</a>
-            </div>
-          </div>
+          <ProjectRecommendations recommendations={projectRecommendations} />
+
+          <nav class="project-footer-nav mb-4 fade-section" aria-label="More portfolio pages">
+            <a href="/posts" class="project-footer-link project-footer-link--back">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+              <span>All Projects</span>
+            </a>
+            <a href="/profile" class="project-footer-link project-footer-link--forward" data-analytics-profile-source="project_page">
+              <span>View Profile</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a>
+          </nav>
 
           {frontmatter.footnotes && (
             <div class="case-footnote fade-section">
@@ -748,6 +730,7 @@ const projectSchema = {
       padding: 0.3rem 0.1rem;
       background: transparent; border: none;
       color: #111; font-weight: 600; font-size: 0.95rem;
+      text-decoration: none;
       cursor: pointer;
       transition: opacity 0.15s ease;
     }
@@ -755,6 +738,59 @@ const projectSchema = {
     .back-btn:hover { opacity: 0.55; }
     .back-btn:hover svg { transform: translateX(-3px); }
     .back-btn:active svg { transform: translateX(-1px); }
+
+    .project-footer-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .project-footer-link {
+      display: flex;
+      min-height: 84px;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.35rem;
+      padding: 20px 24px;
+      color: #111;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: left;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+    .project-footer-link--forward {
+      justify-content: flex-end;
+      text-align: right;
+    }
+    .project-footer-link svg {
+      width: 1.05rem;
+      height: 1.05rem;
+      flex-shrink: 0;
+      transition: transform 0.18s ease;
+    }
+    .project-footer-link:focus-visible {
+      outline: 3px solid #5b74a3;
+      outline-offset: 3px;
+    }
+    @media (hover: hover) {
+      .project-footer-link:hover { opacity: 0.55; }
+      .project-footer-link--back:hover svg { transform: translateX(-3px); }
+      .project-footer-link--forward:hover svg { transform: translateX(3px); }
+    }
+    .project-footer-link--back:active svg { transform: translateX(-1px); }
+    .project-footer-link--forward:active svg { transform: translateX(1px); }
+    @media (max-width: 640px) {
+      .project-footer-nav { gap: 8px; }
+      .project-footer-link {
+        min-height: 72px;
+        padding: 16px;
+        font-size: 0.95rem;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .project-footer-link,
+      .project-footer-link svg { transition: none; }
+    }
     html, body { background: #ebe9e5; }
 
     /* --- 캐러셀 & 마키 마우스 드래그 커서 및 충돌 방지 CSS --- */
@@ -895,41 +931,49 @@ const projectSchema = {
       border-bottom: 1px solid rgba(17, 17, 17, 0.15);
     }
     .stat-eyebrow .title {
+      display: block;
       font-size: 1.35rem;
       font-weight: 800;
+      line-height: 1;
       letter-spacing: -0.02em;
       text-transform: uppercase;
       color: #111;
+      transform: translateY(-1px);
     }
     .stat-eyebrow .subtitle {
       display: block;
       margin-top: 6px;
       font-size: 0.95rem;
       font-weight: 500;
+      line-height: 1.4;
       text-transform: none;
       letter-spacing: -0.01em;
       color: #8a8a8a;
     }
     .stat-eyebrow.no-border { border-bottom: none; padding-bottom: 0; margin-bottom: 16px; }
 
-    /* 차트 카드 전용 헤딩 — 제목 → 그레이 헤어라인 → 부가설명 순서(다른 카드의
-       title+subtitle가 함께 라인 위에 있는 stat-eyebrow와 다른, 차트 카드만의 변형) */
-    .chart-eyebrow { margin-bottom: 20px; }
+    /* 차트 카드 제목도 다른 본문 섹션과 같은 헤더 여백·구분선 규칙을 사용 */
+    .chart-eyebrow {
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+    }
     .chart-eyebrow .title {
       display: block;
       font-size: 1.35rem;
       font-weight: 800;
+      line-height: 1;
       letter-spacing: -0.02em;
       text-transform: uppercase;
       color: #111;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(17, 17, 17, 0.15);
+      transform: translateY(-1px);
     }
     .chart-eyebrow .subtitle {
       display: block;
       margin-top: 10px;
       font-size: 0.95rem;
       font-weight: 500;
+      line-height: 1.4;
       letter-spacing: -0.01em;
       color: #8a8a8a;
     }
