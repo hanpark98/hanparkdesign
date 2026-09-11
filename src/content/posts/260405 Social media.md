@@ -4,7 +4,7 @@ slug: social-media
 format: wide
 description: "Content Creation / Video & Static"
 image: "/images/posts/260405 Social media/social_thumb2.webp"
-category: ["Marketing", "Motion & Content"]
+category: ["Marketing", "Motion"]
 date: "2024-12-31"
 intro:
   ### Introduction

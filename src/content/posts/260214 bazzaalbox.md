@@ -4,7 +4,7 @@ slug: bazzaalbox
 format: wide
 description: "The First Beauty Box Curated by Creators"
 image: "/images/posts/260214 bazzaalbox/thumb.webp"
-category: ["Branding", "Print & Illustration", "E-commerce"]
+category: ["Branding", "Print"]
 date: "2023-02-01"
 intro: |
   ### Design Background

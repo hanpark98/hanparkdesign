@@ -322,6 +322,55 @@ video::-webkit-media-controls-enclosure { display: none !important; }
   border-right: 4px solid rgba(255, 255, 255, 0.96);
 }
 
+/* 자동 재생 영상은 클릭으로 재생/정지하는 대신 소리만 토글한다. */
+.has-autoplay-video .video-play-overlay,
+.has-autoplay-video .carousel-video-overlay {
+  display: none !important;
+}
+.video-sound-status {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 24;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(12, 12, 14, 0.62);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.18s ease, opacity 0.18s ease;
+}
+.video-sound-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #d7d7dc;
+}
+.video-sound-status.is-audible {
+  background: rgba(120, 35, 64, 0.82);
+}
+.video-sound-status.is-audible::before { background: #fff; }
+.autoplay-video:focus-visible {
+  outline: 3px solid #5b74a3;
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .has-autoplay-video:not(:hover) > .video-sound-status { opacity: 0.72; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .video-sound-status { transition: none; }
+}
+
 .prose-lg :where(blockquote):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
   margin-top: 1.5rem;
   padding: 1rem !important;

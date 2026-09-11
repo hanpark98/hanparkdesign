@@ -4,7 +4,7 @@ slug: mediheal
 format: wide
 description: "CRM & Performance Creative"
 image: "/images/posts/260331 Mediheal/thumb2.webp"
-category: ["Marketing", "E-commerce"]
+category: ["Marketing"]
 date: "2025-12-31"
 hideMarkdownBody: true
 role:

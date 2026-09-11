@@ -30,7 +30,7 @@ const showFooter = Astro.url.pathname !== '/';
 // 햄버거 메뉴의 프로젝트 카테고리 목록 — posts.astro와 동일한 정렬 기준
 const postFiles = Object.entries(import.meta.glob('../content/posts/*.md', { eager: true }));
 const menuPosts = postFiles.map(([, f]) => f.frontmatter);
-const menuCategoryOrder = ['Marketing', 'E-commerce', 'Branding', 'Motion & Content', 'Print & Illustration', 'Events'];
+const menuCategoryOrder = ['Marketing', 'Branding', 'Print', 'Events', 'Motion'];
 const menuRawCategories = [...new Set(menuPosts.flatMap(p => Array.isArray(p.category) ? p.category : (p.category ? [p.category] : [])))];
 const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.includes(c)), ...menuRawCategories.filter(c => !menuCategoryOrder.includes(c))];
 ---
@@ -250,7 +250,6 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
                 <div class="menu-divider menu-panel-item" aria-hidden="true"></div>
                 <a href="/posts" class="menu-link menu-panel-item">All Projects</a>
                 <div class="menu-section-label menu-panel-item">Filter</div>
-                <a href="/posts" class="menu-link menu-sub menu-panel-item">Featured</a>
                 <a href="/posts?view=all" class="menu-link menu-sub menu-panel-item">By Date</a>
                 {menuCategories.map(c => (
                   <a href={`/posts?cat=${encodeURIComponent(c)}`} class="menu-link menu-sub menu-panel-item">{c}</a>
@@ -285,6 +284,18 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       function enhanceVideo(video) {
         const isCarousel = video.classList.contains('my-carousel-img');
 
+        const ensureSoundStatus = (container) => {
+          if (!container) return null;
+          let status = container.querySelector(':scope > .video-sound-status');
+          if (!status) {
+            status = document.createElement('span');
+            status.className = 'video-sound-status';
+            status.setAttribute('aria-hidden', 'true');
+            container.appendChild(status);
+          }
+          return status;
+        };
+
         if (isCarousel) {
           const existingWrapper = video.closest('.video-wrapper');
           if (existingWrapper) {
@@ -297,19 +308,24 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
 
           // 캐러셀 아이템 혹은 그리드(img-col) 컨테이너 탐색
           const container = video.closest('.my-carousel-item') || video.closest('.img-col');
-          if (container && !container.querySelector('.carousel-video-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'carousel-video-overlay';
-            container.appendChild(overlay);
+          if (container) {
+            container.classList.add('has-autoplay-video');
+            const oldOverlay = container.querySelector('.carousel-video-overlay');
+            if (oldOverlay) oldOverlay.remove();
+            ensureSoundStatus(container);
           }
-          return null;
+          return container;
         }
 
         let wrapper = video.closest('.video-wrapper');
-        if (wrapper) return wrapper;
+        if (wrapper) {
+          wrapper.classList.add('has-autoplay-video');
+          ensureSoundStatus(wrapper);
+          return wrapper;
+        }
 
         wrapper = document.createElement('div');
-        wrapper.className = 'video-wrapper';
+        wrapper.className = 'video-wrapper has-autoplay-video';
 
         const parent = video.parentNode;
         if (!parent) return null;
@@ -317,35 +333,14 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
         parent.insertBefore(wrapper, video);
         wrapper.appendChild(video);
 
-        const overlay = document.createElement('div');
-        overlay.className = 'video-play-overlay';
-        wrapper.appendChild(overlay);
-
-        let hasPlayed = false;
-        const syncOverlay = () => {
-          if (video.paused) {
-            if (hasPlayed) wrapper.classList.add('is-paused');
-            wrapper.classList.remove('is-playing');
-          } else {
-            hasPlayed = true;
-            wrapper.classList.add('is-playing');
-            wrapper.classList.remove('is-paused');
-          }
-        };
-
-        video.addEventListener('play', syncOverlay);
-        video.addEventListener('pause', syncOverlay);
-        video.addEventListener('ended', () => {
-          hasPlayed = false;
-          syncOverlay();
-        });
-
-        syncOverlay();
+        ensureSoundStatus(wrapper);
         return wrapper;
       }
 
       function setupVideoControls() {
         const videos = document.querySelectorAll('video');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const managedVideos = [];
 
         videos.forEach((video) => {
           // 자체 재생 로직 또는 장식 용도의 영상은 일반 콘텐츠용 컨트롤 처리에서 제외
@@ -362,51 +357,52 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
 
           video.setAttribute('playsinline', '');
           video.setAttribute('webkit-playsinline', '');
+          video.setAttribute('loop', '');
+          video.setAttribute('muted', '');
+          video.defaultMuted = true;
+          video.muted = true;
+          video.loop = true;
+          video.autoplay = !prefersReducedMotion;
+          video.classList.add('autoplay-video');
+          video.setAttribute('tabindex', '0');
+          video.setAttribute('role', 'button');
 
-          enhanceVideo(video);
+          const container = enhanceVideo(video);
+          const soundStatus = container ? container.querySelector(':scope > .video-sound-status') : null;
+
+          const syncSoundState = () => {
+            const isMuted = video.muted;
+            if (soundStatus) {
+              soundStatus.textContent = isMuted ? 'Sound off' : 'Sound on';
+              soundStatus.classList.toggle('is-audible', !isMuted);
+            }
+            video.setAttribute('aria-pressed', String(!isMuted));
+            video.setAttribute('aria-label', isMuted ? 'Play video with sound' : 'Mute video');
+          };
+
+          syncSoundState();
+          video.addEventListener('volumechange', syncSoundState);
 
           if (video.dataset.hasListener) return;
 
-          if (isCarousel) {
-            const container = video.closest('.my-carousel-item') || video.closest('.img-col');
-            const overlay = container ? container.querySelector('.carousel-video-overlay') : null;
-            let hasPlayed = false;
-
-            const syncCarouselOverlay = () => {
-              if (!overlay) return;
-              if (!hasPlayed && video.paused) {
-                overlay.classList.remove('is-playing', 'is-paused');
-              } else if (!video.paused) {
-                hasPlayed = true;
-                overlay.classList.add('is-playing');
-                overlay.classList.remove('is-paused');
-              } else {
-                overlay.classList.remove('is-playing');
-                overlay.classList.add('is-paused');
-              }
-            };
-
-            video.addEventListener('play', syncCarouselOverlay);
-            video.addEventListener('pause', syncCarouselOverlay);
-            video.addEventListener('ended', () => {
-              hasPlayed = false;
-              syncCarouselOverlay();
-            });
-
-            syncCarouselOverlay();
-          }
-
-          video.addEventListener('click', function (e) {
+          const toggleSound = (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            if (video.paused) {
-              // 클릭 시 음소거 해제 후 재생
-              video.muted = false;
-              video.play();
-            } else {
-              video.pause();
+            const willUnmute = video.muted;
+            if (willUnmute) {
+              document.querySelectorAll('video.autoplay-video').forEach((otherVideo) => {
+                if (otherVideo !== video) otherVideo.muted = true;
+              });
             }
+            video.muted = !willUnmute;
+            if (video.paused && !prefersReducedMotion) video.play().catch(() => {});
+            syncSoundState();
+          };
+
+          video.addEventListener('click', toggleSound);
+          video.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') toggleSound(e);
           });
 
           video.addEventListener('dblclick', function (e) {
@@ -414,7 +410,20 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
           });
 
           video.dataset.hasListener = 'true';
+          managedVideos.push(video);
         });
+
+        if (!prefersReducedMotion && managedVideos.length) {
+          const playbackObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              const video = entry.target;
+              if (entry.isIntersecting) video.play().catch(() => {});
+              else video.pause();
+            });
+          }, { rootMargin: '120px 0px', threshold: 0.05 });
+
+          managedVideos.forEach(video => playbackObserver.observe(video));
+        }
       }
 
       function setupAntiCopy() {

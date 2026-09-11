@@ -634,16 +634,276 @@ const projectSchema = {
           )}
 
           {!frontmatter.hideMarkdownBody && (
-            <div class="bg-white p-2 sm:p-4 mb-4 card-shell post-content fade-section">
-              <Content />
+            <div class="bg-white p-2 sm:p-4 mb-4 card-shell fade-section">
+              {frontmatter.bodySectionTitle && (
+                <div class="stat-eyebrow post-section-heading">
+                  <span class="title">{frontmatter.bodySectionTitle}</span>
+                </div>
+              )}
+              <div class="post-content">
+                <Content />
+              </div>
             </div>
+          )}
+
+          {introHtml && frontmatter.bestCampaign && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
+              <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
+            </div>
+          )}
+
+          {frontmatter.bestCampaign && (
+            <section class="best-campaign" aria-labelledby="best-campaign-title">
+              <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section campaign-case-card">
+                <div class="stat-eyebrow">
+                  <span class="title" id="best-campaign-title">{frontmatter.bestCampaign.title}</span>
+                </div>
+
+                <div class="img-col ar-2-1 campaign-hero">
+                  {frontmatter.bestCampaign.hero?.video ? (
+                    <video
+                      src={frontmatter.bestCampaign.hero.video}
+                      poster={frontmatter.bestCampaign.hero.poster}
+                      autoplay
+                      loop
+                      muted
+                      playsinline
+                      preload="metadata"
+                      aria-label={frontmatter.bestCampaign.hero.alt || frontmatter.bestCampaign.hero.label}
+                    />
+                  ) : frontmatter.bestCampaign.hero?.image ? (
+                    <img
+                      src={frontmatter.bestCampaign.hero.image}
+                      alt={frontmatter.bestCampaign.hero.alt || frontmatter.bestCampaign.hero.label}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="campaign-placeholder campaign-placeholder-hero">
+                      <span>{frontmatter.bestCampaign.hero?.label || 'Campaign hero · 2:1'}</span>
+                    </div>
+                  )}
+                </div>
+
+                {frontmatter.bestCampaign.storefront && (
+                  <div class="campaign-case-block">
+                  <div class="storefront-viewer has-mobile campaign-storefront">
+                    <div class="storefront-copy">
+                      <div class="fe-tag">{frontmatter.bestCampaign.storefront.tag}</div>
+                      <div class="storefront-label">{frontmatter.bestCampaign.storefront.title}</div>
+                      {frontmatter.bestCampaign.storefront.description && (
+                        <p class="storefront-description">{frontmatter.bestCampaign.storefront.description}</p>
+                      )}
+                    </div>
+                    <div
+                      class="storefront-scroll-unit storefront-mac campaign-storefront-mac"
+                      class:list={{ 'is-placeholder': !frontmatter.bestCampaign.storefront.desktopImage }}
+                    >
+                      <div class="storefront-device">
+                        <div
+                          class="storefront-screen storefront-scroll-screen campaign-device-screen"
+                          tabindex="0"
+                          aria-label="Kijibae desktop storefront preview"
+                        >
+                          {frontmatter.bestCampaign.storefront.desktopImage ? (
+                            <img src={frontmatter.bestCampaign.storefront.desktopImage} alt={frontmatter.bestCampaign.storefront.desktopAlt || 'Kijibae desktop storefront'} loading="lazy" draggable="false" />
+                          ) : (
+                            <div class="campaign-placeholder"><span>Desktop storefront</span></div>
+                          )}
+                        </div>
+                        <img
+                          class="storefront-frame"
+                          src={frontmatter.bestCampaign.storefront.frame}
+                          alt=""
+                          loading="lazy"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div class="storefront-rail">
+                        <button
+                          class="storefront-rail-knob"
+                          type="button"
+                          role="scrollbar"
+                          aria-label="Scroll desktop storefront preview"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="0"
+                        >
+                          <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 5 5 2l3 3M2 13l3 3 3-3" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div
+                      class="storefront-scroll-unit storefront-phone-wrap campaign-storefront-phone"
+                      class:list={{ 'is-placeholder': !frontmatter.bestCampaign.storefront.mobileImage }}
+                    >
+                      <div class="storefront-phone">
+                        <div
+                          class="storefront-phone-screen storefront-scroll-screen campaign-device-screen"
+                          tabindex="0"
+                          aria-label="Kijibae mobile storefront preview"
+                        >
+                          {frontmatter.bestCampaign.storefront.mobileImage ? (
+                            <img src={frontmatter.bestCampaign.storefront.mobileImage} alt={frontmatter.bestCampaign.storefront.mobileAlt || 'Kijibae mobile storefront'} loading="lazy" draggable="false" />
+                          ) : (
+                            <div class="campaign-placeholder"><span>Mobile storefront</span></div>
+                          )}
+                        </div>
+                        <span class="storefront-dynamic-island" aria-hidden="true"></span>
+                      </div>
+                      <div class="storefront-rail">
+                        <button
+                          class="storefront-rail-knob"
+                          type="button"
+                          role="scrollbar"
+                          aria-label="Scroll mobile storefront preview"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow="0"
+                        >
+                          <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 5 5 2l3 3M2 13l3 3 3-3" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                )}
+
+                {frontmatter.bestCampaign.emails && (
+                  <div class="campaign-case-block featured-email-section">
+                  <div class="fe-groups">
+                    <div class="fe-group is-sequence is-revenue-only campaign-email-sequence">
+                      <div class="fe-group-text">
+                        <div class="fe-tag">{frontmatter.bestCampaign.emails.tag}</div>
+                        <div class="fe-kicker">{frontmatter.bestCampaign.emails.title}</div>
+                        {frontmatter.bestCampaign.emails.description && (
+                          <p class="fe-body">{frontmatter.bestCampaign.emails.description}</p>
+                        )}
+                      </div>
+                      <div class="fe-phones">
+                        {frontmatter.bestCampaign.emails.items.map(item => (
+                          <figure class="fe-phone-fig campaign-email-item">
+                            <div class="fe-cap-top">
+                              <div class="fe-cap-label">{item.label}</div>
+                              {item.date && <div class="fe-cap-date">{item.date}</div>}
+                            </div>
+                            <div class="fe-phone" class:list={{ 'is-placeholder': !item.image }}>
+                              <div class="fe-phone-screen campaign-device-screen">
+                                {item.image ? (
+                                  <img src={item.image} alt={item.alt || item.label} loading="lazy" />
+                                ) : (
+                                  <div class="campaign-placeholder"><span>{item.label}</span></div>
+                                )}
+                              </div>
+                              <div class="fe-rail">
+                                <div class="fe-rail-knob">
+                                  <svg viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M2 5 L5 2 L8 5" />
+                                    <path d="M2 13 L5 16 L8 13" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
+                            {(item.hero || item.badge) && (
+                              <figcaption class="fe-cap-bottom">
+                                {item.heroLabel && <div class="fe-hero-label">{item.heroLabel}</div>}
+                                {item.hero && <div class="fe-hero">{item.hero}</div>}
+                                {item.badge && (
+                                  <div class="fe-badge">
+                                    <span class="fe-badge-copy">
+                                      <span>{item.badge}</span>
+                                      {item.badgeSecondLine && <span class="fe-badge-second-line">{item.badgeSecondLine}</span>}
+                                    </span>
+                                  </div>
+                                )}
+                              </figcaption>
+                            )}
+                          </figure>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                )}
+
+                {frontmatter.bestCampaign.social && (
+                  <div class="campaign-case-block featured-email-section">
+                  <div class="fe-groups">
+                    <div class="fe-group is-gallery campaign-social-group">
+                      <div class="fe-group-text">
+                        <div class="fe-tag">{frontmatter.bestCampaign.social.tag}</div>
+                        <div class="fe-kicker">{frontmatter.bestCampaign.social.title}</div>
+                        {frontmatter.bestCampaign.social.description && (
+                          <p class="fe-body">{frontmatter.bestCampaign.social.description}</p>
+                        )}
+                      </div>
+                      <div class="campaign-social-grid">
+                        {frontmatter.bestCampaign.social.items.map(item => (
+                          <figure class="campaign-social-item">
+                            <figcaption class="fe-cap-top">
+                              <span class="fe-cap-label">{item.label}</span>
+                              {item.date && <span class="fe-cap-date">{item.date}</span>}
+                            </figcaption>
+                            <div class="campaign-social-frame">
+                              {item.video ? (
+                                <video
+                                  src={item.video}
+                                  poster={item.poster}
+                                  autoplay
+                                  loop
+                                  muted
+                                  playsinline
+                                  preload="metadata"
+                                  aria-label={item.alt || item.label}
+                                />
+                              ) : item.image ? (
+                                <img src={item.image} alt={item.alt || item.label} loading="lazy" />
+                              ) : (
+                                <div class="campaign-placeholder"><span>{item.label}</span></div>
+                              )}
+                            </div>
+                          </figure>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                )}
+              </div>
+
+              {frontmatter.bestCampaign.overview && (
+                <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section campaign-overview-card">
+                  <div class="stat-eyebrow">
+                    <span class="title">{frontmatter.bestCampaign.overview.tag}</span>
+                    <span class="subtitle">{frontmatter.bestCampaign.overview.title}</span>
+                  </div>
+                  {frontmatter.bestCampaign.overview.description && (
+                    <p class="fe-body campaign-overview-body">{frontmatter.bestCampaign.overview.description}</p>
+                  )}
+                  {frontmatter.bestCampaign.overview.stats?.length && (
+                    <div class="stat-grid campaign-stat-grid">
+                      {frontmatter.bestCampaign.overview.stats.map(s => (
+                        <div class="stat-card">
+                          <div class="stat-label">{s.label}</div>
+                          <div class="stat-number">{s.prefix && <span class="plus">{s.prefix}</span>}{s.value}<span class="unit">{s.unit}</span></div>
+                          {s.detail && <div class="stat-detail">{s.detail}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
           )}
 
           {frontmatter.role && (
             <ProjectRoleCard role={frontmatter.role} />
           )}
 
-          {introHtml && (
+          {introHtml && !frontmatter.bestCampaign && (
             <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
               <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
             </div>
@@ -836,6 +1096,159 @@ const projectSchema = {
       display: block !important;
       max-width: none !important;
       border-radius: 0 !important;
+    }
+
+    /* Kijibae campaign: existing case-study components provide the visual system.
+       These rules only cover asset slots and the requested responsive media grid. */
+    .post-section-heading { margin: 16px 16px 22px; }
+    .campaign-hero {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #f5f6f8;
+    }
+    .campaign-hero > img,
+    .campaign-hero > video,
+    .campaign-hero > .video-wrapper,
+    .campaign-hero .video-wrapper video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0 !important;
+      object-fit: cover;
+    }
+    .campaign-placeholder {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      place-items: center;
+      overflow: hidden;
+      background: #eef0f4;
+      color: #5b74a3;
+    }
+    .campaign-placeholder span {
+      font-size: 0.76rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .campaign-case-block { margin-top: 18px; }
+    .storefront-screen.campaign-device-screen,
+    .storefront-phone-screen.campaign-device-screen,
+    .fe-phone-screen.campaign-device-screen {
+      background: #eef0f4;
+    }
+    .campaign-device-screen > img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      object-fit: cover;
+    }
+    /* Keep the control visible while asset slots are empty; it becomes functional
+       automatically as soon as a scrollable storefront image is supplied. */
+    .campaign-storefront .storefront-scroll-unit.is-placeholder.no-scroll .storefront-rail {
+      display: block;
+      opacity: 0.45;
+    }
+    /* Kijibae email set: fixed, vertically centered crops instead of scrollable
+       screenshots. Short assets reveal the artwork's sampled bubblegum edge color;
+       the taller Reminder 1 is intentionally cropped at the top and bottom. */
+    .campaign-email-item .fe-phone-screen {
+      overflow: hidden;
+      background: #e9cffe;
+      pointer-events: none;
+    }
+    .campaign-email-item .fe-phone-screen > img {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: auto;
+      transform: translateY(-50%);
+    }
+    .campaign-email-item .fe-rail {
+      display: none !important;
+    }
+    .campaign-overview-body { margin-bottom: 28px !important; }
+    .fe-group.is-sequence.campaign-email-sequence .fe-phones,
+    .campaign-social-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 30px;
+      align-items: start;
+    }
+    .campaign-social-item {
+      width: 100%;
+      max-width: 190px;
+      justify-self: center;
+      min-width: 0;
+      margin: 0;
+    }
+    .campaign-social-frame {
+      position: relative;
+      aspect-ratio: 9 / 16;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #eef0f4;
+    }
+    .campaign-social-frame > img,
+    .campaign-social-frame > video,
+    .campaign-social-frame > .video-wrapper,
+    .campaign-social-frame .video-wrapper video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0 !important;
+      object-fit: cover;
+    }
+    @media (max-width: 900px) {
+      .campaign-case-card .fe-group.is-sequence.campaign-email-sequence .fe-phones,
+      .campaign-case-card .campaign-social-grid {
+        display: flex;
+        justify-content: flex-start;
+        gap: 28px;
+        margin-right: -24px;
+        margin-left: -24px;
+        padding: 0 24px 14px;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        scroll-padding-inline: 24px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+      .campaign-case-card .fe-group.is-sequence.campaign-email-sequence .fe-phones::-webkit-scrollbar,
+      .campaign-case-card .campaign-social-grid::-webkit-scrollbar { display: none; }
+      .campaign-case-card .fe-group.is-sequence.campaign-email-sequence .campaign-email-item {
+        flex: 0 0 min(52vw, 190px);
+        max-width: 190px;
+        scroll-snap-align: start;
+      }
+      .campaign-case-card .campaign-social-item {
+        flex: 0 0 min(54vw, 240px);
+        max-width: 240px;
+        scroll-snap-align: start;
+      }
+    }
+    @media (max-width: 640px) {
+      .campaign-case-card .fe-group.is-sequence.campaign-email-sequence .fe-phones,
+      .campaign-case-card .campaign-social-grid {
+        margin-right: -20px;
+        margin-left: -20px;
+        padding-right: 20px;
+        padding-left: 20px;
+        scroll-padding-inline: 20px;
+      }
+      .campaign-case-card .fe-group.is-sequence.campaign-email-sequence .campaign-email-item {
+        flex-basis: min(70vw, 190px);
+      }
+      .campaign-case-card .campaign-social-item {
+        flex-basis: min(70vw, 240px);
+      }
+      .campaign-social-frame { aspect-ratio: 1 / 1; }
     }
 
     /* ------------ Role / Scope — 팀 성과와 내 기여를 구분하는 정직성 블록.
