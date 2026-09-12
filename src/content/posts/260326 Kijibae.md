@@ -6,40 +6,41 @@ description: "Performance Creative & Branding"
 image: "/images/posts/260326 Kijibae/thumb3.webp"
 category: ["Branding", "Marketing"]
 date: "2024-07-07"
-bodySectionTitle: "Branding"
+bodySectionTitle: "Brand Identity & Packaging"
 bodyAfterBestCampaign: true
 introAfterRole: true
 bestCampaign:
-  title: "Best Performing Campaign"
+  title: "Best-Performing Campaign"
   hero:
     image: "/images/posts/260326 Kijibae/plain-2-1.webp"
     alt: "Kijibae birthday giveaway campaign"
   overview:
-    tag: "Key Performance"
-    title: "Kijibae Birthday Giveaway · August 25–31, 2025"
-    description: "A coordinated birthday campaign connected five days of email and social storytelling with the storefront, turning a week-long giveaway into measurable revenue and efficient marketing returns."
+    tag: "Campaign Results — Kijibae Birthday Bash"
+    period: "Aug 18–24 vs. Aug 25–31, 2025"
     stats:
       - label: "Weekly Revenue"
-        prefix: "$"
-        value: "6.15"
-        unit: "K"
-        detail: "August 25–31, 2025"
-      - label: "Marketing ROI"
+        prefix: "+"
+        value: "123"
+        unit: "%"
+        detail: "$2,763 → $6,154"
+      - label: "Marketing Efficiency"
         value: "5.9"
-        unit: "x"
-        detail: "Return across the campaign week"
+        unit: "x MER"
+        detail: "$1,040 marketing spend"
+      - label: "Conversion Rate"
+        prefix: "+"
+        value: "33"
+        unit: "%"
+        detail: "1.32% → 1.76% · +0.44pp"
       - label: "Email-Attributed Revenue"
         prefix: "$"
-        value: "1.75"
-        unit: "K"
-        detail: "Revenue attributed to email"
-      - label: "Revenue from Email"
-        value: "28"
-        unit: "%"
-        detail: "Share of weekly revenue"
+        value: "1,747"
+        unit: ""
+        detail: "28% of weekly revenue · Last-click"
+    supportingText: "Shopping Sessions 5,505 (+54%) · Email Sessions 777"
   storefront:
     tag: "Storefront"
-    title: "From campaign to storefront"
+    title: "From Campaign to Storefront"
     description: "The birthday campaign carried through to the storefront, creating one continuous experience from message to purchase."
     frame: "/images/posts/260331 Mediheal/macmock.webp"
     desktopImage: "/images/posts/260326 Kijibae/kijibae-storefront-pc-birthday.webp"
@@ -48,8 +49,8 @@ bestCampaign:
     mobileAlt: "Kijibae birthday campaign mobile storefront"
   emails:
     tag: "Email Marketing"
-    title: "A Five-Day Email Sequence"
-    description: "Two announcements, two reminders, and a final call kept the week-long campaign moving from launch through Friday."
+    title: "Weekday Email Cadence"
+    description: "Each send built momentum and kept the campaign top of mind heading into the weekend close."
     items:
       - label: "Announcement 1"
         date: "Aug 25 · Mon"
@@ -79,9 +80,9 @@ bestCampaign:
         hero: "—"
         badge: "Final Call"
   social:
-    tag: "Social Content"
-    title: "Five Days of Giveaway Content"
-    description: "Across five daily posts, followers entered the giveaway by commenting with the design they wanted and tagging a friend for a chance to receive a gift."
+    tag: "Social Media"
+    title: "Giveaway Participation"
+    description: "Inviting followers to tag a friend and comment with their preferred design expanded reach and helped drive traffic across the campaign’s connected channels."
     items:
       - label: "Trending Audio"
         date: "Aug 25 · Mon"
@@ -124,12 +125,12 @@ role:
     - "Campaign Key Visuals"
     - "Email & Storefront Creative"
 intro:
-  ### Introduction
+  ### About the Brand
   기지배 / Ki·ji·bae / (noun) / Korean
 
-  Originally a derogatory slang, we’ve reclaimed 'Kijibae' to represent our community. Now, a Kijibae is a friend who is bold, takes the lead, and isn’t afraid to show their thorns.
+  Originally used as a derogatory term, “Kijibae” was reclaimed to represent a bold, self-assured community—friends who take the lead and aren’t afraid to show their thorns.
   
-  Kijibae brings Korea’s innovative DIY nail technology to the United States. We deliver a flawless, salon-grade finish you can easily achieve on your own.
+  Kijibae brings Korea’s innovative semi-cured gel nail strips to the United States, offering a salon-quality finish that can be applied at home.
 ---
 
 

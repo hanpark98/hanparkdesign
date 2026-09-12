@@ -878,8 +878,10 @@ const projectSchema = {
                 <div class="bg-white p-6 sm:p-8 mb-4 card-shell fade-section campaign-overview-card">
                   <div class="stat-eyebrow">
                     <span class="title">{frontmatter.bestCampaign.overview.tag}</span>
-                    <span class="subtitle">{frontmatter.bestCampaign.overview.title}</span>
                   </div>
+                  {frontmatter.bestCampaign.overview.title && (
+                    <div class="fe-kicker">{frontmatter.bestCampaign.overview.title}</div>
+                  )}
                   {frontmatter.bestCampaign.overview.description && (
                     <p class="fe-body campaign-overview-body">{frontmatter.bestCampaign.overview.description}</p>
                   )}
@@ -892,6 +894,12 @@ const projectSchema = {
                           {s.detail && <div class="stat-detail">{s.detail}</div>}
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {frontmatter.bestCampaign.overview.supportingText && (
+                    <div class="team-result-period">
+                      {frontmatter.bestCampaign.overview.supportingText}
+                      {frontmatter.bestCampaign.overview.period && <> · {frontmatter.bestCampaign.overview.period}</>}
                     </div>
                   )}
                 </div>
@@ -1192,7 +1200,7 @@ const projectSchema = {
     .campaign-email-item .fe-rail {
       display: none !important;
     }
-    .campaign-overview-body { margin-bottom: 28px !important; }
+    .fe-body.campaign-overview-body { margin-bottom: 32px !important; }
     .fe-group.is-sequence.campaign-email-sequence .fe-phones,
     .campaign-social-grid {
       display: grid;
