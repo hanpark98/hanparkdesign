@@ -2,7 +2,7 @@
 title: "Mediheal"
 slug: mediheal
 format: wide
-description: "CRM & Performance Creative"
+description: "Performance Creative & CRM"
 image: "/images/posts/260331 Mediheal/thumb2.webp"
 category: ["Marketing"]
 date: "2025-12-31"
@@ -23,10 +23,9 @@ role:
     - name: "Loreta"
       part: "Site Operation"
   scope:
-    - "CRM Design (Email & SMS)"
-    - "Storefront Visuals (Shopify)"
+    - "Email & SMS Creative"
+    - "Storefront Campaign Visuals (Shopify)"
     - "Performance Ad Creative (Meta)"
-    - "Copy Drafts"
 revenueTrend:
   unit: "Shopify Total Sales / Monthly · USD"
   troughLabel: "$19,284"
