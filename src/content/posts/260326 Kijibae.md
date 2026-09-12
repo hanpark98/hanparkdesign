@@ -7,6 +7,8 @@ image: "/images/posts/260326 Kijibae/thumb3.webp"
 category: ["Branding", "Marketing"]
 date: "2024-07-07"
 bodySectionTitle: "Branding"
+bodyAfterBestCampaign: true
+introAfterRole: true
 bestCampaign:
   title: "Best Performing Campaign"
   hero:

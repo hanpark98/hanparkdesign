@@ -633,7 +633,7 @@ const projectSchema = {
             </div>
           )}
 
-          {!frontmatter.hideMarkdownBody && (
+          {!frontmatter.hideMarkdownBody && !frontmatter.bodyAfterBestCampaign && (
             <div class="bg-white p-2 sm:p-4 mb-4 card-shell fade-section">
               {frontmatter.bodySectionTitle && (
                 <div class="stat-eyebrow post-section-heading">
@@ -646,7 +646,7 @@ const projectSchema = {
             </div>
           )}
 
-          {introHtml && frontmatter.bestCampaign && (
+          {introHtml && frontmatter.bestCampaign && !frontmatter.introAfterRole && (
             <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
               <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
             </div>
@@ -899,8 +899,27 @@ const projectSchema = {
             </section>
           )}
 
+          {!frontmatter.hideMarkdownBody && frontmatter.bodyAfterBestCampaign && (
+            <div class="bg-white p-2 sm:p-4 mb-4 card-shell fade-section">
+              {frontmatter.bodySectionTitle && (
+                <div class="stat-eyebrow post-section-heading">
+                  <span class="title">{frontmatter.bodySectionTitle}</span>
+                </div>
+              )}
+              <div class="post-content">
+                <Content />
+              </div>
+            </div>
+          )}
+
           {frontmatter.role && (
             <ProjectRoleCard role={frontmatter.role} />
+          )}
+
+          {introHtml && frontmatter.bestCampaign && frontmatter.introAfterRole && (
+            <div class="bg-white p-6 sm:p-8 mb-4 card-shell post-content fade-section">
+              <div class="prose prose-lg max-w-none text-gray-800" set:html={introHtml} />
+            </div>
           )}
 
           {introHtml && !frontmatter.bestCampaign && (
