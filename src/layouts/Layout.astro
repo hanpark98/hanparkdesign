@@ -39,6 +39,45 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script is:inline>
+      (() => {
+        const storageKey = 'hanparkdesign:posthog-disabled';
+
+        const applyAnalyticsControl = () => {
+          const control = new URLSearchParams(window.location.search).get('analytics');
+          let disabled = control === 'off';
+
+          try {
+            if (control === 'off') {
+              window.localStorage.setItem(storageKey, 'true');
+            } else if (control === 'on') {
+              window.localStorage.removeItem(storageKey);
+              disabled = false;
+            } else {
+              disabled = window.localStorage.getItem(storageKey) === 'true';
+            }
+          } catch {
+            // Storage may be unavailable in privacy-restricted browsing contexts.
+          }
+
+          window.__hanAnalyticsDisabled = disabled;
+          return disabled;
+        };
+
+        window.__hanApplyAnalyticsControl = applyAnalyticsControl;
+        applyAnalyticsControl();
+
+        // The Astro integration reads this callback while it initializes, so it must
+        // exist before any deferred analytics modules or custom elements can run.
+        window.webAnalyticsBeforeSend = (event) => (
+          applyAnalyticsControl() ? null : event
+        );
+
+        window.addEventListener('pageshow', (event) => {
+          if (event.persisted) applyAnalyticsControl();
+        });
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content={`${siteData.name} (${siteData.alternateName})`} />

@@ -9,6 +9,8 @@ const projectExplorationStorageKey = 'hanparkdesign:project-exploration';
 
 declare global {
   interface Window {
+    __hanAnalyticsDisabled?: boolean;
+    __hanApplyAnalyticsControl?: () => boolean;
     __hanPostHogInitialized?: boolean;
     webAnalyticsBeforeSend?: BeforeSend;
   }
@@ -41,9 +43,14 @@ type ProjectExploration = {
 };
 
 let posthogClient: PostHogClient | null = null;
+let analyticsBindingsInitialized = false;
 const queuedEvents: QueuedEvent[] = [];
 
 function isAnalyticsDisabled() {
+  if (window.__hanApplyAnalyticsControl) {
+    return window.__hanApplyAnalyticsControl();
+  }
+
   const analyticsControl = new URLSearchParams(window.location.search).get('analytics');
   let disabled = analyticsControl === 'off';
 
@@ -60,6 +67,7 @@ function isAnalyticsDisabled() {
     // If storage is unavailable, the URL switch still applies to the current page.
   }
 
+  window.__hanAnalyticsDisabled = disabled;
   return disabled;
 }
 
@@ -262,6 +270,8 @@ function getSourcePage() {
 }
 
 function capture(event: string, properties: Record<string, string | number>) {
+  if (isAnalyticsDisabled()) return;
+
   if (!posthogClient) {
     if (queuedEvents.length < 20) queuedEvents.push({ event, properties });
     return;
@@ -281,6 +291,10 @@ async function initializePostHog(key: string, host: string) {
     // Keep the SDK out of the render-critical bundle while starting it as soon as this
     // lightweight event layer is ready.
     const { default: posthog } = await import('posthog-js');
+    if (isAnalyticsDisabled()) {
+      queuedEvents.length = 0;
+      return;
+    }
 
     posthog.init(key, {
       api_host: host,
@@ -297,6 +311,14 @@ async function initializePostHog(key: string, host: string) {
         captureJsonLd: false,
       },
     });
+
+    if (
+      new URLSearchParams(window.location.search).get('analytics') === 'on'
+      && posthog.has_opted_out_capturing()
+    ) {
+      posthog.opt_in_capturing({ captureEventName: false });
+      posthog.startSessionRecording();
+    }
 
     posthogClient = posthog;
     queuedEvents.splice(0).forEach(({ event, properties }) => {
@@ -471,20 +493,54 @@ function setupProjectEngagement(attribution: SessionAttribution, entrySource: En
   window.addEventListener('pageshow', updateScrollDepth, { passive: true });
 }
 
-const analyticsDisabled = isAnalyticsDisabled();
+function disableActiveAnalytics() {
+  queuedEvents.length = 0;
+  if (!posthogClient) return;
 
-window.webAnalyticsBeforeSend = (event) => (analyticsDisabled ? null : event);
-
-if (!analyticsDisabled && posthogKey && posthogHost && !window.__hanPostHogInitialized) {
-  window.__hanPostHogInitialized = true;
-  const project = getProjectContext();
-  const attribution = getSessionAttribution(project);
-  const projectEntrySource = getProjectEntrySource(attribution);
-  setupClickEvents(attribution);
-  captureProjectsEntry();
-  captureProjectView(project, attribution, projectEntrySource);
-  setupProjectEngagement(attribution, projectEntrySource);
-  void initializePostHog(posthogKey, posthogHost);
+  try {
+    posthogClient.stopSessionRecording();
+    posthogClient.opt_out_capturing();
+  } catch {
+    // Analytics state changes must never affect the website.
+  }
 }
+
+function startAnalytics() {
+  if (isAnalyticsDisabled()) {
+    disableActiveAnalytics();
+    return;
+  }
+
+  if (!analyticsBindingsInitialized) {
+    analyticsBindingsInitialized = true;
+    const project = getProjectContext();
+    const attribution = getSessionAttribution(project);
+    const projectEntrySource = getProjectEntrySource(attribution);
+    setupClickEvents(attribution);
+    captureProjectsEntry();
+    captureProjectView(project, attribution, projectEntrySource);
+    setupProjectEngagement(attribution, projectEntrySource);
+  }
+
+  if (posthogClient?.has_opted_out_capturing()) {
+    posthogClient.opt_in_capturing({ captureEventName: false });
+    posthogClient.startSessionRecording();
+  }
+
+  if (posthogKey && posthogHost && !window.__hanPostHogInitialized) {
+    window.__hanPostHogInitialized = true;
+    void initializePostHog(posthogKey, posthogHost);
+  }
+}
+
+window.webAnalyticsBeforeSend ??= (event) => (isAnalyticsDisabled() ? null : event);
+
+startAnalytics();
+
+window.addEventListener('pageshow', (event) => {
+  if (!event.persisted) return;
+  if (isAnalyticsDisabled()) disableActiveAnalytics();
+  else startAnalytics();
+}, { passive: true });
 
 export {};
