@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { personId, siteData } from '../data/site';
 import { getValidatedProjects } from '../utils/projectSlugs';
+import { formatUsDate } from '../utils/dateFormat';
 
 // .md 파일 수집
 const postFiles = Object.entries(import.meta.glob('../content/posts/*.md', { eager: true }));
@@ -67,7 +68,7 @@ const posts = [...chronologicalPosts].sort((a, b) =>
   <div class="bg-[#ebe9e5] min-h-screen">
 
     <!-- 포스트 목록 -->
-    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-3 sm:px-6 pt-3 sm:pt-6 pb-6">
+    <div id="posts-wrapper" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       <!-- 항상 맨 앞에 고정되는 프로필 카드 — 카테고리 필터와 무관하게 항상 보임 -->
       <a href="/profile" class="group post-card tilt-card" data-analytics-profile-source="projects_grid">
         <div class="w-full aspect-square overflow-hidden profile-grid-thumb">
@@ -75,8 +76,9 @@ const posts = [...chronologicalPosts].sort((a, b) =>
                class="tilt-card-thumb w-full h-full object-cover"/>
         </div>
         <div class="post-card-content">
+          <div class="post-card-date">Graphic Design</div>
           <h3 class="post-card-title">Profile</h3>
-          <p class="post-card-desc">{siteData.name} — {siteData.jobTitle}</p>
+          <p class="post-card-desc">Han Park</p>
         </div>
       </a>
       {posts.map(p => (
@@ -94,7 +96,7 @@ const posts = [...chronologicalPosts].sort((a, b) =>
                  class="tilt-card-thumb w-full h-full object-cover"/>
           </div>
           <div class="post-card-content">
-            {p.date && <div class="post-card-date">{(new Date(p.date)).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'})}</div>}
+            {p.date && <div class="post-card-date">{formatUsDate(p.date)}</div>}
             <h3 class="post-card-title">{p.title}</h3>
             <p class="post-card-desc">{p.description}</p>
           </div>
@@ -162,6 +164,14 @@ const posts = [...chronologicalPosts].sort((a, b) =>
 </script>
 
   <style>
+    #posts-wrapper {
+      gap: 16px;
+      padding: var(--layout-page-gutter);
+    }
+
+    @media (min-width: 641px) {
+      #posts-wrapper { gap: 24px; }
+    }
 
     /* 카드 */
     /* 모바일(1열)에서는 정사각 썸네일이 첫 화면을 다 차지해서 아래 작품들이 안 보이던 문제 —
@@ -175,7 +185,7 @@ const posts = [...chronologicalPosts].sort((a, b) =>
 
     .post-card {
       position: relative;
-      border-radius: 16px;
+      border-radius: var(--radius-shell);
       background: #fff;
       overflow: hidden;
       display: block;
@@ -217,9 +227,9 @@ const posts = [...chronologicalPosts].sort((a, b) =>
       transition: transform 0.15s ease;
     }
 
-    .post-card-content { padding: 1.2rem; }
-    .post-card-date { font-size: .8rem; color: #A0A0A0; margin-bottom: 0.3rem; }
-    .post-card-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0rem; }
+    .post-card-content { padding: var(--layout-compact-padding); }
+    .post-card-date { font-size: .8rem; color: #A0A0A0; margin-bottom: var(--text-space-xs); }
+    .post-card-title { font-size: 1.3rem; font-weight: 800; margin: 0 0 var(--text-space-xs) !important; }
     .post-card-desc {
       font-size: 1rem !important;
       line-height: 1.4 !important;

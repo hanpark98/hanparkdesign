@@ -120,11 +120,11 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
 
     <style>
       :root{
-        --nav-radius: 16px; 
+        --nav-radius: var(--radius-shell);
         --nav-pad-x: 27px;  
         --nav-pad-t: 22px;  
         --nav-pad-b: 22px;  
-        --nav-side-gap: 24px; 
+        --nav-side-gap: var(--layout-page-gutter);
         --nav-gradient: linear-gradient(
           to bottom,
           #040404 0%,
@@ -195,7 +195,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       #menu-toggle{
         display:flex; align-items:center; justify-content:center;
         width: 2.75rem; height: 2.75rem;
-        border-radius: 9999px; border: 0; cursor:pointer;
+        border-radius: var(--radius-pill); border: 0; cursor:pointer;
         background: transparent; color:#fff;
         transition: opacity .2s;
       }
@@ -207,7 +207,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
         position:absolute; top: calc(100% + 8px); right: 0;
         min-width: 13rem;
         background: #fff; color:#111;
-        border-radius: 16px;
+        border-radius: var(--radius-shell);
         box-shadow: 0 20px 45px -12px rgba(0,0,0,0.35), 0 4px 14px rgba(0,0,0,0.1);
         padding: 0.5rem;
         opacity:0; visibility:hidden; transform: translateY(-14px);
@@ -237,7 +237,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       #menu-wrap.is-open .menu-panel-item:nth-child(9){ transition-delay: 0.26s; }
 
       .menu-link{
-        display:block; padding: 0.55rem 0.8rem; border-radius: 9px;
+        display:block; padding: 0.55rem 0.8rem; border-radius: var(--radius-control);
         font-weight:600; font-size:0.95rem; color:#111; text-decoration:none;
         transition: background .15s ease, transform .15s ease;
       }
@@ -256,7 +256,7 @@ const menuCategories = [...menuCategoryOrder.filter(c => menuRawCategories.inclu
       .menu-link.menu-sub{ font-weight:500; font-size:0.9rem; color:#333; }
 
       @media (max-width: 640px){
-        .site-nav-box{ margin-inline: max(12px, env(safe-area-inset-left)); }
+        .site-nav-box{ margin-inline: max(var(--layout-page-gutter), env(safe-area-inset-left)); }
 
         #menu-panel{ min-width: 14rem; padding: 0.6rem; }
         .menu-link{ padding: 0.85rem 1rem; font-size: 1.02rem; }

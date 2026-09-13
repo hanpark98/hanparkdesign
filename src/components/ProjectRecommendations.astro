@@ -29,6 +29,7 @@ const cards = [
           aria-label={`${card.label}: ${card.title}`}
           data-analytics-project-card
           data-analytics-source="project_recommendations"
+          data-recommendation-layout="overlay"
           data-recommendation-type={card.type}
           data-project={card.title}
           data-slug={card.slug}
@@ -55,8 +56,9 @@ const cards = [
 <style>
   .project-highlights-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--layout-section-gap);
     margin: 0;
   }
 
@@ -65,7 +67,7 @@ const cards = [
     display: block;
     aspect-ratio: 1;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: var(--radius-media);
     background: #e6e4de;
     box-shadow:
       0 0 0 0 rgba(116, 126, 137, 0),
@@ -83,6 +85,7 @@ const cards = [
     inset: 0;
     z-index: 1;
     display: flex;
+    min-width: 0;
     flex-direction: column;
     justify-content: flex-end;
     padding: 1.2rem;
@@ -95,24 +98,27 @@ const cards = [
   }
 
   .project-highlight-title {
+    overflow: hidden;
     margin: 0;
     color: #fff;
     font-size: 1.3rem;
     font-weight: 800;
     line-height: 1.25;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .project-highlight-description {
-    display: -webkit-box;
+    display: block;
     overflow: hidden;
-    margin: 0 !important;
+    margin: var(--text-space-xs) 0 0 !important;
     color: rgba(255, 255, 255, 0.84);
     font-size: 1rem !important;
     line-height: 1.4 !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .project-highlight-image {
@@ -151,13 +157,30 @@ const cards = [
     .project-highlight-item:hover .project-highlight-image img {
       transform: scale(1.025);
     }
+
   }
 
   @media (min-width: 641px) {
     .project-highlights-grid {
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
     }
+  }
+
+  @media (max-width: 640px) {
+    .project-highlight-content {
+      padding: 0.8rem;
+    }
+
+    .project-highlight-title {
+      font-size: 1rem;
+      line-height: 1.2;
+    }
+
+    .project-highlight-description {
+      font-size: 0.78rem !important;
+      line-height: 1.35 !important;
+    }
+
   }
 
   @media (prefers-reduced-motion: reduce) {

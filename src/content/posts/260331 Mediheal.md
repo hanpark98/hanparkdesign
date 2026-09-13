@@ -154,24 +154,20 @@ clickTable:
 featuredEmails:
   title: "HOW I WORK"
   groups:
-    - type: "gallery"
-      tag: "Calendar"
-      kicker: "Key-Date Campaigns"
-      body: "Every key date got its own campaign look, Halloween through New Year."
+    - type: "sequence"
+      tag: "Journey"
+      kicker: "Welcome Flow"
+      body: "Three emails, each with a clear role in onboarding and nurturing new subscribers."
       emails:
-        - label: "Halloween"
-          seg: "Oct 23 – Oct 31"
-          imageFolder: "/images/posts/260331 Mediheal/emails/1-1 halloween"
-        - label: "Black Friday"
-          seg: "Nov 20 – Dec 1"
-          imageFolder: "/images/posts/260331 Mediheal/emails/1-2 black friday"
-        - label: "Winter"
-          imageFolder: "/images/posts/260331 Mediheal/emails/1-3 winter"
-          badge: "Featured on"
-          badgeSecondLine: "MEDIHEAL Official"
-        - label: "Christmas"
-          seg: "Dec 8 – Dec 25"
-          imageFolder: "/images/posts/260331 Mediheal/emails/1-4 christmas"
+        - label: "Brand Introduction"
+          date: "Email 1"
+          imageFolder: "/images/posts/260331 Mediheal/emails/4-1 brand introduction"
+        - label: "Trust Building"
+          date: "Email 2"
+          imageFolder: "/images/posts/260331 Mediheal/emails/4-2 trust building"
+        - label: "Product Discovery"
+          date: "Email 3"
+          imageFolder: "/images/posts/260331 Mediheal/emails/4-3 product discovery"
     - type: "pair"
       tag: "Audience"
       kicker: "Segment-Based Creatives"
@@ -192,6 +188,24 @@ featuredEmails:
           heroLabel: "Click Rate"
           sub: "779 clicks"
           badge: "Best Large Send"
+    - type: "gallery"
+      tag: "Calendar"
+      kicker: "Key-Date Campaigns"
+      body: "Every key date got its own campaign look, Halloween through New Year."
+      emails:
+        - label: "Halloween"
+          seg: "Oct 23–31"
+          imageFolder: "/images/posts/260331 Mediheal/emails/1-1 halloween"
+        - label: "Black Friday"
+          seg: "Nov 20–Dec 1"
+          imageFolder: "/images/posts/260331 Mediheal/emails/1-2 black friday"
+        - label: "Winter"
+          imageFolder: "/images/posts/260331 Mediheal/emails/1-3 winter"
+          badge: "Featured on"
+          badgeSecondLine: "MEDIHEAL Official"
+        - label: "Christmas"
+          seg: "Dec 8–25"
+          imageFolder: "/images/posts/260331 Mediheal/emails/1-4 christmas"
     - type: "sequence"
       revenueOnly: true
       tag: "Timing"
@@ -246,11 +260,11 @@ storefrontVisuals:
   mobileImage: "/images/posts/260331 Mediheal/wintermobile.webp"
   mobileAlt: "MEDIHEAL winter campaign mobile storefront"
 intro: |
-  ### Key Takeaways
+  ### Project Background
+  From Sep–Dec 2025, I worked across more than 80 emails as well as storefront and paid media visuals for Mediheal. The project depended on close collaboration: strategy set the direction, creative gave it shape, and media and store operations carried each campaign live.
 
-  This project ran on tight collaboration: strategy set the direction, creative gave it shape, and media and store operations carried it live. From Sep 2025 to Dec 2025, I worked on 80+ emails, plus the storefront and paid media visuals.
-
-  Each send came back with numbers, and those numbers shaped the next one. That loop of designing, reading, adjusting became the real skill I took from this project: how to find out what works, not just guess at it.
+  ### Working Approach
+  Every send returned new performance data, and those results informed the next round of creative. This continuous loop of designing, reading, and adjusting turned the work into a repeatable process for discovering what resonates rather than relying on assumptions.
 ---
 
 <div class="my-carousel">

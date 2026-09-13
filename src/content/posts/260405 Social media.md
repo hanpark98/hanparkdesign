@@ -1,18 +1,17 @@
 ---
-title: "Social Media Marketing"
+title: "Content Creation"
 slug: social-media
 format: wide
-description: "Content Creation / Video & Static"
+description: "Social Media Marketing"
 image: "/images/posts/260405 Social media/social_thumb2.webp"
 category: ["Marketing", "Motion"]
 date: "2024-12-31"
-intro:
-  ### Introduction
-  <b> Content Creation Achievements </b><br><br>
+intro: |
+  ### Project Background
+  This collection brings together social content created for beauty and lifestyle brands across short-form video, motion, and static formats. The work supported product launches, seasonal campaigns, influencer moments, and always-on storytelling while adapting each brand’s visual identity to a fast-moving social environment.
 
- ‣ Provided personalized tutorials on videography, post-edit for team skill development.<br>
- ‣ Metric analysis based content strategy for growth in audience engagement.<br>
- ‣ Trend-sensitive creatives syncronized with social media movements.<br>
+  ### Content Approach
+  I combined trend-aware concepts with platform-specific pacing, editing, and graphic treatments, then used engagement signals to refine future content. Alongside production, I shared practical guidance on videography and post-production with team members, helping turn individual executions into a more consistent and repeatable content workflow.
 
 ---
 <div class="img-col">

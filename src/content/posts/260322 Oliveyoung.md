@@ -2,13 +2,16 @@
 title: "Olive Young"
 slug: oliveyoung
 format: wide
-description: "Winter Sale 2025"
+description: "Print & Influencer Marketing"
 image: "/images/posts/260322 Oliveyoung/oliveyoung_thumb.webp"
 category: ["Marketing", "Print"]
 date: "2025-11-30"
 intro: |
-  ### Introduction
-  This campaign focused on expanding the Olive Young Winter Sale's presence in the international market through strategic influencer outreach. We collaborated with 100 skincare influencers, providing them with the necessary tools to share their authentic experiences. The project resulted in 858.6k cumulative reach and a 39% engagement rate, marking a successful organic milestone for the brand's global expansion.
+  ### Campaign Background
+  This campaign extended the Olive Young Winter Sale into the international market through a coordinated influencer program. The goal was to build awareness through credible, creator-led product experiences rather than relying on a single campaign message.
+
+  ### Outreach & Results
+  We partnered with 100 skincare influencers and equipped them with the print and campaign materials needed to share the sale in their own voice. The program generated 858.6K in cumulative reach and a 39% engagement rate, establishing a strong organic milestone for the brand’s global expansion.
 
 
 ---

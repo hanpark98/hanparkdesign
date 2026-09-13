@@ -15,7 +15,7 @@ bestCampaign:
     image: "/images/posts/260326 Kijibae/plain-2-1.webp"
     alt: "Kijibae birthday giveaway campaign"
   overview:
-    tag: "Campaign Results — Kijibae Birthday Bash"
+    tag: "Campaign Results — Kijibae's 2nd Birthday Bash"
     period: "Aug 18–24 vs. Aug 25–31, 2025"
     stats:
       - label: "Weekly Revenue"
@@ -33,10 +33,11 @@ bestCampaign:
         unit: "%"
         detail: "1.32% → 1.76% · +0.44pp"
       - label: "Email-Attributed Revenue"
-        prefix: "$"
-        value: "1,747"
-        unit: ""
-        detail: "28% of weekly revenue · Last-click"
+        prefix: ""
+        value: "28"
+        unit: "%"
+        unitSuffix: "of weekly revenue"
+        detail: "$1,747 · Last-click"
     supportingText: "Shopping Sessions 5,505 (+54%) · Email Sessions 777"
   storefront:
     tag: "Storefront"
@@ -54,34 +55,22 @@ bestCampaign:
     items:
       - label: "Announcement 1"
         date: "Aug 25 · Mon"
-        image: "/images/posts/260326 Kijibae/kjbbash-email-announcement-1-250825mon.webp"
-        heroLabel: "Revenue"
-        hero: "—"
-        badge: "Campaign Launch"
+        imageFolder: "/images/posts/260326 Kijibae/emails/1-1 announcement 1"
       - label: "Announcement 2"
         date: "Aug 26 · Tue"
-        image: "/images/posts/260326 Kijibae/kjbbash-email-announcement-2-250826tue.webp"
-        heroLabel: "Revenue"
-        hero: "—"
+        imageFolder: "/images/posts/260326 Kijibae/emails/1-2 announcement 2"
       - label: "Reminder 1"
         date: "Aug 27 · Wed"
-        image: "/images/posts/260326 Kijibae/kjbbash-email-reminder-1-250827wed.webp"
-        heroLabel: "Revenue"
-        hero: "—"
+        imageFolder: "/images/posts/260326 Kijibae/emails/1-3 reminder 1"
       - label: "Reminder 2"
         date: "Aug 28 · Thu"
-        image: "/images/posts/260326 Kijibae/kjbbash-email-reminder2-250828thur.jpg"
-        heroLabel: "Revenue"
-        hero: "—"
+        imageFolder: "/images/posts/260326 Kijibae/emails/1-4 reminder 2"
       - label: "Last Call"
         date: "Aug 29 · Fri"
-        image: "/images/posts/260326 Kijibae/kjbbash-email-lastcall-250829fri.webp"
-        heroLabel: "Revenue"
-        hero: "—"
-        badge: "Final Call"
+        imageFolder: "/images/posts/260326 Kijibae/emails/1-5 last call"
   social:
     tag: "Social Media"
-    title: "Giveaway Participation"
+    title: "Giveaway Campaign Strategy"
     description: "Inviting followers to tag a friend and comment with their preferred design expanded reach and helped drive traffic across the campaign’s connected channels."
     items:
       - label: "Trending Audio"
@@ -124,13 +113,16 @@ role:
     - "Packaging Design"
     - "Campaign Key Visuals"
     - "Email & Storefront Creative"
-intro:
-  ### About the Brand
+intro: |
+  ### Brand Background
   기지배 / Ki·ji·bae / (noun) / Korean
 
-  Originally used as a derogatory term, “Kijibae” was reclaimed to represent a bold, self-assured community—friends who take the lead and aren’t afraid to show their thorns.
-  
-  Kijibae brings Korea’s innovative semi-cured gel nail strips to the United States, offering a salon-quality finish that can be applied at home.
+  Originally used as a derogatory term, “Kijibae” was reclaimed as the name of a bold, self-assured community—friends who take the lead and are not afraid to show their thorns. The brand brings Korea’s semi-cured gel nail strips to the United States, offering a salon-quality finish that can be applied at home.
+
+  ### Creative Direction
+  I developed a flexible visual system that carried Kijibae’s expressive personality across brand identity, packaging, campaign key visuals, email, and storefront creative. Bold typography, playful imagery, and a direct promotional voice helped the brand remain recognizable while giving individual product launches and seasonal moments their own character.
+
+  For Kijibae’s 2nd Birthday Bash, that system connected a giveaway-led social campaign with a five-email weekday cadence and a coordinated storefront takeover. Keeping the offer and visual language consistent from discovery through purchase contributed to a 123% increase in weekly revenue, with email accounting for 28% of weekly revenue on a last-click basis.
 ---
 
 

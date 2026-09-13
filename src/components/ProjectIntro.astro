@@ -1,0 +1,13 @@
+---
+const { html, revealClass = 'fade-section' } = Astro.props;
+---
+
+<section
+  class={`bg-white mb-4 card-shell section-card post-content project-intro-section ${revealClass}`}
+  aria-labelledby="about-project-title"
+>
+  <div class="stat-eyebrow">
+    <span class="title" id="about-project-title">About the Project</span>
+  </div>
+  <div class="prose prose-lg max-w-none text-gray-800 project-intro-copy" set:html={html} />
+</section>

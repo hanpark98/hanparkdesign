@@ -2,13 +2,16 @@
 title: "VT Cosmetics"
 slug: vt-cosmetics
 format: wide
-description: "Secret Society - Exclusive Beauty Event"
+description: "Event Design & Packaging"
 image: "/images/posts/260215 VT cosmetics/thumb2.webp"
 category: ["Branding", "Events"]
 date: "2025-04-06"
 intro: |
-  ### VT Cosmetics: Secret Society
-  An invitation-only event held in Los Angeles and New York, centered around the theme of hidden beauty rituals. The 'Secret Recipe', a unique pairing of products for glowing skin was introduced through artistic illustrations that captivated an audience of 100+ top beauty influencers. This creative approach transformed product education into a visual journey, accumulating 24M+ social media reach.
+  ### Event Background
+  *VT Cosmetics: Secret Society* was an invitation-only event held in Los Angeles and New York for more than 100 leading beauty influencers. The experience centered on hidden beauty rituals and introduced guests to unexpected product pairings for glowing skin.
+
+  ### Creative Direction
+  I translated the “Secret Recipe” concept into an illustrated visual system spanning the event environment and packaging. Framing product education as a discovery-driven experience made the information more engaging and helped the event generate more than 24M in social media reach.
 
 ---
 

@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useId } from "react";
+import { formatUsDate } from "../utils/dateFormat";
 
 type Category = "film" | "book" | "music";
 type Review = {
@@ -88,12 +89,12 @@ export default function ReviewList({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="검색: 제목·감독/저자·태그"
-              className="w-48 sm:w-64 px-3 py-1.5 rounded-md border border-gray-200 text-sm placeholder:text-gray-400"
+              className="w-48 sm:w-64 px-3 py-1.5 rounded-[var(--radius-control)] border border-gray-200 text-sm placeholder:text-gray-400"
             />
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as "date" | "rating")}
-              className="px-3 py-1.5 rounded-md border border-gray-200 text-sm bg-white"
+              className="px-3 py-1.5 rounded-[var(--radius-control)] border border-gray-200 text-sm bg-white"
             >
               <option value="date">최신순</option>
               <option value="rating">별점순</option>
@@ -116,7 +117,7 @@ export default function ReviewList({
             return (
               <li
                 key={r.id}
-                className="border border-gray-200 rounded-2xl p-4 hover:shadow-xs transition"
+                className="border border-gray-200 rounded-[var(--radius-shell)] p-4 hover:shadow-xs transition"
               >
                 <div className="flex items-start gap-4">
                   {r.cover ? (
@@ -125,7 +126,7 @@ export default function ReviewList({
                       src={r.cover}
                       width={w}
                       height={h}                                      // CLS 방지
-                      className={`w-48 sm:w-56 md:w-64 ${aspect} rounded-2xl object-cover flex-none`}
+                      className={`w-48 sm:w-56 md:w-64 ${aspect} rounded-[var(--radius-media)] object-cover flex-none`}
                       loading={i < 2 ? "eager" : "lazy"}             // 상단 2개만 즉시 로딩
                       decoding="async"
                     />
@@ -143,7 +144,7 @@ export default function ReviewList({
                         )}
                       </h3>
                       <span className="text-xs text-gray-500">
-                        {fmtDate(r.date)} · {label(r.category)}
+                        {formatUsDate(r.date)} · {label(r.category)}
                       </span>
                     </div>
 
@@ -181,12 +182,6 @@ export default function ReviewList({
 
 function label(c: "all" | Category) {
   return c === "all" ? "전체" : c === "film" ? "영화" : c === "book" ? "책" : "음악";
-}
-
-function fmtDate(s: string) {
-  const [y, m, d] = s.split("-").map(Number);
-  const dt = new Date(y, (m ?? 1) - 1, d ?? 1);
-  return new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "short", day: "numeric" }).format(dt);
 }
 
 // ISO 문자열은 문자열 비교로 정렬 안전

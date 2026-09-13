@@ -2,7 +2,7 @@
 title: "Muguhada"
 slug: muguhada
 format: wide
-description: "Brand Identity & ChiMi Chess Knight Packaging"
+description: "Branding & Packaging"
 image: "/images/posts/260816 muguhada/thumb-color.webp"
 category: ["Branding", "Print"]
 date: "2026-08-16"
