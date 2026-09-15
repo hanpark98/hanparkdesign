@@ -1,8 +1,9 @@
 const campaigns = {
-  upwork: { source: 'upwork', medium: 'proposal' },
-  linkedin: { source: 'linkedin', medium: 'dm' },
-  email: { source: 'email', medium: 'application' },
-  behance: { source: 'behance', medium: 'portfolio' },
+  upwork: { source: 'upwork' },
+  linkedin: { source: 'linkedin' },
+  indeed: { source: 'indeed' },
+  email: { source: 'email' },
+  behance: { source: 'behance' },
 } as const;
 
 const projectSlugs = new Set([
@@ -32,6 +33,7 @@ const legacyProjectSlugs: Record<string, string> = {
 
 function decodeSegment(segment: string | undefined) {
   if (!segment) return '';
+
   try {
     return decodeURIComponent(segment);
   } catch {
@@ -41,14 +43,24 @@ function decodeSegment(segment: string | undefined) {
 
 export default function middleware(request: Request) {
   const url = new URL(request.url);
-  const segments = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+  const segments = url.pathname
+    .replace(/\/+$/, '')
+    .split('/')
+    .filter(Boolean);
+
   const source = decodeSegment(segments[1]).toLowerCase() as keyof typeof campaigns;
   const campaign = campaigns[source];
 
-  if ((segments.length !== 2 && segments.length !== 3) || segments[0] !== 'go' || !campaign) {
+  if (
+    (segments.length !== 2 && segments.length !== 3)
+    || segments[0] !== 'go'
+    || !campaign
+  ) {
     return new Response('Not Found', {
       status: 404,
-      headers: { 'content-type': 'text/plain; charset=utf-8' },
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+      },
     });
   }
 
@@ -60,16 +72,20 @@ export default function middleware(request: Request) {
   if (segments.length === 3 && !projectSlug) {
     return new Response('Not Found', {
       status: 404,
-      headers: { 'content-type': 'text/plain; charset=utf-8' },
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+      },
     });
   }
 
   const analyticsControl = url.searchParams.get('analytics');
+
   url.pathname = projectSlug ? `/posts/${projectSlug}` : '/';
   url.search = '';
   url.hash = '';
+
   url.searchParams.set('utm_source', campaign.source);
-  url.searchParams.set('utm_medium', campaign.medium);
+
   if (analyticsControl === 'off' || analyticsControl === 'on') {
     url.searchParams.set('analytics', analyticsControl);
   }
