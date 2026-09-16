@@ -2,6 +2,7 @@ const campaigns = {
   upwork: { source: 'upwork' },
   linkedin: { source: 'linkedin' },
   indeed: { source: 'indeed' },
+  saramin: { source: 'saramin' },
   email: { source: 'email' },
   behance: { source: 'behance' },
 } as const;
