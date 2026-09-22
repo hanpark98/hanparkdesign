@@ -3,6 +3,7 @@ const campaigns = {
   linkedin: { source: 'linkedin' },
   indeed: { source: 'indeed' },
   saramin: { source: 'saramin' },
+  remember: { source: 'remember' },
   email: { source: 'email' },
   behance: { source: 'behance' },
 } as const;
