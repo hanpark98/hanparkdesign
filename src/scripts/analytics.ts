@@ -1,9 +1,9 @@
+import './analytics-control.js';
 import type posthog from 'posthog-js';
 import type { BeforeSend } from '@vercel/analytics';
 
 const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY?.trim();
 const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST?.trim().replace(/\/$/, '');
-const analyticsDisabledStorageKey = 'hanparkdesign:posthog-disabled';
 const sessionAttributionStorageKey = 'hanparkdesign:session-attribution';
 const projectExplorationStorageKey = 'hanparkdesign:project-exploration';
 
@@ -47,28 +47,7 @@ let analyticsBindingsInitialized = false;
 const queuedEvents: QueuedEvent[] = [];
 
 function isAnalyticsDisabled() {
-  if (window.__hanApplyAnalyticsControl) {
-    return window.__hanApplyAnalyticsControl();
-  }
-
-  const analyticsControl = new URLSearchParams(window.location.search).get('analytics');
-  let disabled = analyticsControl === 'off';
-
-  try {
-    if (analyticsControl === 'off') {
-      window.localStorage.setItem(analyticsDisabledStorageKey, 'true');
-    } else if (analyticsControl === 'on') {
-      window.localStorage.removeItem(analyticsDisabledStorageKey);
-      disabled = false;
-    } else {
-      disabled = window.localStorage.getItem(analyticsDisabledStorageKey) === 'true';
-    }
-  } catch {
-    // If storage is unavailable, the URL switch still applies to the current page.
-  }
-
-  window.__hanAnalyticsDisabled = disabled;
-  return disabled;
+  return window.__hanApplyAnalyticsControl!();
 }
 
 function sanitizeCampaignValue(value: string | null) {
@@ -293,6 +272,7 @@ async function initializePostHog(key: string, host: string) {
     const { default: posthog } = await import('posthog-js');
     if (isAnalyticsDisabled()) {
       queuedEvents.length = 0;
+      window.__hanPostHogInitialized = false;
       return;
     }
 
@@ -520,11 +500,6 @@ function startAnalytics() {
     captureProjectsEntry();
     captureProjectView(project, attribution, projectEntrySource);
     setupProjectEngagement(attribution, projectEntrySource);
-  }
-
-  if (posthogClient?.has_opted_out_capturing()) {
-    posthogClient.opt_in_capturing({ captureEventName: false });
-    posthogClient.startSessionRecording();
   }
 
   if (posthogKey && posthogHost && !window.__hanPostHogInitialized) {
