@@ -6,6 +6,7 @@ const campaigns = {
   remember: { source: 'remember' },
   email: { source: 'email' },
   behance: { source: 'behance' },
+  instagram: { source: 'instagram' },
 } as const;
 
 const projectSlugs = new Set([
