@@ -244,6 +244,32 @@ body {
   margin: 0;
 }
 
+/*
+ * Story screenshot crop preset (approved on Zara Larsson).
+ * Reuse `story-crop-mode` for matching 1290x2796 screenshots.
+ * Frame: 9:16; image position/scale: top -22.55%, left -12.62%, width 125.24%.
+ * Carousel sizing is set in markup: desktop 600px, mobile 65vw.
+ */
+.story-crop-mode .my-carousel-item {
+  width: auto;
+  height: var(--carousel-height);
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: var(--radius-media);
+}
+
+.story-crop-mode .my-carousel-img {
+  position: absolute;
+  top: -22.55%;
+  left: -12.62%;
+  width: 125.24%;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: initial;
+  border-radius: 0;
+}
+
 .my-carousel-title {
   margin: 8px 0 0 0;
   line-height: 1.5;

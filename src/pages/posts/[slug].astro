@@ -2867,8 +2867,199 @@ const projectSchema = {
         });
       });
 
+      document.querySelectorAll<HTMLElement>('.my-carousel.infinite-drag-mode').forEach((carousel) => {
+        const scrollArea = carousel.querySelector<HTMLElement>('.my-carousel-scroll');
+        if (!scrollArea || scrollArea.dataset.infiniteReady === 'true') return;
+
+        const originalItems = Array.from(scrollArea.children) as HTMLElement[];
+        if (originalItems.length < 2) return;
+        scrollArea.dataset.infiniteReady = 'true';
+
+        const before = document.createDocumentFragment();
+        originalItems.forEach((item) => {
+          const clone = item.cloneNode(true) as HTMLElement;
+          clone.setAttribute('aria-hidden', 'true');
+          before.appendChild(clone);
+        });
+        scrollArea.insertBefore(before, scrollArea.firstChild);
+
+        originalItems.forEach((item) => {
+          const clone = item.cloneNode(true) as HTMLElement;
+          clone.setAttribute('aria-hidden', 'true');
+          scrollArea.appendChild(clone);
+        });
+
+        let loopStart = 0;
+        let loopWidth = 0;
+        let initialized = false;
+        let currentScroll = 0;
+        let targetScroll = 0;
+        let velocity = 0;
+        let animationFrame = 0;
+        let idleResumeAt = performance.now();
+        const idleSpeed = 0.28;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        scrollArea.style.setProperty('scroll-behavior', 'auto', 'important');
+        scrollArea.style.touchAction = 'pan-y pinch-zoom';
+        scrollArea.addEventListener('dragstart', (event) => event.preventDefault());
+
+        const measure = () => {
+          const items = Array.from(scrollArea.children) as HTMLElement[];
+          const firstOriginal = items[originalItems.length];
+          const firstTrailingClone = items[originalItems.length * 2];
+          if (!firstOriginal || !firstTrailingClone) return;
+
+          loopStart = firstOriginal.offsetLeft;
+          loopWidth = firstTrailingClone.offsetLeft - firstOriginal.offsetLeft;
+          if (!initialized && loopWidth > 0) {
+            currentScroll = loopStart;
+            targetScroll = loopStart;
+            scrollArea.scrollLeft = currentScroll;
+            initialized = true;
+          }
+        };
+
+        const normalizePosition = () => {
+          if (!loopWidth) return;
+          const lowerBoundary = loopStart - loopWidth * 0.5;
+          const upperBoundary = loopStart + loopWidth * 0.5;
+
+          while (currentScroll < lowerBoundary) {
+            currentScroll += loopWidth;
+            targetScroll += loopWidth;
+          }
+          while (currentScroll >= upperBoundary) {
+            currentScroll -= loopWidth;
+            targetScroll -= loopWidth;
+          }
+        };
+
+        let isPointerDown = false;
+        let dragAxis: '' | 'horizontal' | 'vertical' = '';
+        let startX = 0;
+        let startY = 0;
+        let lastX = 0;
+
+        const animate = () => {
+          animationFrame = 0;
+
+          if (!isPointerDown && Math.abs(velocity) > 0.01) {
+            targetScroll += velocity;
+            velocity *= 0.92;
+          }
+
+          const isIdleFlowing = (
+            !prefersReducedMotion &&
+            !isPointerDown &&
+            Math.abs(velocity) <= 0.01 &&
+            performance.now() >= idleResumeAt
+          );
+          if (isIdleFlowing) targetScroll += idleSpeed;
+
+          const easing = isPointerDown && dragAxis === 'horizontal' ? 0.1 : 0.08;
+          currentScroll += (targetScroll - currentScroll) * easing;
+          normalizePosition();
+          scrollArea.scrollLeft = currentScroll;
+
+          if (
+            isPointerDown ||
+            Math.abs(targetScroll - currentScroll) > 0.25 ||
+            Math.abs(velocity) > 0.01 ||
+            !prefersReducedMotion
+          ) {
+            animationFrame = requestAnimationFrame(animate);
+          } else {
+            currentScroll = targetScroll;
+            normalizePosition();
+            scrollArea.scrollLeft = currentScroll;
+            scrollArea.classList.remove('is-dragging');
+          }
+        };
+
+        const startAnimation = () => {
+          if (!animationFrame) animationFrame = requestAnimationFrame(animate);
+        };
+
+        scrollArea.addEventListener('pointerdown', (event) => {
+          if (event.pointerType === 'mouse' && event.button !== 0) return;
+          isPointerDown = true;
+          dragAxis = event.pointerType === 'mouse' ? 'horizontal' : '';
+          startX = event.clientX;
+          startY = event.clientY;
+          lastX = event.clientX;
+          velocity = 0;
+          idleResumeAt = Number.POSITIVE_INFINITY;
+          currentScroll = scrollArea.scrollLeft;
+          targetScroll = currentScroll;
+          if (event.pointerType === 'mouse') {
+            event.preventDefault();
+            scrollArea.setPointerCapture(event.pointerId);
+          }
+          startAnimation();
+        });
+
+        scrollArea.addEventListener('pointermove', (event) => {
+          if (!isPointerDown) return;
+
+          if (!dragAxis) {
+            const deltaX = event.clientX - startX;
+            const deltaY = event.clientY - startY;
+            if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 8) return;
+            dragAxis = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+            if (dragAxis === 'vertical') return;
+            scrollArea.setPointerCapture(event.pointerId);
+          }
+
+          if (dragAxis !== 'horizontal') return;
+          event.preventDefault();
+          const delta = (lastX - event.clientX) * 1.5;
+          targetScroll += delta;
+          velocity = velocity * 0.65 + delta * 0.35;
+          lastX = event.clientX;
+          scrollArea.classList.add('is-dragging');
+          startAnimation();
+        });
+
+        const endDrag = (event: PointerEvent) => {
+          if (!isPointerDown) return;
+          isPointerDown = false;
+          dragAxis = '';
+          if (scrollArea.hasPointerCapture(event.pointerId)) {
+            scrollArea.releasePointerCapture(event.pointerId);
+          }
+          idleResumeAt = performance.now() + 900;
+          startAnimation();
+        };
+
+        scrollArea.addEventListener('pointerup', endDrag);
+        scrollArea.addEventListener('pointercancel', endDrag);
+
+        scrollArea.addEventListener('wheel', (event) => {
+          if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+          event.preventDefault();
+          targetScroll += event.deltaX;
+          velocity = velocity * 0.5 + event.deltaX * 0.14;
+          idleResumeAt = performance.now() + 900;
+          startAnimation();
+        }, { passive: false });
+
+        window.addEventListener('resize', () => {
+          initialized = false;
+          measure();
+        });
+        window.addEventListener('load', () => {
+          measure();
+          startAnimation();
+        }, { once: true });
+        requestAnimationFrame(() => {
+          measure();
+          startAnimation();
+        });
+      });
+
       document.querySelectorAll('.my-carousel').forEach(function(carousel) {
-        if (carousel.classList.contains('marquee-mode')) return;
+        if (carousel.classList.contains('marquee-mode') || carousel.classList.contains('infinite-drag-mode')) return;
         const scrollArea = carousel.querySelector('.my-carousel-scroll');
         if (!scrollArea) return;
 
