@@ -2,35 +2,31 @@
 title: "Zara Larsson"
 slug: zara-larsson
 format: wide
-description: "Localised Visuals for Korea"
+description: "Localized Visuals for Korea"
 image: "/images/posts/261114 Zara Larsson/zara-thumb.webp"
 category: ["Events", "Print"]
-date: "2023-08-01"
+date: "2026-10-05"
 role:
   team:
     - name: "Han Park"
-      part: "Graphic Design"
+      part: "Designer"
       mine: true
     - name: "Si Hyun Kim"
       part: "Project Manager"
   scope:
-    - "Localized Visual Direction"
-    - "Graphic Design"
+    - "Art Direction & Visual Design"
+    - "On-site Operation"
 intro: |
   ### Project Background
-  To celebrate Zara Larsson’s first solo concert in Korea, our team proposed localized visuals to Live Nation Korea and organized a fan event. (Self-Initiated, Non-Commercial)
-
-  The visual identity of the *Midnight Sun Tour* was reimagined for Korean audiences and brought to life through merchandise and on-site installations. Custom lettering stickers and postcards were distributed at the venue, while a large-scale poster wall became a popular photo spot, drawing lines of fans. *Zara Larsson’s team and Sony Music Korea also requested copies of the merchandise.*
+  To celebrate Zara Larsson’s first solo concert in Korea, our team proposed localized visuals to Live Nation Korea and organized a fan event (Self-Initiated, Non-Commercial). The visual identity of the *Midnight Sun Tour* was reimagined for Korean audiences and brought to life through merchandise and on-site installations. Custom lettering stickers and postcards were distributed at the venue, while a large-scale poster wall became a popular photo spot, drawing lines of fans. *Zara Larsson’s team and Sony Music Korea also requested copies of the merchandise.*
 
   ### Visual Direction
-  The album’s key motifs of Swedish summer nights and nature were reinterpreted through plants native to the Korean Peninsula, creating a visual connection between Swedish and Korean identities.
-
-  The lingering melody of “Midnight Sun” is expressed through a flowing curve extending from the Korean lettering, while the two “S”s in ZARA LARSSON are mirrored to form a heart-shaped symbol. Together, these elements symbolize the hope for an enduring connection between Zara and her Korean fans.
+  The album’s key motifs of Swedish summer nights and nature were reinterpreted through plants native to the Korean Peninsula, creating a visual connection between Swedish and Korean identities. The lingering melody of “Midnight Sun” is expressed through a flowing curve extending from the Korean lettering, while the two “S”s in ZARA LARSSON are mirrored to form a heart-shaped symbol. Together, these elements symbolize the hope for an enduring connection between Zara and her Korean fans.
 ---
 
-<section class="muguhada-project-card muguhada-package-section valley-blue-section" aria-labelledby="valley-live-poster-title">
+<section class="muguhada-project-card muguhada-package-section valley-blue-section" aria-labelledby="zara-localized-visuals-title">
   <div class="muguhada-project-divider">
-    <h2 id="valley-live-poster-title">Live Footage Poster</h2>
+    <h2 id="zara-localized-visuals-title">Localized Visuals &amp; Activation</h2>
   </div>
 
   <div class="img-row valley-event-row">
@@ -82,7 +78,7 @@ intro: |
     </div>
   </div>
 
-  <div class="img-row keep-row zara-posterwall-candid-row">
+  <div class="img-row zara-posterwall-candid-row">
     <div class="img-col ar-3-4">
       <img
         src="/images/posts/261114 Zara Larsson/posterwall-candid1.webp"
@@ -100,37 +96,79 @@ intro: |
     </div>
   </div>
 
-  <div class="my-carousel infinite-drag-mode story-crop-mode" style="--ch-pc: 600px; --ch-mo: 65vw;">
+  <div class="my-carousel infinite-drag-mode story-crop-mode" data-idle-speed="42" style="--ch-pc: 600px; --ch-mo: 65vw;">
     <div class="my-carousel-scroll">
       <div class="my-carousel-item">
         <img
           class="my-carousel-img"
-          src="/images/posts/261114 Zara Larsson/story1.webp"
+          src="/images/posts/261114 Zara Larsson/story/story1.webp"
           alt="Zara Larsson localized visual Instagram Story 1" />
       </div>
       <div class="my-carousel-item">
         <img
           class="my-carousel-img"
-          src="/images/posts/261114 Zara Larsson/story2.webp"
+          src="/images/posts/261114 Zara Larsson/story/story2.webp"
           alt="Zara Larsson localized visual Instagram Story 2" />
       </div>
       <div class="my-carousel-item">
         <img
           class="my-carousel-img"
-          src="/images/posts/261114 Zara Larsson/story3.webp"
+          src="/images/posts/261114 Zara Larsson/story/story3.webp"
           alt="Zara Larsson localized visual Instagram Story 3" />
       </div>
       <div class="my-carousel-item">
         <img
           class="my-carousel-img"
-          src="/images/posts/261114 Zara Larsson/story4.webp"
+          src="/images/posts/261114 Zara Larsson/story/story4.webp"
           alt="Zara Larsson localized visual Instagram Story 4" />
       </div>
       <div class="my-carousel-item">
         <img
           class="my-carousel-img"
-          src="/images/posts/261114 Zara Larsson/story5.webp"
+          src="/images/posts/261114 Zara Larsson/story/story5.webp"
           alt="Zara Larsson localized visual Instagram Story 5" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story6.webp"
+          alt="Zara Larsson localized visual Instagram Story 6" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story7.webp"
+          alt="Zara Larsson localized visual Instagram Story 7" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story8.webp"
+          alt="Zara Larsson localized visual Instagram Story 8" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story9.webp"
+          alt="Zara Larsson localized visual Instagram Story 9" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story10.webp"
+          alt="Zara Larsson localized visual Instagram Story 10" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story11.webp"
+          alt="Zara Larsson localized visual Instagram Story 11" />
+      </div>
+      <div class="my-carousel-item">
+        <img
+          class="my-carousel-img"
+          src="/images/posts/261114 Zara Larsson/story/story12.webp"
+          alt="Zara Larsson localized visual Instagram Story 12" />
       </div>
     </div>
   </div>
@@ -138,7 +176,7 @@ intro: |
 
 <style>
   .valley-event-video {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 3 / 4;
     overflow: hidden;
     border-radius: var(--radius-media);
   }
