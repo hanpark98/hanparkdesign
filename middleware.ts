@@ -7,6 +7,7 @@ const campaigns = {
   email: { source: 'email' },
   behance: { source: 'behance' },
   instagram: { source: 'instagram' },
+  careers: { source: 'careers' },
 } as const;
 
 const projectSlugs = new Set([
