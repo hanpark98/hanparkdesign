@@ -37,9 +37,9 @@ type SessionAttribution = {
   original_entry_project_slug: string;
 };
 type ProjectExploration = {
-  entry_project: string;
-  entry_project_name: string;
-  explored_projects: string[];
+  session_id: string;
+  last_project: string;
+  last_project_name: string;
 };
 
 let posthogClient: PostHogClient | null = null;
@@ -180,16 +180,20 @@ function getProjectEntrySource(attribution: SessionAttribution): EntrySource {
 function readProjectExploration() {
   try {
     const stored = JSON.parse(window.sessionStorage.getItem(projectExplorationStorageKey) || 'null');
-    if (!stored || typeof stored.entry_project !== 'string' || !stored.entry_project) return null;
+    if (
+      !stored
+      || typeof stored.session_id !== 'string'
+      || !stored.session_id
+      || typeof stored.last_project !== 'string'
+      || !stored.last_project
+    ) return null;
 
     return {
-      entry_project: stored.entry_project.slice(0, 160),
-      entry_project_name: typeof stored.entry_project_name === 'string'
-        ? stored.entry_project_name.slice(0, 160)
+      session_id: stored.session_id.slice(0, 160),
+      last_project: stored.last_project.slice(0, 160),
+      last_project_name: typeof stored.last_project_name === 'string'
+        ? stored.last_project_name.slice(0, 160)
         : '',
-      explored_projects: Array.isArray(stored.explored_projects)
-        ? stored.explored_projects.filter((slug: unknown) => typeof slug === 'string').slice(0, 100)
-        : [],
     } satisfies ProjectExploration;
   } catch {
     return null;
@@ -205,37 +209,41 @@ function writeProjectExploration(exploration: ProjectExploration) {
   }
 }
 
-function captureProjectExploration(project: ProjectContext, attribution: SessionAttribution) {
-  if (!project.slug || project.slug === 'unknown') return;
+function captureProjectExploration(
+  project: ProjectContext,
+  attribution: SessionAttribution,
+  sessionId: string,
+) {
+  if (!sessionId || !project.slug || project.slug === 'unknown') return;
 
   const exploration = readProjectExploration();
-  if (!exploration) {
+  if (!exploration || exploration.session_id !== sessionId) {
     writeProjectExploration({
-      entry_project: project.slug,
-      entry_project_name: project.project,
-      explored_projects: [],
+      session_id: sessionId,
+      last_project: project.slug,
+      last_project_name: project.project,
     });
     return;
   }
 
-  if (
-    project.slug === exploration.entry_project
-    || exploration.explored_projects.includes(project.slug)
-  ) return;
+  if (project.slug === exploration.last_project) return;
 
   if (!writeProjectExploration({
-    ...exploration,
-    explored_projects: [...exploration.explored_projects, project.slug],
+    session_id: sessionId,
+    last_project: project.slug,
+    last_project_name: project.project,
   })) return;
 
   capture('explore_another_project', {
-    entry_project: exploration.entry_project,
-    entry_project_name: exploration.entry_project_name,
-    project: project.project,
-    slug: project.slug,
+    project: exploration.last_project_name,
+    slug: exploration.last_project,
+    destination_project: project.project,
+    destination_slug: project.slug,
+    tracking_version: 'navigation_v2',
     utm_source: attribution.utm_source,
     utm_medium: attribution.utm_medium,
     utm_campaign: attribution.utm_campaign,
+    utm_content: attribution.utm_content,
     entry_source: attribution.entry_source,
   });
 }
@@ -265,7 +273,12 @@ function capture(event: string, properties: Record<string, string | number>) {
   }
 }
 
-async function initializePostHog(key: string, host: string) {
+async function initializePostHog(
+  key: string,
+  host: string,
+  project: ProjectContext,
+  attribution: SessionAttribution,
+) {
   try {
     // Keep the SDK out of the render-critical bundle while starting it as soon as this
     // lightweight event layer is ready.
@@ -303,6 +316,9 @@ async function initializePostHog(key: string, host: string) {
     posthogClient = posthog;
     queuedEvents.splice(0).forEach(({ event, properties }) => {
       capture(event, properties);
+    });
+    posthog.onSessionId((sessionId) => {
+      captureProjectExploration(project, attribution, sessionId);
     });
   } catch {
     // A blocked or unavailable analytics client must not affect the website.
@@ -398,7 +414,6 @@ function captureProjectView(
     utm_campaign: attribution.utm_campaign,
     utm_content: attribution.utm_content,
   });
-  captureProjectExploration(project, attribution);
 }
 
 function captureProjectsEntry() {
@@ -491,10 +506,11 @@ function startAnalytics() {
     return;
   }
 
+  const project = getProjectContext();
+  const attribution = getSessionAttribution(project);
+
   if (!analyticsBindingsInitialized) {
     analyticsBindingsInitialized = true;
-    const project = getProjectContext();
-    const attribution = getSessionAttribution(project);
     const projectEntrySource = getProjectEntrySource(attribution);
     setupClickEvents(attribution);
     captureProjectsEntry();
@@ -504,7 +520,7 @@ function startAnalytics() {
 
   if (posthogKey && posthogHost && !window.__hanPostHogInitialized) {
     window.__hanPostHogInitialized = true;
-    void initializePostHog(posthogKey, posthogHost);
+    void initializePostHog(posthogKey, posthogHost, project, attribution);
   }
 }
 
@@ -515,7 +531,13 @@ startAnalytics();
 window.addEventListener('pageshow', (event) => {
   if (!event.persisted) return;
   if (isAnalyticsDisabled()) disableActiveAnalytics();
-  else startAnalytics();
+  else {
+    startAnalytics();
+    if (posthogClient) {
+      const project = getProjectContext();
+      captureProjectExploration(project, getSessionAttribution(project), posthogClient.get_session_id());
+    }
+  }
 }, { passive: true });
 
 export {};

@@ -52,6 +52,8 @@ function browser({ search = '', storage = new Map(), cookies = new Map(), storag
     opt_out_capturing() { calls.optOut++; optedOut = true; },
     startSessionRecording() {},
     stopSessionRecording() {},
+    onSessionId(callback) { callback('test-session', 'test-window'); return () => {}; },
+    get_session_id() { return 'test-session'; },
   };
   let resolveImport;
   const imported = new Promise((resolve) => { resolveImport = () => resolve({ default: posthog }); });
